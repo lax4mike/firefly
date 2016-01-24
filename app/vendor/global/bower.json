@@ -1,0 +1,17 @@
+{
+  "name": "global",
+  "authors": [
+    "Mike Lambert <lax4mike@gmail.com>"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "fetch": "~0.11.0"
+  }
+}
