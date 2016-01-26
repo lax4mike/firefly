@@ -25,27 +25,73 @@ export default React.createClass({
     displayName: "Canvas",
 
     propTypes: {
-        height : PropTypes.number.isRequired,
-        width  : PropTypes.number.isRequired
+        signalRadius: PropTypes.number,
+        showSignalRadius: PropTypes.bool
+    },
+
+    getDefaultProps: function(){
+
     },
 
     getInitialState: function(){
-        return {};
+
+        return {
+            width: 0,
+            height: 0,
+            fireflys: [] // holds the firefly data
+        };
+    },
+
+    componentDidMount: function(){
+        window.addEventListener("resize", this.onResize);
+
+        // trigger onResize() after it mounts so we can initialize the width of the app
+        this.onResize();
+    },
+
+    componentWillUnmount: function(){
+        window.removeEventListener("resize", this.onResize);
+    },
+
+    generateNewFireflys: function({width, height}){
+
+        return Array(20).fill().map((zero, i) => {
+            return {
+                centerx: Math.random() * width,
+                centery: Math.random() * height
+            };
+        });
+    },
+
+    onResize: function(){
+
+        let width = this.refs.canvas.clientWidth;
+        let height = this.refs.canvas.clientHeight;
+
+        console.log("width", width);
+        console.log("height", height);
+
+        // We can't use media queries, so we're grabbing the width of the app element instead
+        this.setState({
+            width: width,
+            height: height,
+            fireflys: this.generateNewFireflys({width, height})
+        });
     },
 
     render: function(){
 
         let canvasStyles = {
             "position"  : "relative",
-            "width"     : this.props.width,
-            "height"    : this.props.height,
-            "padding"   : RADIUS, // a firefly at 0,0 will not go off the edge
+            // "width"     : this.state.width,
+            // "height"    : this.state.height,
+            "margin"   : RADIUS, // a firefly at 0,0 will not go off the edge
             "boxSizing" : "border-box",
             "border"    : "1px solid #aaa"
         };
 
         return (
-            <svg className="canvas" style={canvasStyles}>
+            <svg className="canvas" style={canvasStyles} ref="canvas">
 
                 <defs>
                 { // define color gradients for fireflys (see colors variable)
@@ -58,13 +104,16 @@ export default React.createClass({
                 </defs>
 
                 { // generate some random fireflys
-                Array(50).fill().map((zero, i) => (
+                this.state.fireflys.map((firefly, i) => (
                     <Firefly
-                        key={i}
-                        r={RADIUS}
-                        cx={Math.random() * this.props.width}
-                        cy={Math.random() * this.props.height}
-                        fill={`url(#${colors[Math.floor(Math.random() * colors.length)].id})`}/>
+                        key              = {i}
+                        radisu           = {RADIUS}
+                        centerx          = {firefly.centerx}
+                        centery          = {firefly.centery}
+                        fill             = {`url(#${colors[Math.floor(Math.random() * colors.length)].id})`}
+                        signalRadius     = {this.props.signalRadius}
+                        showSignalRadius = {this.props.showSignalRadius}
+                    />
                 ))}
 
             </svg>

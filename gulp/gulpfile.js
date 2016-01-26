@@ -34,7 +34,7 @@ utils.setConfig({
 
 
 // load the tasks
-utils.loadTasks(["copy", "js", "bower"]);
+utils.loadTasks(["copy", "js", "bower", "css"]);
 
 /**
  * dev task

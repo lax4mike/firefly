@@ -1,6 +1,7 @@
 import React from "react";
 
-import Canvas from "./Canvas.jsx";
+import Canvas   from "./Canvas.jsx";
+import Controls from "./Controls.jsx";
 
 export default React.createClass({
 
@@ -11,52 +12,27 @@ export default React.createClass({
     },
 
     getInitialState: function(){
-
         return {
-            width: 0,
-            height: 0
+            showSignalRadius: false
         };
     },
 
-    componentDidMount: function(){
-        window.addEventListener("resize", this.onResize);
-
-        // trigger onResize() after it mounts so we can initialize the width of the app
-        this.onResize();
-    },
-
-    componentWillUnmount: function(){
-        window.removeEventListener("resize", this.onResize);
-    },
-
-    onResize: function(){
-        // We can't use media queries, so we're grabbing the width of the app element instead
+    handleSignalRadiusCheckboxChange: function(bool){
         this.setState({
-            width: this.refs.app.clientWidth,
-            height: this.refs.app.clientHeight
+            showSignalRadius: bool
         });
     },
 
-
     render: function(){
 
-        let appStyles = {
-            "position" : "fixed",
-            "top"      : "0",
-            "right"    : "0",
-            "bottom"   : "0",
-            "left"     : "0",
-            "padding"  : "0", // needs to be 0 to properly fit the canvas ( becuase of clientWidth)
-            "margin"   : "20px"
-        };
-
         return (
-            <div className="fireflys" ref="app" style={appStyles}>
+            <div className="fireflys-app" ref="app">
+
+                <Controls
+                    onSignalRadiusCheckboxChange = {this.handleSignalRadiusCheckboxChange}/>
 
                 <Canvas
-                    width  = {this.state.width}
-                    height = {this.state.height}
-                />
+                    showSignalRadius = {this.state.showSignalRadius}/>
 
             </div>
         );

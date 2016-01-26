@@ -6,32 +6,46 @@ export default React.createClass({
     displayName: "Firefly",
 
     propTypes: {
-        r  : PropTypes.number,
-        cx : PropTypes.number,
-        cy : PropTypes.number,
-        fill: PropTypes.string
+        radius       : PropTypes.number,
+        centerx      : PropTypes.number,
+        centery      : PropTypes.number,
+        fill         : PropTypes.string,
+        signalRadius : PropTypes.number,
+        showSignalRadius: PropTypes.bool
     },
 
     getDefaultProps: function(){
         return {
-            r: 10,
-            cx: 0,
-            cy: 0,
-            fill: "#f1c40f"
+            radius: 10,
+            centerx: 0,
+            centery: 0,
+            fill: "#f1c40f",
+            signalRadius: 200
         };
     },
 
     getInitialState: function(){
         return {
-            interval: 1000 + 200 * Math.random(),
-            fill: this.props.fill,
+            interval: 2000,
+            fill: "transparent", // start off
+            // fill: this.props.fill, // start on
             blinkId: null
         };
     },
 
     componentDidMount: function(){
         // start blinking 0-1s from now
-        setTimeout(this.startBlink, Math.random() * 1000);
+        setTimeout(this.startBlink, Math.random() * 2000);
+    },
+
+    handleMouseEnter: function(){
+        // show signal radius on hover
+        this.setState({ showSignalRadius: true });
+    },
+
+    handleMouseLeave: function(){
+        // hide signal radius
+        this.setState({ showSignalRadius: false });
     },
 
     startBlink: function(){
@@ -48,7 +62,9 @@ export default React.createClass({
 
     tick: function(){
 
-        this.setState({ fill: this.props.fill });
+        this.setState({
+            fill: this.props.fill
+        });
 
         setTimeout(() => {
             this.setState({ fill: "transparent" });
@@ -57,19 +73,34 @@ export default React.createClass({
 
     render: function(){
 
-        let circleStyles = {
-            "transition": "all 150ms"
-        };
-
         return (
-            <circle
-                style={circleStyles}
-                cx={this.props.cx}
-                cy={this.props.cy}
-                r={this.props.r}
-                fill={this.state.fill}>
+            <g className="firefly">
 
-            </circle>
+                { // only show the signal radius cirle on hover
+                (this.props.showSignalRadius || this.state.showSignalRadius)
+                    ? (
+                        <circle
+                            className="firefly__signal-radius"
+                            cx     = {this.props.centerx}
+                            cy     = {this.props.centery}
+                            r      = {this.props.signalRadius}
+                            fill   = "transparent"
+                            stroke = {"#999"} />
+                    )
+                    : null
+                }
+
+                <circle
+                    className="firefly__light"
+                    onMouseEnter = {this.handleMouseEnter}
+                    onMouseLeave = {this.handleMouseLeave}
+                    cx    = {this.props.centerx}
+                    cy    = {this.props.centery}
+                    r     = {this.props.radius}
+                    fill  = {this.state.fill} />
+
+
+            </g>
         );
     }
 
