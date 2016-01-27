@@ -13,14 +13,17 @@ export default React.createClass({
 
     getInitialState: function(){
         return {
-            showSignalRadius: false
+            showSignalRadius: false,
+            signalRadius: 200
         };
     },
 
     handleSignalRadiusCheckboxChange: function(bool){
-        this.setState({
-            showSignalRadius: bool
-        });
+        this.setState({ showSignalRadius: bool });
+    },
+
+    handleSignalRadiusChange: function(radius){
+        this.setState({ signalRadius: radius });
     },
 
     render: function(){
@@ -29,10 +32,16 @@ export default React.createClass({
             <div className="fireflys-app" ref="app">
 
                 <Controls
-                    onSignalRadiusCheckboxChange = {this.handleSignalRadiusCheckboxChange}/>
+                    showSignalRadius             = {this.state.showSignalRadius}
+                    onSignalRadiusCheckboxChange = {this.handleSignalRadiusCheckboxChange}
+                    signalRadius                 = {this.state.signalRadius}
+                    onSignalRadiusChange         = {this.handleSignalRadiusChange}
+                />
 
                 <Canvas
-                    showSignalRadius = {this.state.showSignalRadius}/>
+                    showSignalRadius = {this.state.showSignalRadius}
+                    signalRadius     = {this.state.signalRadius}
+                />
 
             </div>
         );

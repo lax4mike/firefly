@@ -56,9 +56,16 @@ export default React.createClass({
     generateNewFireflys: function({width, height}){
 
         return Array(20).fill().map((zero, i) => {
+            // return {
+            //     centerx: Math.random() * width,
+            //     centery: Math.random() * height
+            // };
+
+            let columns = 4;
+            let rows = 5;
             return {
-                centerx: Math.random() * width,
-                centery: Math.random() * height
+                centerx: (width/(columns+1) * ((i % columns) + 1)),
+                centery: (height/(rows+1) * ((i % rows) + 1))
             };
         });
     },
@@ -68,8 +75,8 @@ export default React.createClass({
         let width = this.refs.canvas.clientWidth;
         let height = this.refs.canvas.clientHeight;
 
-        console.log("width", width);
-        console.log("height", height);
+        // console.log("width", width);
+        // console.log("height", height);
 
         // We can't use media queries, so we're grabbing the width of the app element instead
         this.setState({
@@ -107,7 +114,7 @@ export default React.createClass({
                 this.state.fireflys.map((firefly, i) => (
                     <Firefly
                         key              = {i}
-                        radisu           = {RADIUS}
+                        radius           = {RADIUS}
                         centerx          = {firefly.centerx}
                         centery          = {firefly.centery}
                         fill             = {`url(#${colors[Math.floor(Math.random() * colors.length)].id})`}

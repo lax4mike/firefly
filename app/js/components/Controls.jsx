@@ -6,9 +6,10 @@ export default React.createClass({
     displayName: "Controls",
 
     propTypes: {
-        signalRadius: PropTypes.number,
-        showSignalRadius: PropTypes.bool,
-        onSignalRadiusCheckboxChange: PropTypes.func
+        signalRadius                 : PropTypes.number,
+        onSignalRadiusChange         : PropTypes.func,
+        showSignalRadius             : PropTypes.bool,
+        onSignalRadiusCheckboxChange : PropTypes.func
     },
 
     getDefaultProps: function(){
@@ -34,6 +35,12 @@ export default React.createClass({
         }
     },
 
+    handleSignalRadiusChange: function(e){
+        if (this.props.onSignalRadiusChange){
+            this.props.onSignalRadiusChange(Number(e.target.value));
+        }
+    },
+
     render: function(){
 
         return (
@@ -42,7 +49,16 @@ export default React.createClass({
                     <label>
                         show signal radius
                         <input type="checkbox"
+                            checked={this.props.showSignalRadius}
                             onChange={this.handleSignalRadiusCheckboxChange}/>
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div>signal radius {this.props.signalRadius}</div>
+                        <input type="range" min={25} max={300}
+                            onChange={this.handleSignalRadiusChange} />
                     </label>
                 </div>
             </div>

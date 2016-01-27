@@ -85,7 +85,7 @@ export default React.createClass({
                             cy     = {this.props.centery}
                             r      = {this.props.signalRadius}
                             fill   = "transparent"
-                            stroke = {"#999"} />
+                            stroke = {"#ccc"} />
                     )
                     : null
                 }
