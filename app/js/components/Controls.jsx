@@ -8,25 +8,8 @@ export default React.createClass({
     propTypes: {
         signalRadius                 : PropTypes.number,
         onSignalRadiusChange         : PropTypes.func,
-        showSignalRadius             : PropTypes.bool,
+        signalRadiusIsHidden         : PropTypes.bool,
         onSignalRadiusCheckboxChange : PropTypes.func
-    },
-
-    getDefaultProps: function(){
-        return {
-
-        };
-    },
-
-    getInitialState: function(){
-        return {
-
-        };
-    },
-
-    componentDidMount: function(){
-        // start blinking 0-1s from now
-        // setTimeout(this.startBlink, Math.random() * 1000);
     },
 
     handleSignalRadiusCheckboxChange: function(e){
@@ -49,7 +32,7 @@ export default React.createClass({
                     <label>
                         show signal radius
                         <input type="checkbox"
-                            checked={this.props.showSignalRadius}
+                            defaulChecked={!this.props.signalRadiusIsHidden}
                             onChange={this.handleSignalRadiusCheckboxChange}/>
                     </label>
                 </div>

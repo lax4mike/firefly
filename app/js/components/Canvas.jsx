@@ -26,7 +26,12 @@ export default React.createClass({
 
     propTypes: {
         signalRadius: PropTypes.number,
-        showSignalRadius: PropTypes.bool
+        showSignalRadius: PropTypes.bool,
+        fireflies: PropTypes.arrayOf(PropTypes.shape({
+            id      : PropTypes.number,
+            centerx : PropTypes.number,
+            centery : PropTypes.number
+        })).isRequired
     },
 
     getDefaultProps: function(){
@@ -34,11 +39,9 @@ export default React.createClass({
     },
 
     getInitialState: function(){
-
         return {
             width: 0,
-            height: 0,
-            fireflys: [] // holds the firefly data
+            height: 0
         };
     },
 
@@ -53,23 +56,6 @@ export default React.createClass({
         window.removeEventListener("resize", this.onResize);
     },
 
-    generateNewFireflys: function({width, height}){
-
-        return Array(20).fill().map((zero, i) => {
-            // return {
-            //     centerx: Math.random() * width,
-            //     centery: Math.random() * height
-            // };
-
-            let columns = 4;
-            let rows = 5;
-            return {
-                centerx: (width/(columns+1) * ((i % columns) + 1)),
-                centery: (height/(rows+1) * ((i % rows) + 1))
-            };
-        });
-    },
-
     onResize: function(){
 
         let width = this.refs.canvas.clientWidth;
@@ -81,9 +67,10 @@ export default React.createClass({
         // We can't use media queries, so we're grabbing the width of the app element instead
         this.setState({
             width: width,
-            height: height,
-            fireflys: this.generateNewFireflys({width, height})
+            height: height
         });
+
+        this.props.onResize({width, height});
     },
 
     render: function(){
@@ -101,7 +88,7 @@ export default React.createClass({
             <svg className="canvas" style={canvasStyles} ref="canvas">
 
                 <defs>
-                { // define color gradients for fireflys (see colors variable)
+                { // define color gradients for fireflies (see colors variable)
                 colors.map((color) => (
                     <radialGradient id={color.id} key={color.id}>
                         <stop offset="0%"   stopColor={color.hex} stopOpacity="1"/>
@@ -110,8 +97,8 @@ export default React.createClass({
                 ))}
                 </defs>
 
-                { // generate some random fireflys
-                this.state.fireflys.map((firefly, i) => (
+                { // generate some random fireflies
+                this.props.fireflies.map((firefly, i) => (
                     <Firefly
                         key              = {i}
                         radius           = {RADIUS}

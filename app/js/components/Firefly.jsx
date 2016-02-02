@@ -38,6 +38,10 @@ export default React.createClass({
         setTimeout(this.startBlink, Math.random() * 2000);
     },
 
+    componentWillUnmount: function(){
+        this.stopBlink();
+    },
+
     handleMouseEnter: function(){
         // show signal radius on hover
         this.setState({ showSignalRadius: true });
@@ -67,7 +71,9 @@ export default React.createClass({
         });
 
         setTimeout(() => {
-            this.setState({ fill: "transparent" });
+            if (this.isMounted()){
+                this.setState({ fill: "transparent" });
+            }
         }, 500);
     },
 
