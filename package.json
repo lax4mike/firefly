@@ -31,6 +31,7 @@
   "dependencies": {
     "classnames": "^2.2.3",
     "react-redux": "^4.1.2",
-    "redux": "^3.1.6"
+    "redux": "^3.1.6",
+    "reselect": "^2.0.3"
   }
 }

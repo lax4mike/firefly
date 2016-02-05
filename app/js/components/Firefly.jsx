@@ -6,22 +6,13 @@ export default React.createClass({
     displayName: "Firefly",
 
     propTypes: {
-        radius       : PropTypes.number,
-        centerx      : PropTypes.number,
-        centery      : PropTypes.number,
-        fill         : PropTypes.string,
-        signalRadius : PropTypes.number,
-        showSignalRadius: PropTypes.bool
-    },
-
-    getDefaultProps: function(){
-        return {
-            radius: 10,
-            centerx: 0,
-            centery: 0,
-            fill: "#f1c40f",
-            signalRadius: 200
-        };
+        radius       : PropTypes.number.isRequired,
+        centerx      : PropTypes.number.isRequired,
+        centery      : PropTypes.number.isRequired,
+        fill         : PropTypes.string.isRequired,
+        interval     : PropTypes.number.isRequired,
+        signalRadius : PropTypes.number.isRequired,
+        showSignalRadius: PropTypes.bool.isRequired
     },
 
     getInitialState: function(){
@@ -29,7 +20,8 @@ export default React.createClass({
             interval: 2000,
             fill: "transparent", // start off
             // fill: this.props.fill, // start on
-            blinkId: null
+            blinkId: null,
+            showSignalRadius: false // for this individual firefly
         };
     },
 
@@ -53,7 +45,7 @@ export default React.createClass({
     },
 
     startBlink: function(){
-        this.setState({ blinkId: setInterval(this.tick, this.state.interval) });
+        this.setState({ blinkId: setInterval(this.blink, this.props.interval) });
     },
 
     stopBlink: function(){
@@ -64,7 +56,7 @@ export default React.createClass({
         });
     },
 
-    tick: function(){
+    blink: function(){
 
         this.setState({
             fill: this.props.fill
@@ -74,7 +66,7 @@ export default React.createClass({
             if (this.isMounted()){
                 this.setState({ fill: "transparent" });
             }
-        }, 500);
+        }, 350);
     },
 
     render: function(){

@@ -24,26 +24,45 @@ export default React.createClass({
         }
     },
 
+    handleMouseDown: function(){
+        if (this.props.onSignalRadiusCheckboxChange){
+            this.props.onSignalRadiusCheckboxChange(true);
+        }
+    },
+
+    handleMouseUp: function(){
+        if (this.props.onSignalRadiusCheckboxChange){
+            this.props.onSignalRadiusCheckboxChange(false);
+        }
+    },
+
     render: function(){
 
         return (
             <div className="controls">
                 <div className="control">
                     <label>
-                        show signal radius
+                        <div><span className="label">signal radius</span>: <span className="number">{this.props.signalRadius}</span></div>
+                        <input type="range" min={50} max={500}
+                            value={this.props.signalRadius}
+                            onMouseDown={this.handleMouseDown}
+                            onMouseUp={this.handleMouseUp}
+                            onChange={this.handleSignalRadiusChange} />
+                    </label>
+                </div>
+
+                {/*
+                <div className="control">
+                    <label>
+                        <span className="label">show signal radius</span>
                         <input type="checkbox"
                             defaulChecked={!this.props.signalRadiusIsHidden}
                             onChange={this.handleSignalRadiusCheckboxChange}/>
                     </label>
                 </div>
 
-                <div className="control">
-                    <label>
-                        <div>signal radius {this.props.signalRadius}</div>
-                        <input type="range" min={25} max={300}
-                            onChange={this.handleSignalRadiusChange} />
-                    </label>
-                </div>
+                */}
+
             </div>
         );
     }

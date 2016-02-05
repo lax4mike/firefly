@@ -1,5 +1,6 @@
 import { connect } from "react-redux";
 import { generateFireflies } from "../redux/modules/fireflies.js";
+import { getFireflies } from "../redux/modules/fireflies-selectors.js";
 
 import Canvas from "./Canvas.jsx";
 
@@ -8,7 +9,7 @@ import Canvas from "./Canvas.jsx";
 
 function mapStateToProps(state){
     return {
-        fireflies: state.fireflies,
+        fireflies: getFireflies(state),
         signalRadius: state.signalRadius.radius,
         showSignalRadius: !state.signalRadius.isHidden
     };

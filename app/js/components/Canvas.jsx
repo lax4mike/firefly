@@ -31,7 +31,8 @@ export default React.createClass({
             id      : PropTypes.number,
             centerx : PropTypes.number,
             centery : PropTypes.number
-        })).isRequired
+        })).isRequired,
+        onResize: PropTypes.func
     },
 
     getDefaultProps: function(){
@@ -70,7 +71,10 @@ export default React.createClass({
             height: height
         });
 
-        this.props.onResize({width, height});
+        // pass this data to the parent
+        if (this.props.onResize){
+            this.props.onResize({width, height});
+        }
     },
 
     render: function(){
@@ -104,6 +108,7 @@ export default React.createClass({
                         radius           = {RADIUS}
                         centerx          = {firefly.centerx}
                         centery          = {firefly.centery}
+                        interval         = {firefly.interval}
                         fill             = {`url(#${colors[Math.floor(Math.random() * colors.length)].id})`}
                         signalRadius     = {this.props.signalRadius}
                         showSignalRadius = {this.props.showSignalRadius}

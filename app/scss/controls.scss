@@ -1,3 +1,19 @@
+@import "./_fonts.scss";
+
 .controls {
     padding: 10px;
+}
+
+.number {
+    font-family: $sourceCodePro;
+}
+
+.control {
+
+    padding: 0 0 20px;
+
+    .label {
+        font-size: 12px;
+        text-transform: uppercase;
+    }
 }
