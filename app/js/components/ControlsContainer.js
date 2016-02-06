@@ -8,7 +8,7 @@ import { setFireflyBlink } from "../redux/modules/fireflies-blink-status.js";
 function mapStateToProps(state) {
     return {
         signalRadius     : state.signalRadius.radius,
-        showSignalRadius : state.signalRadius.isHidden,
+        showSignalRadius : state.signalRadius.isVisible,
         blinkStatus      : state.blinkStatus
     };
 }

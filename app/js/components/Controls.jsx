@@ -7,14 +7,23 @@ export default React.createClass({
     displayName: "Controls",
 
     propTypes: {
-        signalRadius         : PropTypes.number,
-        blinkStatus          : PropTypes.string,
+        signalRadius         : PropTypes.number.isRequired,
+        showSignalRadius     : PropTypes.bool.isRequired,
+        blinkStatus          : PropTypes.string.isRequired,
         onSignalRadiusChange : PropTypes.func.isRequired,
         onSignalRadiusVisibilityChange: PropTypes.func.isRequired,
         onBlinkStatusChange  : PropTypes.func.isRequired
     },
 
-    handleBlinKStatusChange: function(e){
+    getInitialState: function(){
+        return {
+            // remember what this value is from redux
+            // use this to revert the status after dragging the range slider
+            showSignalRadius: this.props.showSignalRadius
+        };
+    },
+
+    handleBlinkStatusChange: function(e){
         this.props.onBlinkStatusChange(e.target.value);
     },
 
@@ -22,26 +31,41 @@ export default React.createClass({
         this.props.onSignalRadiusChange(Number(e.target.value));
     },
 
-    handleShowFirefliesChange: function(e){
-        this.props.onBlinkStatusChange(e.target.value);
+    handleSignalRadiusVisibilityChange: function(e){
+        // if we send a value up, store it here first
+        this.setState({
+            showSignalRadius: e.target.checked
+        });
+        this.props.onSignalRadiusVisibilityChange(e.target.checked);
     },
 
     handleMouseDown: function(){
-        if (this.props.onSignalRadiusVisibilityChange){
-            this.props.onSignalRadiusVisibilityChange(true);
-        }
+        // store the value of this so we can revert it on mouse up
+        this.setState({
+            showSignalRadius: this.props.showSignalRadius
+        });
+        this.props.onSignalRadiusVisibilityChange(true);
     },
 
     handleMouseUp: function(){
-        if (this.props.onSignalRadiusVisibilityChange){
-            this.props.onSignalRadiusVisibilityChange(false);
-        }
+        // restore the original value
+        this.props.onSignalRadiusVisibilityChange(this.state.showSignalRadius);
     },
 
     render: function(){
 
         return (
             <div className="controls">
+
+                <div className="control">
+                    <label className="checkbox-control">
+                        <span className="label">Show Signal Radius </span>
+                        <input type="checkbox"
+                            checked={this.state.showSignalRadius}
+                            onChange={this.handleSignalRadiusVisibilityChange} />
+                    </label>
+                </div>
+
                 <div className="control">
                     <label>
                         <div><span className="label">Signal Radius</span>: <span className="number">{this.props.signalRadius}</span></div>
@@ -58,7 +82,7 @@ export default React.createClass({
                         <div className="label">Blink status</div>
 
                         <select
-                            onChange={this.handleShowFirefliesChange}
+                            onChange={this.handleBlinkStatusChange}
                             value={this.props.blinkStatus}>
                             {blinks.map((b) => (
                                 <option
@@ -70,7 +94,6 @@ export default React.createClass({
                         </select>
                     </label>
                 </div>
-
 
             </div>
         );

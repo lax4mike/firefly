@@ -12,6 +12,10 @@
 
     padding: 0 0 20px;
 
+    label {
+        display: block;
+    }
+
     .label {
         font-size: 12px;
         text-transform: uppercase;
@@ -20,4 +24,8 @@
     select {
         width: 100%;
     }
+}
+
+.checkbox-control {
+    white-space: nowrap;
 }

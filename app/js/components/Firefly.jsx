@@ -81,7 +81,6 @@ export default React.createClass({
 
     // when the user lifts the mouse, remove the listeners
     handleWindowMouseUp: function(e){
-        console.log("UP");
         window.removeEventListener("mousemove", this.handleWindowMouseMove);
         window.removeEventListener("mouseup", this.handleWindowMouseUp, true);
     },
