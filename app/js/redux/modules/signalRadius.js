@@ -11,17 +11,17 @@ export function updateRadius(radius){
     };
 }
 
-export function toggleHidden(bool){
+export function toggleVisbility(bool){
     return {
         type: RADIUS_TOGGLE,
         bool
-    }
+    };
 }
 
 // inital state
 let initialState = {
     radius: 200,
-    isHidden: true
+    isVisible: false
 };
 
 // reducer function
@@ -37,7 +37,7 @@ function reducer(state = initialState, action) {
 
         case RADIUS_TOGGLE: {
             return Object.assign({}, state, {
-                isHidden: action.bool
+                isVisible: action.bool
             });
         }
 

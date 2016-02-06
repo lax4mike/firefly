@@ -2,7 +2,7 @@ import React, { PropTypes } from "react";
 
 import Firefly from "./Firefly.jsx";
 
-const RADIUS = 10;
+const RADIUS = 15;
 
 let colors = [
     {
@@ -25,18 +25,16 @@ export default React.createClass({
     displayName: "Canvas",
 
     propTypes: {
-        signalRadius: PropTypes.number,
-        showSignalRadius: PropTypes.bool,
+        showSignalRadius: PropTypes.bool.isRequired,
+        signalRadius: PropTypes.number.isRequired,
+        blinkStatus: PropTypes.string.isRequired,
         fireflies: PropTypes.arrayOf(PropTypes.shape({
-            id      : PropTypes.number,
-            centerx : PropTypes.number,
-            centery : PropTypes.number
+            id      : PropTypes.number.isRequired,
+            centerx : PropTypes.number.isRequired,
+            centery : PropTypes.number.isRequired
         })).isRequired,
-        onResize: PropTypes.func
-    },
-
-    getDefaultProps: function(){
-
+        onResize: PropTypes.func.isRequired,
+        onFireflyBlink: PropTypes.func.isRequired
     },
 
     getInitialState: function(){
@@ -104,14 +102,17 @@ export default React.createClass({
                 { // generate some random fireflies
                 this.props.fireflies.map((firefly, i) => (
                     <Firefly
-                        key              = {i}
+                        key              = {firefly.id}
+                        id               = {firefly.id}
                         radius           = {RADIUS}
                         centerx          = {firefly.centerx}
                         centery          = {firefly.centery}
                         interval         = {firefly.interval}
-                        fill             = {`url(#${colors[Math.floor(Math.random() * colors.length)].id})`}
+                        fill             = {`url(#${colors[0].id})`}
                         signalRadius     = {this.props.signalRadius}
                         showSignalRadius = {this.props.showSignalRadius}
+                        blinkStatus      = {this.props.blinkStatus}
+                        onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
                     />
                 ))}
 

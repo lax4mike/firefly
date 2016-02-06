@@ -1,38 +1,40 @@
 import React, { PropTypes } from "react";
 
+import blinks from "../blink-status.js";
 
 export default React.createClass({
 
     displayName: "Controls",
 
     propTypes: {
-        signalRadius                 : PropTypes.number,
-        onSignalRadiusChange         : PropTypes.func,
-        signalRadiusIsHidden         : PropTypes.bool,
-        onSignalRadiusCheckboxChange : PropTypes.func
+        signalRadius         : PropTypes.number,
+        blinkStatus          : PropTypes.string,
+        onSignalRadiusChange : PropTypes.func.isRequired,
+        onSignalRadiusVisibilityChange: PropTypes.func.isRequired,
+        onBlinkStatusChange  : PropTypes.func.isRequired
     },
 
-    handleSignalRadiusCheckboxChange: function(e){
-        if (this.props.onSignalRadiusCheckboxChange){
-            this.props.onSignalRadiusCheckboxChange(e.target.checked);
-        }
+    handleBlinKStatusChange: function(e){
+        this.props.onBlinkStatusChange(e.target.value);
     },
 
     handleSignalRadiusChange: function(e){
-        if (this.props.onSignalRadiusChange){
-            this.props.onSignalRadiusChange(Number(e.target.value));
-        }
+        this.props.onSignalRadiusChange(Number(e.target.value));
+    },
+
+    handleShowFirefliesChange: function(e){
+        this.props.onBlinkStatusChange(e.target.value);
     },
 
     handleMouseDown: function(){
-        if (this.props.onSignalRadiusCheckboxChange){
-            this.props.onSignalRadiusCheckboxChange(true);
+        if (this.props.onSignalRadiusVisibilityChange){
+            this.props.onSignalRadiusVisibilityChange(true);
         }
     },
 
     handleMouseUp: function(){
-        if (this.props.onSignalRadiusCheckboxChange){
-            this.props.onSignalRadiusCheckboxChange(false);
+        if (this.props.onSignalRadiusVisibilityChange){
+            this.props.onSignalRadiusVisibilityChange(false);
         }
     },
 
@@ -42,7 +44,7 @@ export default React.createClass({
             <div className="controls">
                 <div className="control">
                     <label>
-                        <div><span className="label">signal radius</span>: <span className="number">{this.props.signalRadius}</span></div>
+                        <div><span className="label">Signal Radius</span>: <span className="number">{this.props.signalRadius}</span></div>
                         <input type="range" min={50} max={500}
                             value={this.props.signalRadius}
                             onMouseDown={this.handleMouseDown}
@@ -51,17 +53,24 @@ export default React.createClass({
                     </label>
                 </div>
 
-                {/*
                 <div className="control">
                     <label>
-                        <span className="label">show signal radius</span>
-                        <input type="checkbox"
-                            defaulChecked={!this.props.signalRadiusIsHidden}
-                            onChange={this.handleSignalRadiusCheckboxChange}/>
+                        <div className="label">Blink status</div>
+
+                        <select
+                            onChange={this.handleShowFirefliesChange}
+                            value={this.props.blinkStatus}>
+                            {blinks.map((b) => (
+                                <option
+                                    key={b}
+                                    value={b}>
+                                    {b}
+                                </option>
+                            ))}
+                        </select>
                     </label>
                 </div>
 
-                */}
 
             </div>
         );

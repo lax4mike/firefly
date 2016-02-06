@@ -2,12 +2,14 @@ import { connect } from "react-redux";
 
 import Controls from "./Controls.jsx";
 
-import { updateRadius, toggleHidden } from "../redux/modules/signalRadius.js";
+import { updateRadius, toggleVisbility } from "../redux/modules/signalRadius.js";
+import { setFireflyBlink } from "../redux/modules/fireflies-blink-status.js";
 
 function mapStateToProps(state) {
     return {
-        signalRadius : state.signalRadius.radius,
-        showSignalRadius : state.signalRadius.isHidden
+        signalRadius     : state.signalRadius.radius,
+        showSignalRadius : state.signalRadius.isHidden,
+        blinkStatus      : state.blinkStatus
     };
 }
 
@@ -16,8 +18,11 @@ function mapDispatchToProps(dispatch, ownProps) {
         onSignalRadiusChange: function(radius){
             dispatch(updateRadius(radius));
         },
-        onSignalRadiusCheckboxChange: function(bool){
-            dispatch(toggleHidden(!bool));
+        onSignalRadiusVisibilityChange: function(bool){
+            dispatch(toggleVisbility(bool));
+        },
+        onBlinkStatusChange: function(status){
+            dispatch(setFireflyBlink(status));
         }
     };
 }

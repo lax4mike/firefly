@@ -6,32 +6,59 @@ export default React.createClass({
     displayName: "Firefly",
 
     propTypes: {
+        id           : PropTypes.number.isRequired,
         radius       : PropTypes.number.isRequired,
         centerx      : PropTypes.number.isRequired,
         centery      : PropTypes.number.isRequired,
         fill         : PropTypes.string.isRequired,
+
         interval     : PropTypes.number.isRequired,
+        onBlink      : PropTypes.func.isRequired,
+        blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
+
         signalRadius : PropTypes.number.isRequired,
         showSignalRadius: PropTypes.bool.isRequired
     },
 
+    contextTypes: {
+        store: PropTypes.object
+    },
+
     getInitialState: function(){
         return {
-            interval: 2000,
+            isBlinking: (this.props.blinkStatus === "blink"),
+            interval: 1000,
             fill: "transparent", // start off
             // fill: this.props.fill, // start on
-            blinkId: null,
             showSignalRadius: false // for this individual firefly
         };
     },
 
     componentDidMount: function(){
-        // start blinking 0-1s from now
-        setTimeout(this.startBlink, Math.random() * 2000);
+        this.handleBlinKStatusChange(this.props.blinkStatus);
     },
 
     componentWillUnmount: function(){
         this.stopBlink();
+    },
+
+    componentWillReceiveProps: function(nextProps){
+
+        // if the blink status has changed
+        if (nextProps.blinkStatus !== this.props.blinkStatus){
+            this.stopBlink();
+            this.handleBlinKStatusChange(nextProps.blinkStatus);
+        }
+        // start blinking 0-1s from now
+    },
+
+    handleBlinKStatusChange: function(status){
+        if (status === "blink"){
+            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.random() * 3000);
+        }
+        else {
+            this.stopBlink(status);
+        }
     },
 
     handleMouseEnter: function(){
@@ -45,28 +72,59 @@ export default React.createClass({
     },
 
     startBlink: function(){
-        this.setState({ blinkId: setInterval(this.blink, this.props.interval) });
+        this.setState({
+            isBlinking: true
+        });
+        this.blink();
     },
 
-    stopBlink: function(){
-        clearInterval(this.state.blinkId);
+    stopBlink: function(status){
+        clearTimeout(this.startBlinkTimeoutId);
+        clearTimeout(this.nextBlinkTimeoutId);
+        clearTimeout(this.blinkOffTimeoutId);
         this.setState({
-            blinkId: null,
-            fill: "transparent" // always end "off"
+            isBlinking: false,
+            fill: (status === "off") ? "transparent" : this.props.fill
         });
     },
 
     blink: function(){
 
-        this.setState({
-            fill: this.props.fill
+        let blinkLog = this.context.store.getState().blinkLog;
+
+        // check the blink log for a blink that happened in the last 500ms
+        let closeBlinks = blinkLog.filter((b) => {
+            let diff = Date.now() - b.timestamp;
+            // console.log(this.props.id, b.id, diff, this.state.interval);
+            return diff > 50 && diff < 500;
         });
 
-        setTimeout(() => {
+        // closeBlinks.forEach((b) => {
+        //     console.log(Date.now() - b.timestamp);
+        // });
+
+
+        // blink off
+        this.blinkOffTimeoutId = setTimeout(() => {
             if (this.isMounted()){
                 this.setState({ fill: "transparent" });
             }
         }, 350);
+
+        // blink next time
+        this.nextBlinkTimeoutId = setTimeout(() => {
+            if (this.state.isBlinking){
+                this.blink();
+            }
+        }, this.state.interval);
+
+        this.setState({
+            fill: this.props.fill,
+            interval: (closeBlinks.length > 0) ? 1025 : 1000
+        });
+
+        // record this blink to the blink log
+        this.props.onBlink();
     },
 
     render: function(){

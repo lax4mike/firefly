@@ -15,18 +15,18 @@ export function setFireflies(fireflies){
 }
 
 export function generateFireflies({width, height}){
-    const fireflies = Array(2).fill().map((zero, i) => {
+    const fireflies = Array(4).fill().map((zero, i) => {
         // return {
         //     centerx: Math.random() * width,
         //     centery: Math.random() * height
         // };
 
-        let columns = 2;
-        let rows = 1;
+        let columns = 6;
+        let rows = 3;
         return {
             id: fireflyId++,
             centerx: (width/(columns+1) * ((i % columns) + 1)),
-            centery: (height/(rows+1) * ((i % rows) + 1)),
+            centery: (height/2),//(height/(rows+1) * ((i % rows) + 1)),
             interval: 1000
         };
     });
