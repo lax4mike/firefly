@@ -17,7 +17,9 @@ export default React.createClass({
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
 
         signalRadius : PropTypes.number.isRequired,
-        showSignalRadius: PropTypes.bool.isRequired
+        showSignalRadius: PropTypes.bool.isRequired,
+
+        onDrag       : PropTypes.func.isRequired
     },
 
     contextTypes: {
@@ -71,6 +73,24 @@ export default React.createClass({
         this.setState({ showSignalRadius: false });
     },
 
+    // attach drag and mouseup events to the window
+    handleMouseDown: function(){
+        window.addEventListener("mousemove", this.handleWindowMouseMove);
+        window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+    },
+
+    // when the user lifts the mouse, remove the listeners
+    handleWindowMouseUp: function(e){
+        console.log("UP");
+        window.removeEventListener("mousemove", this.handleWindowMouseMove);
+        window.removeEventListener("mouseup", this.handleWindowMouseUp, true);
+    },
+
+    // while dragging, send the offset info up
+    handleWindowMouseMove: function(e){
+        this.props.onDrag(e.offsetX, e.offsetY);
+    },
+
     startBlink: function(){
         this.setState({
             isBlinking: true
@@ -80,8 +100,6 @@ export default React.createClass({
 
     stopBlink: function(status){
         clearTimeout(this.startBlinkTimeoutId);
-        clearTimeout(this.nextBlinkTimeoutId);
-        clearTimeout(this.blinkOffTimeoutId);
         this.setState({
             isBlinking: false,
             fill: (status === "off") ? "transparent" : this.props.fill
@@ -105,14 +123,14 @@ export default React.createClass({
 
 
         // blink off
-        this.blinkOffTimeoutId = setTimeout(() => {
-            if (this.isMounted()){
+        setTimeout(() => {
+            if (this.isMounted() && this.state.isBlinking){
                 this.setState({ fill: "transparent" });
             }
         }, 350);
 
         // blink next time
-        this.nextBlinkTimeoutId = setTimeout(() => {
+        setTimeout(() => {
             if (this.state.isBlinking){
                 this.blink();
             }
@@ -150,6 +168,7 @@ export default React.createClass({
                     className="firefly__light"
                     onMouseEnter = {this.handleMouseEnter}
                     onMouseLeave = {this.handleMouseLeave}
+                    onMouseDown  = {this.handleMouseDown}
                     cx    = {this.props.centerx}
                     cy    = {this.props.centery}
                     r     = {this.props.radius}

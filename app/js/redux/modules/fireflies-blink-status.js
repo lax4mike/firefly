@@ -18,7 +18,7 @@ export function setFireflyBlink(status){
 }
 
 // inital state
-let initialState = blinks[0];
+let initialState = blinks[1];
 
 // reducer function
 function reducer(state = initialState, action) {

@@ -34,7 +34,8 @@ export default React.createClass({
             centery : PropTypes.number.isRequired
         })).isRequired,
         onResize: PropTypes.func.isRequired,
-        onFireflyBlink: PropTypes.func.isRequired
+        onFireflyBlink: PropTypes.func.isRequired,
+        onFireflyDrag : PropTypes.func.isRequired
     },
 
     getInitialState: function(){
@@ -112,6 +113,7 @@ export default React.createClass({
                         signalRadius     = {this.props.signalRadius}
                         showSignalRadius = {this.props.showSignalRadius}
                         blinkStatus      = {this.props.blinkStatus}
+                        onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
                         onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
                     />
                 ))}
