@@ -8,7 +8,7 @@ const firefliesSelector = (state) => state.fireflies;
 // of each firelfly)
 export const getFireflies = createSelector(
     [firefliesSelector, radiusSelector],
-    
+
     (fireflies, radius) => {
         return fireflies.map(f1 => {
             let neighbors = fireflies
@@ -21,7 +21,7 @@ export const getFireflies = createSelector(
                 })
                 // only keep the fireflies that are close to f1
                 .filter(f3 => {
-                    return (f3.id !== f1.id) && (f3.distance < radius)
+                    return (f3.id !== f1.id) && (f3.distance < radius);
                 })
                 .sort((a, b) => b.distance - a.distance);
 

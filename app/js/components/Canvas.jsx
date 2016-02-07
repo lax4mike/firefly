@@ -31,7 +31,11 @@ export default React.createClass({
         fireflies: PropTypes.arrayOf(PropTypes.shape({
             id      : PropTypes.number.isRequired,
             centerx : PropTypes.number.isRequired,
-            centery : PropTypes.number.isRequired
+            centery : PropTypes.number.isRequired,
+            neighbors: PropTypes.arrayOf(PropTypes.shape({
+                id      : PropTypes.number.isRequired,
+                distance: PropTypes.number.isRequired
+            })).isRequired
         })).isRequired,
         onResize: PropTypes.func.isRequired,
         onFireflyBlink: PropTypes.func.isRequired,
@@ -108,6 +112,7 @@ export default React.createClass({
                         radius           = {RADIUS}
                         centerx          = {firefly.centerx}
                         centery          = {firefly.centery}
+                        neighbors        = {firefly.neighbors}
                         interval         = {firefly.interval}
                         fill             = {`url(#${colors[0].id})`}
                         signalRadius     = {this.props.signalRadius}

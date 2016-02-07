@@ -26,7 +26,7 @@ function reducer(state = initialState, action) {
 
         case BLINK_LOGIT: {
             let pruned = pruneLog(state);
-            return pruned.concat(action.blink)
+            return pruned.concat(action.blink);
         }
 
         default:
@@ -38,7 +38,9 @@ function reducer(state = initialState, action) {
 // remove all entries older than 2000ms
 function pruneLog(log){
     let now = Date.now();
-    return log.filter((b) => now - b.timestamp > 2000 )
+    return log.filter((b) => {
+        return now - b.timestamp < 2000 ;
+    });
 }
 
 export default reducer;

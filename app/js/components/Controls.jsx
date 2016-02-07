@@ -58,15 +58,6 @@ export default React.createClass({
             <div className="controls">
 
                 <div className="control">
-                    <label className="checkbox-control">
-                        <span className="label">Show Signal Radius </span>
-                        <input type="checkbox"
-                            checked={this.state.showSignalRadius}
-                            onChange={this.handleSignalRadiusVisibilityChange} />
-                    </label>
-                </div>
-
-                <div className="control">
                     <label>
                         <div><span className="label">Signal Radius</span>: <span className="number">{this.props.signalRadius}</span></div>
                         <input type="range" min={50} max={500}
@@ -78,20 +69,29 @@ export default React.createClass({
                 </div>
 
                 <div className="control">
+                    <label className="checkbox-control">
+                        <input type="checkbox"
+                            checked={this.state.showSignalRadius}
+                            onChange={this.handleSignalRadiusVisibilityChange} />
+                        <span className="label">Show Signal Radius </span>
+                    </label>
+                </div>
+
+                <div className="control">
                     <label>
                         <div className="label">Blink status</div>
 
-                        <select
-                            onChange={this.handleBlinkStatusChange}
-                            value={this.props.blinkStatus}>
-                            {blinks.map((b) => (
-                                <option
-                                    key={b}
-                                    value={b}>
-                                    {b}
-                                </option>
-                            ))}
-                        </select>
+                        {blinks.map((b) => (
+                            <label className="radio" key={b}>
+                                <input
+                                    type="radio"
+                                    name="blink-status"
+                                    checked={b === this.props.blinkStatus}
+                                    value={b}
+                                    onChange={this.handleBlinkStatusChange} />
+                                &nbsp; {b}
+                            </label>
+                        ))}
                     </label>
                 </div>
 

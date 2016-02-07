@@ -10,6 +10,10 @@ export default React.createClass({
         radius       : PropTypes.number.isRequired,
         centerx      : PropTypes.number.isRequired,
         centery      : PropTypes.number.isRequired,
+        neighbors    : PropTypes.arrayOf(PropTypes.shape({
+            id       : PropTypes.number.isRequired,
+            distance : PropTypes.number.isRequired
+        })),
         fill         : PropTypes.string.isRequired,
 
         interval     : PropTypes.number.isRequired,
@@ -112,13 +116,10 @@ export default React.createClass({
         // check the blink log for a blink that happened in the last 500ms
         let closeBlinks = blinkLog.filter((b) => {
             let diff = Date.now() - b.timestamp;
-            // console.log(this.props.id, b.id, diff, this.state.interval);
-            return diff > 50 && diff < 500;
+            let isNeighbor = this.props.neighbors.find((n) => n.id === b.id);
+            // if this blink is detected in the 2nd half
+            return isNeighbor && (diff < (this.state.interval/2));
         });
-
-        // closeBlinks.forEach((b) => {
-        //     console.log(Date.now() - b.timestamp);
-        // });
 
 
         // blink off
@@ -135,10 +136,18 @@ export default React.createClass({
             }
         }, this.state.interval);
 
+        // determine the interval
+        let newInterval = (closeBlinks.length > 0) ? 1000 : 1025;
         this.setState({
             fill: this.props.fill,
-            interval: (closeBlinks.length > 0) ? 1025 : 1000
+            interval: newInterval
         });
+
+        // console.log("firefly #", this.props.id);
+        // closeBlinks.forEach((b) => {
+        //     console.log(b.id, Date.now() - b.timestamp);
+        // });
+        // console.log("new interval", newInterval)
 
         // record this blink to the blink log
         this.props.onBlink();
