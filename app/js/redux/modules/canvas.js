@@ -22,7 +22,7 @@ function reducer(state = initialState, action) {
     switch(action.type) {
 
         case CANVAS_SET_DIMENSIONS: {
-            let { width, height } = action.dimentions
+            let { width, height } = action.dimentions;
             return Object.assign({}, state, {
                 width, height
             });

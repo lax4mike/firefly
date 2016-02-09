@@ -16,7 +16,6 @@ export default React.createClass({
         })),
         fill         : PropTypes.string.isRequired,
 
-        interval     : PropTypes.number.isRequired,
         onBlink      : PropTypes.func.isRequired,
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
 
@@ -33,8 +32,8 @@ export default React.createClass({
     getInitialState: function(){
         return {
             isBlinking: (this.props.blinkStatus === "blink"),
-            interval: 1000,
             fill: "transparent", // start off
+            interval: 1000,
             // fill: this.props.fill, // start on
             showSignalRadius: false // for this individual firefly
         };
@@ -121,11 +120,24 @@ export default React.createClass({
             return isNeighbor && (diff < (this.state.interval/2));
         });
 
+        // determine the interval
+        let newInterval = (closeBlinks.length > 0) ? 975 : 1000;
+
+        // show the firely and update the interval for display purposes
+        if (this.isMounted()){
+            this.setState({
+                fill: this.props.fill,
+                interval: newInterval
+            });
+        }
 
         // blink off
         setTimeout(() => {
             if (this.isMounted() && this.state.isBlinking){
-                this.setState({ fill: "transparent" });
+                this.setState({
+                    fill: "transparent",
+                    interval: newInterval
+                });
             }
         }, 350);
 
@@ -134,14 +146,8 @@ export default React.createClass({
             if (this.state.isBlinking){
                 this.blink();
             }
-        }, this.state.interval);
+        }, newInterval);
 
-        // determine the interval
-        let newInterval = (closeBlinks.length > 0) ? 1000 : 1025;
-        this.setState({
-            fill: this.props.fill,
-            interval: newInterval
-        });
 
         // console.log("firefly #", this.props.id);
         // closeBlinks.forEach((b) => {
@@ -182,6 +188,18 @@ export default React.createClass({
                     r     = {this.props.radius}
                     fill  = {this.state.fill} />
 
+                { // only show the text
+                (this.props.showSignalRadius || this.state.showSignalRadius)
+                    ? (
+                        <text
+                            x = {this.props.centerx - 8}
+                            y = {this.props.centery + 30}
+                        >
+                            {this.props.id + ": " + this.state.interval}
+                        </text>
+                    )
+                    : null
+                }
 
             </g>
         );

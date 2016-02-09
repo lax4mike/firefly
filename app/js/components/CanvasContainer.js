@@ -5,9 +5,6 @@ import { logBlink } from "../redux/modules/blink-log.js";
 
 import Canvas from "./Canvas.jsx";
 
-
-
-
 function mapStateToProps(state){
     return {
         fireflies: getFireflies(state),

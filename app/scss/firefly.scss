@@ -1,4 +1,8 @@
+@import "./_fonts.scss";
 
+.firefly text {
+    font-family: $sourceCodePro;
+}
 
 .firefly__light {
     cursor: pointer;

@@ -24,23 +24,15 @@ export function setFireflyPosition({fireflyId, x, y}){
 
 
 
+
+
 export function generateFireflies({width, height}){
     const fireflies = Array(4).fill().map((zero, i) => {
         return {
             id: fireflyId++,
             centerx: Math.random() * width,
-            centery: Math.random() * height,
-            interval: 1000
+            centery: Math.random() * height
         };
-
-        // let columns = 6;
-        // let rows = 3;
-        // return {
-        //     id: fireflyId++,
-        //     centerx: (width/(columns+1) * ((i % columns) + 1)),
-        //     centery: (height/2),//(height/(rows+1) * ((i % rows) + 1)),
-        //     interval: 1000
-        // };
     });
 
     return {
