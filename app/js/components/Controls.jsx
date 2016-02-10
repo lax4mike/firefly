@@ -12,7 +12,9 @@ export default React.createClass({
         blinkStatus          : PropTypes.string.isRequired,
         onSignalRadiusChange : PropTypes.func.isRequired,
         onSignalRadiusVisibilityChange: PropTypes.func.isRequired,
-        onBlinkStatusChange  : PropTypes.func.isRequired
+        onBlinkStatusChange  : PropTypes.func.isRequired,
+        onAddFirefly         : PropTypes.func.isRequired,
+        onDebugChange        : PropTypes.func.isRequired,
     },
 
     getInitialState: function(){
@@ -29,6 +31,10 @@ export default React.createClass({
 
     handleSignalRadiusChange: function(e){
         this.props.onSignalRadiusChange(Number(e.target.value));
+    },
+
+    handleDebugChange: function(e){
+        this.props.onDebugChange(e.target.checked);
     },
 
     handleSignalRadiusVisibilityChange: function(e){
@@ -71,6 +77,15 @@ export default React.createClass({
                 <div className="control">
                     <label className="checkbox-control">
                         <input type="checkbox"
+                            checked={this.state.debug}
+                            onChange={this.handleDebugChange} />
+                        <span className="label">Show Debug info </span>
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label className="checkbox-control">
+                        <input type="checkbox"
                             checked={this.state.showSignalRadius}
                             onChange={this.handleSignalRadiusVisibilityChange} />
                         <span className="label">Show Signal Radius </span>
@@ -92,6 +107,14 @@ export default React.createClass({
                                 &nbsp; {b}
                             </label>
                         ))}
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label className="checkbox-control">
+                        <button onClick={this.props.onAddFirefly}>
+                            Add firefly
+                        </button>
                     </label>
                 </div>
 

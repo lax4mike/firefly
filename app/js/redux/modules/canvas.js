@@ -3,10 +3,10 @@
 const CANVAS_SET_DIMENSIONS = "CANVAS_SET_DIMENSIONS";
 
 // action creators
-export function setCanvasDimensions(dimentions){
+export function setCanvasDimensions(dimensions){
     return {
         type: CANVAS_SET_DIMENSIONS,
-        dimentions
+        dimensions
     };
 }
 
@@ -22,7 +22,7 @@ function reducer(state = initialState, action) {
     switch(action.type) {
 
         case CANVAS_SET_DIMENSIONS: {
-            let { width, height } = action.dimentions;
+            let { width, height } = action.dimensions;
             return Object.assign({}, state, {
                 width, height
             });

@@ -1,0 +1,22 @@
+
+button {
+    position: relative;
+    padding: 6px 10px;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid #555;
+    border-radius: 5px;
+
+    &:hover {
+        border: 1px solid #2980b9;
+    }
+
+    &:active {
+        top: 1px;
+        left: 1px;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}

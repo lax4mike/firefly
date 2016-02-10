@@ -1,5 +1,6 @@
 import React, { PropTypes } from "react";
 
+let equilibrum = 1000;
 
 export default React.createClass({
 
@@ -14,13 +15,13 @@ export default React.createClass({
             id       : PropTypes.number.isRequired,
             distance : PropTypes.number.isRequired
         })),
-        fill         : PropTypes.string.isRequired,
 
         onBlink      : PropTypes.func.isRequired,
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
 
-        signalRadius : PropTypes.number.isRequired,
-        showSignalRadius: PropTypes.bool.isRequired,
+        debug            : PropTypes.bool.isRequired,
+        signalRadius     : PropTypes.number.isRequired,
+        showSignalRadius : PropTypes.bool.isRequired,
 
         onDrag       : PropTypes.func.isRequired
     },
@@ -33,7 +34,7 @@ export default React.createClass({
         return {
             isBlinking: (this.props.blinkStatus === "blink"),
             fill: "transparent", // start off
-            interval: 1000,
+            interval: equilibrum,
             // fill: this.props.fill, // start on
             showSignalRadius: false // for this individual firefly
         };
@@ -59,7 +60,10 @@ export default React.createClass({
 
     handleBlinKStatusChange: function(status){
         if (status === "blink"){
-            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.random() * 3000);
+            this.setState({
+                fill: "transparent"
+            });
+            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equilibrum));
         }
         else {
             this.stopBlink(status);
@@ -104,7 +108,7 @@ export default React.createClass({
         clearTimeout(this.startBlinkTimeoutId);
         this.setState({
             isBlinking: false,
-            fill: (status === "off") ? "transparent" : this.props.fill
+            fill: (status === "off") ? "transparent" : "url('#yellow')"
         });
     },
 
@@ -113,20 +117,63 @@ export default React.createClass({
         let blinkLog = this.context.store.getState().blinkLog;
 
         // check the blink log for a blink that happened in the last 500ms
-        let closeBlinks = blinkLog.filter((b) => {
-            let diff = Date.now() - b.timestamp;
-            let isNeighbor = this.props.neighbors.find((n) => n.id === b.id);
+        let allNeighborBlinks = blinkLog
+            .map((b) => {
+                // add time deviation from this blink
+                let deviation = Date.now() - b.timestamp;
+                return Object.assign({}, b, { deviation });
+            })
+            .filter((b) => {
+                let isNeighbor = this.props.neighbors.find((n) => n.id === b.id);
+                let isSelf = (this.props.id === b.id);
+                let isTooClose = (b.deviation < 25); // close enough...
+                let isInLastInterval = (b.deviation) < (this.state.interval - 100);
+                return isNeighbor && !isSelf && isInLastInterval && !isTooClose;
+            });
+
+        let closeBlinks = allNeighborBlinks.filter((b) => {
             // if this blink is detected in the 2nd half
-            return isNeighbor && (diff < (this.state.interval/2));
+            let isIn2ndHalf = b.deviation < (this.state.interval/2);
+            return isIn2ndHalf;
         });
 
-        // determine the interval
-        let newInterval = (closeBlinks.length > 0) ? 975 : 1000;
+
+        // blue if they can't see anything
+        let fill = "url('#blue')";
+        let newInterval = equilibrum;
+
+        // green if they see some
+        if (allNeighborBlinks.length > 0) {
+            fill = "url('#green')";
+        }
+
+        // red if they see some close
+        // if (closeBlinks.length > 0) {
+        //     // find the shortest deviation
+        //     const shortest = closeBlinks
+        //         .map((b) => b.deviation)
+        //         .reduce((a, b) => Math.min(a, b));
+        //
+        //     newInterval = equilibrum - Math.ceil((shortest / 2));
+        //
+        //     fill = "url('#red')";
+        //     // newInterval = Math.max(975, newIterval);
+        //
+        // }
+
+        if (closeBlinks.length > 0){
+            newInterval = equilibrum - 25;
+            fill = "url('#red')";
+        }
+
+
+
+        // console.log("MAX", newInterval, closeBlinks);
 
         // show the firely and update the interval for display purposes
         if (this.isMounted()){
             this.setState({
-                fill: this.props.fill,
+                fill: fill,
                 interval: newInterval
             });
         }
@@ -189,7 +236,7 @@ export default React.createClass({
                     fill  = {this.state.fill} />
 
                 { // only show the text
-                (this.props.showSignalRadius || this.state.showSignalRadius)
+                (this.props.debug)
                     ? (
                         <text
                             x = {this.props.centerx - 8}

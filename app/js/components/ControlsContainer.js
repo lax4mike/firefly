@@ -3,13 +3,16 @@ import { connect } from "react-redux";
 import Controls from "./Controls.jsx";
 
 import { updateRadius, toggleVisbility } from "../redux/modules/signalRadius.js";
-import { setFireflyBlink } from "../redux/modules/fireflies-blink-status.js";
+import { setFireflyBlink }               from "../redux/modules/fireflies-blink-status.js";
+import { addFirefly }                    from "../redux/modules/fireflies.js";
+import { toggleDebug }                   from "../redux/modules/debug.js";
 
 function mapStateToProps(state) {
     return {
         signalRadius     : state.signalRadius.radius,
         showSignalRadius : state.signalRadius.isVisible,
-        blinkStatus      : state.blinkStatus
+        blinkStatus      : state.blinkStatus,
+        debug            : state.debug
     };
 }
 
@@ -23,6 +26,12 @@ function mapDispatchToProps(dispatch, ownProps) {
         },
         onBlinkStatusChange: function(status){
             dispatch(setFireflyBlink(status));
+        },
+        onAddFirefly: function(){
+            dispatch(addFirefly())
+        },
+        onDebugChange: function(bool){
+            dispatch(toggleDebug(bool))
         }
     };
 }

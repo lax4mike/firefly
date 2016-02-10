@@ -1,33 +1,19 @@
 import React, { PropTypes } from "react";
-
+import colors from "../colors.js";
 import Firefly from "./Firefly.jsx";
 
+
 const RADIUS = 15;
-
-let colors = [
-    {
-        id: "yellow",
-        hex: "#f1c40f"
-    },
-    {
-        id: "orange",
-        hex: "#f39c12"
-    },
-    {
-        id: "red",
-        hex: "#e74c3c"
-    }
-];
-
 
 export default React.createClass({
 
     displayName: "Canvas",
 
     propTypes: {
-        showSignalRadius: PropTypes.bool.isRequired,
-        signalRadius: PropTypes.number.isRequired,
-        blinkStatus: PropTypes.string.isRequired,
+        debug            : PropTypes.bool.isRequired,
+        showSignalRadius : PropTypes.bool.isRequired,
+        signalRadius     : PropTypes.number.isRequired,
+        blinkStatus      : PropTypes.string.isRequired,
         fireflies: PropTypes.arrayOf(PropTypes.shape({
             id      : PropTypes.number.isRequired,
             centerx : PropTypes.number.isRequired,
@@ -37,9 +23,10 @@ export default React.createClass({
                 distance: PropTypes.number.isRequired
             })).isRequired
         })).isRequired,
-        onResize: PropTypes.func.isRequired,
-        onFireflyBlink: PropTypes.func.isRequired,
-        onFireflyDrag : PropTypes.func.isRequired
+        onResize       : PropTypes.func.isRequired,
+        onFireflyBlink : PropTypes.func.isRequired,
+        onFireflyDrag  : PropTypes.func.isRequired,
+        onInit         : PropTypes.func.isRequired
     },
 
     getInitialState: function(){
@@ -54,6 +41,10 @@ export default React.createClass({
 
         // trigger onResize() after it mounts so we can initialize the width of the app
         this.onResize();
+
+        let width = this.refs.canvas.clientWidth;
+        let height = this.refs.canvas.clientHeight;
+        this.props.onInit({width, height});
     },
 
     componentWillUnmount: function(){
@@ -114,9 +105,9 @@ export default React.createClass({
                         centery          = {firefly.centery}
                         neighbors        = {firefly.neighbors}
                         interval         = {firefly.interval}
-                        fill             = {`url(#${colors[0].id})`}
                         signalRadius     = {this.props.signalRadius}
                         showSignalRadius = {this.props.showSignalRadius}
+                        debug            = {this.props.debug}
                         blinkStatus      = {this.props.blinkStatus}
                         onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
                         onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
