@@ -30,7 +30,7 @@ export const getFireflies = createSelector(
             let isInTheLight = (() => {
                 if (!flashlight.isShining) { return false; }
 
-                let distance = getDistance(f1, {centerx: flashlight.x, centery: flashlight.y});
+                let distance = getDistance(f1, flashlight);
                 return distance < flashlight.radius;
             })();
 
@@ -40,7 +40,7 @@ export const getFireflies = createSelector(
 );
 
 function getDistance(f1, f2){
-    const distY = Math.abs(f1.centery - f2.centery);
-    const distX = Math.abs(f1.centerx - f2.centerx);
+    const distY = Math.abs(f1.y - f2.y);
+    const distX = Math.abs(f1.x - f2.x);
     return Math.sqrt(Math.pow(distX, 2) + Math.pow(distY, 2));
 }

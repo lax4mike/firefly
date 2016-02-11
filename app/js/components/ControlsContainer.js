@@ -4,7 +4,6 @@ import Controls from "./Controls.jsx";
 
 import { updateRadius, toggleVisbility } from "../redux/modules/signalRadius.js";
 import { setFireflyBlink }               from "../redux/modules/fireflies-blink-status.js";
-import { addFirefly }                    from "../redux/modules/fireflies.js";
 import { updateFlashlight }              from "../redux/modules/flashlight.js";
 import { toggleDebug }                   from "../redux/modules/debug.js";
 
@@ -28,9 +27,6 @@ function mapDispatchToProps(dispatch, ownProps) {
         },
         onBlinkStatusChange: function(status){
             dispatch( setFireflyBlink(status) );
-        },
-        onAddFirefly: function(){
-            dispatch( addFirefly() );
         },
         onDebugChange: function(bool){
             dispatch( toggleDebug(bool) );

@@ -5,6 +5,8 @@ import { logBlink }            from "../redux/modules/blink-log.js";
 import { setCanvasDimensions } from "../redux/modules/canvas.js";
 import { updateFlashlight  }   from "../redux/modules/flashlight.js";
 import {
+    addFirefly,
+    deleteFirefly,
     setFireflyPosition,
     addBoxOfFireflies } from "../redux/modules/fireflies.js";
 
@@ -48,6 +50,16 @@ function mapDispatchToProps(dispatch, ownProps){
                 setFireflyPosition({
                     fireflyId, x, y
                 })
+            );
+        },
+        onFireflyAdd: function(firefly){
+            dispatch(
+                addFirefly(firefly)
+            );
+        },
+        onFireflyDelete: function(id){
+            dispatch(
+                deleteFirefly(id)
             );
         }
     };

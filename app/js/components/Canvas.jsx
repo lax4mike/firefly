@@ -19,6 +19,8 @@ export default React.createClass({
         fireflies: PropTypes.arrayOf(PropTypes.object).isRequired,
         onFireflyBlink : PropTypes.func.isRequired,
         onFireflyDrag  : PropTypes.func.isRequired,
+        onFireflyAdd   : PropTypes.func.isRequired,
+        onFireflyDelete: PropTypes.func.isRequired,
 
         flashlight : PropTypes.shape({
             isResizing: PropTypes.bool.isRequired,
@@ -77,17 +79,28 @@ export default React.createClass({
     },
 
     handleCanvasMouseDown: function(e){
-
         let offset = getOffset(this.refs["canvas"], e);
 
-        this.props.onFlashlightUpdate({
-            isShining: true,
-            x: offset.x,
-            y: offset.y
-        });
+        // when the user holds shift and clicks,
+        // add a firefly to that spot
+        if (e.shiftKey) {
+            this.props.onFireflyAdd({
+                x: offset.x,
+                y: offset.y
+            });
+        }
 
-        window.addEventListener("mousemove", this.handleWindowMouseMove);
-        window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+        // otherwise, show the flashlight where they click
+        else {
+            this.props.onFlashlightUpdate({
+                isShining: true,
+                x: offset.x,
+                y: offset.y
+            });
+
+            window.addEventListener("mousemove", this.handleWindowMouseMove);
+            window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+        }
     },
 
     handleWindowMouseMove: function(e){
@@ -151,8 +164,8 @@ export default React.createClass({
                     <Firefly
                         key              = {firefly.id}
                         id               = {firefly.id}
-                        centerx          = {firefly.centerx}
-                        centery          = {firefly.centery}
+                        x                = {firefly.x}
+                        y                = {firefly.y}
                         neighbors        = {firefly.neighbors}
                         interval         = {firefly.interval}
                         isInTheLight     = {firefly.isInTheLight}
@@ -162,6 +175,7 @@ export default React.createClass({
                         showSignalRadius = {this.props.showSignalRadius}
                         debug            = {this.props.debug}
                         blinkStatus      = {this.props.blinkStatus}
+                        onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
                         onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
                         onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
                     />

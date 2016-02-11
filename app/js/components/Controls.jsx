@@ -13,7 +13,6 @@ export default React.createClass({
         onSignalRadiusChange : PropTypes.func.isRequired,
         onSignalRadiusVisibilityChange: PropTypes.func.isRequired,
         onBlinkStatusChange  : PropTypes.func.isRequired,
-        onAddFirefly         : PropTypes.func.isRequired,
         onDebugChange        : PropTypes.func.isRequired,
 
         flashlight: PropTypes.shape({
@@ -145,10 +144,9 @@ export default React.createClass({
                 </div>
 
                 <div className="control">
-                    <label className="checkbox-control">
-                        <button onClick={this.props.onAddFirefly}>
-                            Add firefly
-                        </button>
+                    <label className="label label--brackets">
+                        Shift click to add <br/>
+                        or delete a firefly
                     </label>
                 </div>
 

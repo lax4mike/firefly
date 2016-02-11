@@ -11,8 +11,8 @@ export default React.createClass({
     propTypes: {
         id           : PropTypes.number.isRequired,
         radius       : PropTypes.number.isRequired,
-        centerx      : PropTypes.number.isRequired,
-        centery      : PropTypes.number.isRequired,
+        x            : PropTypes.number.isRequired,
+        y            : PropTypes.number.isRequired,
         canvas       : PropTypes.object.isRequired, // ref to <svg> element
         neighbors    : PropTypes.arrayOf(PropTypes.shape({
             id       : PropTypes.number.isRequired,
@@ -27,7 +27,8 @@ export default React.createClass({
         signalRadius     : PropTypes.number.isRequired,
         showSignalRadius : PropTypes.bool.isRequired,
 
-        onDrag       : PropTypes.func.isRequired
+        onDrag   : PropTypes.func.isRequired,
+        onDelete : PropTypes.func.isRequired
     },
 
     contextTypes: {
@@ -95,9 +96,21 @@ export default React.createClass({
 
     // attach drag and mouseup events to the window
     handleMouseDown: function(e){
-        e.stopPropagation(); // prevent flashlight
-        window.addEventListener("mousemove", this.handleWindowMouseMove);
-        window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+
+        // if the user is holding shift, delete this firefly
+        if (e.shiftKey){
+            // prevent add firefly from happening on the same click
+            e.stopPropagation();
+            this.props.onDelete();
+        }
+
+        // otherwise, start drag
+        else {
+            e.stopPropagation(); // prevent flashlight
+            window.addEventListener("mousemove", this.handleWindowMouseMove);
+            window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+        }
+
     },
 
     // when the user lifts the mouse, remove the listeners
@@ -236,8 +249,8 @@ export default React.createClass({
                     ? (
                         <circle
                             className="firefly__signal-radius"
-                            cx     = {this.props.centerx}
-                            cy     = {this.props.centery}
+                            cx     = {this.props.x}
+                            cy     = {this.props.y}
                             r      = {this.props.signalRadius}
                             fill   = "transparent"
                             stroke = {"#ccc"} />
@@ -250,19 +263,20 @@ export default React.createClass({
                     onMouseEnter = {this.handleMouseEnter}
                     onMouseLeave = {this.handleMouseLeave}
                     onMouseDown  = {this.handleMouseDown}
-                    cx    = {this.props.centerx}
-                    cy    = {this.props.centery}
+                    cx    = {this.props.x}
+                    cy    = {this.props.y}
                     r     = {this.props.radius}
                     fill  = {this.state.fill}
                     fillOpacity = {this.state.fillOpacity} />
 
 
-                { // only show the text
-                (this.props.debug)
+                { // only show the text in debug mode,
+                  // and this firefly isn't in the light
+                (this.props.debug && !this.props.isInTheLight)
                     ? (
                         <text
-                            x = {this.props.centerx - 8}
-                            y = {this.props.centery + 30}
+                            x = {this.props.x - 8}
+                            y = {this.props.y + 30}
                         >
                             {this.props.id + ": " + this.state.interval}
                         </text>

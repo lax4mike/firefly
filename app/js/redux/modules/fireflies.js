@@ -3,7 +3,9 @@
 // action constants
 const FIREFLIES_SET = "FIREFLIES_SET";
 const FIREFLY_SET_POSITION = "FIREFLY_SET_POSITION";
+const FIREFLY_ADD_RANDOM = "FIREFLY_ADD_RANDOM";
 const FIREFLY_ADD = "FIREFLY_ADD";
+const FIREFLY_DELETE = "FIREFLY_DELETE";
 
 
 // action creators
@@ -16,10 +18,19 @@ export function setFireflies(fireflies) {
     };
 }
 
-export function addFirefly(){
+export function addFirefly({x, y}){
 
+    let firefly = {x, y};
     return {
-        type: FIREFLY_ADD
+        type: FIREFLY_ADD,
+        firefly
+    };
+}
+
+export function deleteFirefly(id){
+    return {
+        type: FIREFLY_DELETE,
+        id
     };
 }
 
@@ -41,8 +52,8 @@ export function addBoxOfFireflies({width, height}){
 
         return {
             id: fireflyId++,
-            centerx: (width/2) + ((isEven) ? -50 : 50),
-            centery: (height/2) + ((i < 2) ? -50 : 50)
+            x: (width/2) + ((isEven) ? -50 : 50),
+            y: (height/2) + ((i < 2) ? -50 : 50)
         };
     });
 
@@ -67,14 +78,24 @@ function reducer(state = initialState, action, canvas) {
             return action.fireflies;
         }
 
-        case FIREFLY_ADD: {
+        case FIREFLY_ADD_RANDOM: {
             let firefly = {
                 id: fireflyId++,
-                centerx: Math.random() * canvas.width,
-                centery: Math.random() * canvas.height
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height
             };
 
             return state.concat(firefly);
+        }
+
+        case FIREFLY_ADD: {
+            return state.concat(
+                Object.assign(action.firefly, { id: fireflyId++ })
+            );
+        }
+
+        case FIREFLY_DELETE: {
+            return state.filter((ff) => ff.id !== action.id);
         }
 
         case FIREFLY_SET_POSITION: {
@@ -83,8 +104,8 @@ function reducer(state = initialState, action, canvas) {
 
             let firefly = newState.find((f) => f.id === fireflyId);
             Object.assign(firefly, {
-                centerx: x,
-                centery: y
+                x: x,
+                y: y
             });
 
             return newState;
