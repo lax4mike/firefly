@@ -1,4 +1,5 @@
 import React, { PropTypes } from "react";
+import getOffset from "../offset.js";
 import colors from "../colors.js";
 import Firefly from "./Firefly.jsx";
 
@@ -14,19 +15,22 @@ export default React.createClass({
         showSignalRadius : PropTypes.bool.isRequired,
         signalRadius     : PropTypes.number.isRequired,
         blinkStatus      : PropTypes.string.isRequired,
-        fireflies: PropTypes.arrayOf(PropTypes.shape({
-            id      : PropTypes.number.isRequired,
-            centerx : PropTypes.number.isRequired,
-            centery : PropTypes.number.isRequired,
-            neighbors: PropTypes.arrayOf(PropTypes.shape({
-                id      : PropTypes.number.isRequired,
-                distance: PropTypes.number.isRequired
-            })).isRequired
-        })).isRequired,
-        onResize       : PropTypes.func.isRequired,
+
+        fireflies: PropTypes.arrayOf(PropTypes.object).isRequired,
         onFireflyBlink : PropTypes.func.isRequired,
         onFireflyDrag  : PropTypes.func.isRequired,
-        onInit         : PropTypes.func.isRequired
+
+        flashlight : PropTypes.shape({
+            isResizing: PropTypes.bool.isRequired,
+            isShining : PropTypes.bool.isRequired,
+            radius: PropTypes.number.isRequired,
+            x: PropTypes.number.isRequired,
+            y: PropTypes.number.isRequired
+        }),
+        onFlashlightUpdate : PropTypes.func.isRequired,
+
+        onResize : PropTypes.func.isRequired,
+        onInit   : PropTypes.func.isRequired
     },
 
     getInitialState: function(){
@@ -42,6 +46,7 @@ export default React.createClass({
         // trigger onResize() after it mounts so we can initialize the width of the app
         this.onResize();
 
+        // init some fireflies with this width/height
         let width = this.refs.canvas.clientWidth;
         let height = this.refs.canvas.clientHeight;
         this.props.onInit({width, height});
@@ -71,6 +76,38 @@ export default React.createClass({
         }
     },
 
+    handleCanvasMouseDown: function(e){
+
+        let offset = getOffset(this.refs["canvas"], e);
+
+        this.props.onFlashlightUpdate({
+            isShining: true,
+            x: offset.x,
+            y: offset.y
+        });
+
+        window.addEventListener("mousemove", this.handleWindowMouseMove);
+        window.addEventListener("mouseup", this.handleWindowMouseUp, true);
+    },
+
+    handleWindowMouseMove: function(e){
+
+        let offset = getOffset(this.refs["canvas"], e);
+
+        this.props.onFlashlightUpdate({
+            x: offset.x,
+            y: offset.y
+        });
+    },
+
+    handleWindowMouseUp: function(){
+        this.props.onFlashlightUpdate({ isShining: false });
+
+        window.removeEventListener("mousemove", this.handleWindowMouseMove);
+        window.removeEventListener("mouseup", this.handleWindowMouseUp, true);
+    },
+
+
     render: function(){
 
         let canvasStyles = {
@@ -83,7 +120,9 @@ export default React.createClass({
         };
 
         return (
-            <svg className="canvas" style={canvasStyles} ref="canvas">
+            <svg className="canvas" style={canvasStyles} ref="canvas"
+                onMouseDown={this.handleCanvasMouseDown}
+                >
 
                 <defs>
                 { // define color gradients for fireflies (see colors variable)
@@ -95,16 +134,30 @@ export default React.createClass({
                 ))}
                 </defs>
 
+                { // show the flashlight if it's being shined or resized
+                (this.props.flashlight.isShining || this.props.flashlight.isResizing)
+                ? (
+                    <circle
+                        cx={this.props.flashlight.x}
+                        cy={this.props.flashlight.y}
+                        r={this.props.flashlight.radius}
+                        fill="rgba(241, 196, 15, 0.1)"
+                    />
+                )
+                : null}
+
                 { // generate some random fireflies
                 this.props.fireflies.map((firefly, i) => (
                     <Firefly
                         key              = {firefly.id}
                         id               = {firefly.id}
-                        radius           = {RADIUS}
                         centerx          = {firefly.centerx}
                         centery          = {firefly.centery}
                         neighbors        = {firefly.neighbors}
                         interval         = {firefly.interval}
+                        isInTheLight     = {firefly.isInTheLight}
+                        radius           = {RADIUS}
+                        canvas           = {this.refs.canvas}
                         signalRadius     = {this.props.signalRadius}
                         showSignalRadius = {this.props.showSignalRadius}
                         debug            = {this.props.debug}

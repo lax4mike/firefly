@@ -1,6 +1,8 @@
 import React, { PropTypes } from "react";
+import getOffset from "../offset.js";
 
 let equilibrum = 1000;
+let offOpacity = 0.1;
 
 export default React.createClass({
 
@@ -11,6 +13,7 @@ export default React.createClass({
         radius       : PropTypes.number.isRequired,
         centerx      : PropTypes.number.isRequired,
         centery      : PropTypes.number.isRequired,
+        canvas       : PropTypes.object.isRequired, // ref to <svg> element
         neighbors    : PropTypes.arrayOf(PropTypes.shape({
             id       : PropTypes.number.isRequired,
             distance : PropTypes.number.isRequired
@@ -18,6 +21,7 @@ export default React.createClass({
 
         onBlink      : PropTypes.func.isRequired,
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
+        isInTheLight : PropTypes.bool.isRequired,
 
         debug            : PropTypes.bool.isRequired,
         signalRadius     : PropTypes.number.isRequired,
@@ -33,7 +37,8 @@ export default React.createClass({
     getInitialState: function(){
         return {
             isBlinking: (this.props.blinkStatus === "blink"),
-            fill: "transparent", // start off
+            fill: "url('#yellow')",
+            fillOpacity: 0, // start off
             interval: equilibrum,
             // fill: this.props.fill, // start on
             showSignalRadius: false // for this individual firefly
@@ -50,18 +55,26 @@ export default React.createClass({
 
     componentWillReceiveProps: function(nextProps){
 
+        const blinkStatusChanged = nextProps.blinkStatus !== this.props.blinkStatus;
+        const isInTheLightChanged = nextProps.isInTheLight !== this.props.isInTheLight;
+
         // if the blink status has changed
-        if (nextProps.blinkStatus !== this.props.blinkStatus){
+        if (blinkStatusChanged || isInTheLightChanged){
             this.stopBlink();
-            this.handleBlinKStatusChange(nextProps.blinkStatus);
+            this.handleBlinKStatusChange(nextProps.blinkStatus, nextProps.isInTheLight);
         }
-        // start blinking 0-1s from now
     },
 
-    handleBlinKStatusChange: function(status){
+    handleBlinKStatusChange: function(status, isInTheLight){
+
+        if (isInTheLight) {
+            this.stopBlink("off");
+            return;
+        }
+
         if (status === "blink"){
             this.setState({
-                fill: "transparent"
+                fillOpacity: offOpacity
             });
             this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equilibrum));
         }
@@ -81,7 +94,8 @@ export default React.createClass({
     },
 
     // attach drag and mouseup events to the window
-    handleMouseDown: function(){
+    handleMouseDown: function(e){
+        e.stopPropagation(); // prevent flashlight
         window.addEventListener("mousemove", this.handleWindowMouseMove);
         window.addEventListener("mouseup", this.handleWindowMouseUp, true);
     },
@@ -94,7 +108,9 @@ export default React.createClass({
 
     // while dragging, send the offset info up
     handleWindowMouseMove: function(e){
-        this.props.onDrag(e.offsetX, e.offsetY);
+        // offset in relation to the canvas
+        let offset = getOffset(this.props.canvas, e);
+        this.props.onDrag(offset.x, offset.y);
     },
 
     startBlink: function(){
@@ -108,7 +124,9 @@ export default React.createClass({
         clearTimeout(this.startBlinkTimeoutId);
         this.setState({
             isBlinking: false,
-            fill: (status === "off") ? "transparent" : "url('#yellow')"
+            // fill: "url('#yellow')"
+            fill: this.state.fill,
+            fillOpacity: (status === "off") ? offOpacity : 1
         });
     },
 
@@ -174,6 +192,7 @@ export default React.createClass({
         if (this.isMounted()){
             this.setState({
                 fill: fill,
+                fillOpacity: 1,
                 interval: newInterval
             });
         }
@@ -182,7 +201,7 @@ export default React.createClass({
         setTimeout(() => {
             if (this.isMounted() && this.state.isBlinking){
                 this.setState({
-                    fill: "transparent",
+                    fillOpacity: offOpacity,
                     interval: newInterval
                 });
             }
@@ -212,7 +231,8 @@ export default React.createClass({
             <g className="firefly">
 
                 { // only show the signal radius cirle on hover
-                (this.props.showSignalRadius || this.state.showSignalRadius)
+                  // and if this firefly is not in the light
+                (!this.props.isInTheLight && (this.props.showSignalRadius || this.state.showSignalRadius))
                     ? (
                         <circle
                             className="firefly__signal-radius"
@@ -233,7 +253,9 @@ export default React.createClass({
                     cx    = {this.props.centerx}
                     cy    = {this.props.centery}
                     r     = {this.props.radius}
-                    fill  = {this.state.fill} />
+                    fill  = {this.state.fill}
+                    fillOpacity = {this.state.fillOpacity} />
+
 
                 { // only show the text
                 (this.props.debug)

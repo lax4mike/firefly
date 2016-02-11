@@ -1,11 +1,12 @@
 import { connect } from "react-redux";
-import {
-    setFireflyPosition,
-    addBoxOfFireflies
-}                              from "../redux/modules/fireflies.js";
+
 import { getFireflies }        from "../redux/modules/fireflies-selectors.js";
 import { logBlink }            from "../redux/modules/blink-log.js";
 import { setCanvasDimensions } from "../redux/modules/canvas.js";
+import { updateFlashlight  }   from "../redux/modules/flashlight.js";
+import {
+    setFireflyPosition,
+    addBoxOfFireflies } from "../redux/modules/fireflies.js";
 
 import Canvas from "./Canvas.jsx";
 
@@ -15,7 +16,8 @@ function mapStateToProps(state){
         signalRadius    : state.signalRadius.radius,
         showSignalRadius: state.signalRadius.isVisible,
         blinkStatus     : state.blinkStatus,
-        debug           : state.debug
+        debug           : state.debug,
+        flashlight      : state.flashlight
     };
 }
 
@@ -29,6 +31,11 @@ function mapDispatchToProps(dispatch, ownProps){
         onInit: function({width, height}){
             dispatch(
                 addBoxOfFireflies({width, height})
+            );
+        },
+        onFlashlightUpdate: function(flashlight){
+            dispatch(
+                updateFlashlight(flashlight)
             );
         },
         onFireflyBlink: function(firefly){

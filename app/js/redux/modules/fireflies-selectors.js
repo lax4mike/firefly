@@ -3,13 +3,14 @@ import { createSelector } from "reselect";
 // selectors
 const radiusSelector = (state) => state.signalRadius.radius;
 const firefliesSelector = (state) => state.fireflies;
+const flashlightSelector = (state) => state.flashlight;
 
 // derive the firefly neighbors (fireflies that are withing the signalRadius
 // of each firelfly)
 export const getFireflies = createSelector(
-    [firefliesSelector, radiusSelector],
+    [firefliesSelector, radiusSelector, flashlightSelector],
 
-    (fireflies, radius) => {
+    (fireflies, radius, flashlight) => {
         return fireflies.map(f1 => {
             let neighbors = fireflies
                 // we only need the id, calculate the distance from f1
@@ -25,7 +26,15 @@ export const getFireflies = createSelector(
                 })
                 .sort((a, b) => b.distance - a.distance);
 
-            return Object.assign({}, f1, { neighbors });
+            // check to see if this firefly is being shinned on
+            let isInTheLight = (() => {
+                if (!flashlight.isShining) { return false; }
+
+                let distance = getDistance(f1, {centerx: flashlight.x, centery: flashlight.y});
+                return distance < flashlight.radius;
+            })();
+
+            return Object.assign({}, f1, { neighbors, isInTheLight });
         });
     }
 );

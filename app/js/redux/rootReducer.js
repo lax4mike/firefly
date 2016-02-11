@@ -1,27 +1,30 @@
 
-import firefliesReducer from "./modules/fireflies.js";
-import canvasReducer    from "./modules/canvas.js";
+import firefliesReducer  from "./modules/fireflies.js";
+import canvasReducer     from "./modules/canvas.js";
+import flashlightReducer from "./modules/flashlight.js";
 
-import blinkStatus      from "./modules/fireflies-blink-status.js";
-import signalRadius     from "./modules/signalRadius.js";
 import blinkLog         from "./modules/blink-log.js";
+import blinkStatus      from "./modules/fireflies-blink-status.js";
 import debug            from "./modules/debug.js";
+import signalRadius     from "./modules/signalRadius.js";
 
 export default function reducer(state = {}, action) {
 
-    let canvas    = canvasReducer(state.canvas, action);
-    let fireflies = firefliesReducer(state.fireflies, action, canvas);
-
     let simpleReducerState = combineSimpleReducers({
-        signalRadius,
         blinkLog,
         blinkStatus,
-        debug
+        debug,
+        signalRadius
     })(state, action);
+
+    let canvas    = canvasReducer(state.canvas, action);
+    let fireflies = firefliesReducer(state.fireflies, action, canvas);
+    let flashlight = flashlightReducer(state.flashlight, action, canvas);
 
     return Object.assign({}, simpleReducerState, {
         canvas,
-        fireflies
+        fireflies,
+        flashlight
     });
 
 }
@@ -34,5 +37,5 @@ function combineSimpleReducers(reducers){
             nextState[key] = reducers[key](state[key], action);
             return nextState;
         }, {});
-    }
+    };
 }

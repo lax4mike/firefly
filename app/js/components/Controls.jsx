@@ -15,6 +15,11 @@ export default React.createClass({
         onBlinkStatusChange  : PropTypes.func.isRequired,
         onAddFirefly         : PropTypes.func.isRequired,
         onDebugChange        : PropTypes.func.isRequired,
+
+        flashlight: PropTypes.shape({
+            radius: PropTypes.number.isRequired
+        }).isRequired,
+        onFlashlightChange   : PropTypes.func.isRequired
     },
 
     getInitialState: function(){
@@ -45,7 +50,7 @@ export default React.createClass({
         this.props.onSignalRadiusVisibilityChange(e.target.checked);
     },
 
-    handleMouseDown: function(){
+    handleSignalRadiusMouseDown: function(){
         // store the value of this so we can revert it on mouse up
         this.setState({
             showSignalRadius: this.props.showSignalRadius
@@ -53,9 +58,21 @@ export default React.createClass({
         this.props.onSignalRadiusVisibilityChange(true);
     },
 
-    handleMouseUp: function(){
+    handleSignalRadiusMouseUp: function(){
         // restore the original value
         this.props.onSignalRadiusVisibilityChange(this.state.showSignalRadius);
+    },
+
+    handleFlashlightMouseDown: function(){
+        this.props.onFlashlightChange({ isResizing: true });
+    },
+
+    handleFlashlightChange: function(e){
+        this.props.onFlashlightChange({ radius: Number(e.target.value) });
+    },
+
+    handleFlashlightMouseUp: function(){
+        this.props.onFlashlightChange({ isResizing: false });
     },
 
     render: function(){
@@ -65,21 +82,15 @@ export default React.createClass({
 
                 <div className="control">
                     <label>
-                        <div><span className="label">Signal Radius</span>: <span className="number">{this.props.signalRadius}</span></div>
+                        <div>
+                            <span className="label">Signal Radius</span>
+                            {/* : <span className="number">{this.props.signalRadius}</span> */}
+                        </div>
                         <input type="range" min={50} max={500}
                             value={this.props.signalRadius}
-                            onMouseDown={this.handleMouseDown}
-                            onMouseUp={this.handleMouseUp}
+                            onMouseDown={this.handleSignalRadiusMouseDown}
+                            onMouseUp={this.handleSignalRadiusMouseUp}
                             onChange={this.handleSignalRadiusChange} />
-                    </label>
-                </div>
-
-                <div className="control">
-                    <label className="checkbox-control">
-                        <input type="checkbox"
-                            checked={this.state.debug}
-                            onChange={this.handleDebugChange} />
-                        <span className="label">Show Debug info </span>
                     </label>
                 </div>
 
@@ -89,6 +100,15 @@ export default React.createClass({
                             checked={this.state.showSignalRadius}
                             onChange={this.handleSignalRadiusVisibilityChange} />
                         <span className="label">Show Signal Radius </span>
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label className="checkbox-control">
+                        <input type="checkbox"
+                            checked={this.state.debug}
+                            onChange={this.handleDebugChange} />
+                        <span className="label">Show Debug info </span>
                     </label>
                 </div>
 
@@ -107,6 +127,20 @@ export default React.createClass({
                                 &nbsp; {b}
                             </label>
                         ))}
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div>
+                            <span className="label">Flashlight Radius</span>
+                            {/* <div className="number"> {this.props.flashlight.radius}</div> */}
+                        </div>
+                        <input type="range" min={50} max={250}
+                            value={this.props.flashlight.radius}
+                            onMouseDown={this.handleFlashlightMouseDown}
+                            onMouseUp={this.handleFlashlightMouseUp}
+                            onChange={this.handleFlashlightChange} />
                     </label>
                 </div>
 
