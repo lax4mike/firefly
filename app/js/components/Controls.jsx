@@ -22,15 +22,41 @@ export default React.createClass({
     },
 
     getInitialState: function(){
+
+
+        let onOffStatus = (this.props.blinkStatus !== "blink") ? this.props.blinkStatus : "on";
+
         return {
             // remember what this value is from redux
             // use this to revert the status after dragging the range slider
-            showSignalRadius: this.props.showSignalRadius
+            showSignalRadius: this.props.showSignalRadius,
+
+            // remember the on/off preference.  the user can start/stop the blink
+            // this is the value of when they stop the blink
+            onOffStatus: onOffStatus
         };
     },
 
     handleBlinkStatusChange: function(e){
-        this.props.onBlinkStatusChange(e.target.value);
+
+        let value = e.target.value;
+
+        // if the value is on or off, save it for next time
+        if (value !== "blink"){
+            this.setState({ onOffStatus: value });
+        }
+
+        this.props.onBlinkStatusChange(value);
+    },
+
+    handleStartStopClick: function(e){
+
+        if (this.props.blinkStatus === "blink"){
+            this.props.onBlinkStatusChange(this.state.onOffStatus);
+        }
+        else {
+            this.props.onBlinkStatusChange("blink");
+        }
     },
 
     handleSignalRadiusChange: function(e){
@@ -111,22 +137,34 @@ export default React.createClass({
                     </label>
                 </div>
 
-                <div className="control">
-                    <label>
-                        <div className="label">Blink status</div>
+                <div className="control control--blink-status">
 
-                        {blinks.map((b) => (
-                            <label className="radio" key={b}>
-                                <input
+                    <div className="label">Blink status</div>
+
+
+                    <button type="button" onClick={this.handleStartStopClick}>
+                        {(this.props.blinkStatus === "blink") ? "Stop": "Start"}
+                    </button>
+
+                    { // show "on" and "off" radios if it's not blinking
+                    (this.props.blinkStatus !== "blink")
+                    ? (
+                        blinks
+                            .filter((b) => (b !== "blink"))
+                            .map((b) => (
+                                <label className="radio" key={b}>
+                                    <input
                                     type="radio"
                                     name="blink-status"
                                     checked={b === this.props.blinkStatus}
                                     value={b}
                                     onChange={this.handleBlinkStatusChange} />
-                                &nbsp; {b}
-                            </label>
-                        ))}
-                    </label>
+                                    {b}
+                                </label>
+                            ))
+                    )
+                    : null
+                    }
                 </div>
 
                 <div className="control">

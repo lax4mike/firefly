@@ -20,7 +20,7 @@ export function toggleVisbility(bool){
 
 // inital state
 let initialState = {
-    radius: 200,
+    radius: 120,
     isVisible: false
 };
 

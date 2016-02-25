@@ -22,8 +22,24 @@
         text-transform: uppercase;
     }
 
+    .radio {
+        padding: 0 4px;
+    }
+
+    &.control--blink-status {
+
+        .label {
+            margin-bottom: 10px;
+        }
+
+        .radio {
+            display: inline-block;
+        }
+    }
+
     .label--brackets {
         position: relative;
+        display: block;
         padding: 2px 10px;
         text-align: center;
 

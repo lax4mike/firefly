@@ -40,9 +40,9 @@ export default React.createClass({
             isBlinking: (this.props.blinkStatus === "blink"),
             fill: "url('#yellow')",
             fillOpacity: 0, // start off
-            interval: equilibrum,
+            interval: equalibrum,
             // fill: this.props.fill, // start on
-            showSignalRadius: false // for this individual firefly
+            isHovering: false // for this individual firefly
         };
     },
 
@@ -77,7 +77,7 @@ export default React.createClass({
             this.setState({
                 fillOpacity: offOpacity
             });
-            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equilibrum));
+            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equalibrum));
         }
         else {
             this.stopBlink(status);
@@ -86,12 +86,12 @@ export default React.createClass({
 
     handleMouseEnter: function(){
         // show signal radius on hover
-        this.setState({ showSignalRadius: true });
+        this.setState({ isHovering: true });
     },
 
     handleMouseLeave: function(){
         // hide signal radius
-        this.setState({ showSignalRadius: false });
+        this.setState({ isHovering: false });
     },
 
     // attach drag and mouseup events to the window
@@ -145,77 +145,36 @@ export default React.createClass({
 
     blink: function(){
 
-        let blinkLog = this.context.store.getState().blinkLog;
+        // something is messed up with the timeouts if this happens...
+        if (this.state.isBlinking === false){
+            console.log("UH OH!", this);
+            clearTimeout(this.startBlinkTimeoutId);
+            return;
+        }
 
-        // check the blink log for a blink that happened in the last 500ms
-        let allNeighborBlinks = blinkLog
-            .map((b) => {
-                // add time deviation from this blink
-                let deviation = Date.now() - b.timestamp;
-                return Object.assign({}, b, { deviation });
-            })
-            .filter((b) => {
-                let isNeighbor = this.props.neighbors.find((n) => n.id === b.id);
-                let isSelf = (this.props.id === b.id);
-                let isTooClose = (b.deviation < 25); // close enough...
-                let isInLastInterval = (b.deviation) < (this.state.interval - 100);
-                return isNeighbor && !isSelf && isInLastInterval && !isTooClose;
-            });
+        // make sure the firefly is still there...
+        if (!this.isMounted()){
+            console.log("UH OH!!", this);
+            return;
+        }
 
-        let closeBlinks = allNeighborBlinks.filter((b) => {
-            // if this blink is detected in the 2nd half
-            let isIn2ndHalf = b.deviation < (this.state.interval/2);
-            return isIn2ndHalf;
+        // process this blink to get a new fill and new interval
+        let { fill, newInterval } = this.processBlink();
+
+
+        // show the firely and update the interval
+        this.setState({
+            fill: fill,
+            fillOpacity: 1,
+            interval: newInterval
         });
 
 
-        // blue if they can't see anything
-        let fill = "url('#blue')";
-        let newInterval = equilibrum;
-
-        // green if they see some
-        if (allNeighborBlinks.length > 0) {
-            fill = "url('#green')";
-        }
-
-        // red if they see some close
-        // if (closeBlinks.length > 0) {
-        //     // find the shortest deviation
-        //     const shortest = closeBlinks
-        //         .map((b) => b.deviation)
-        //         .reduce((a, b) => Math.min(a, b));
-        //
-        //     newInterval = equilibrum - Math.ceil((shortest / 2));
-        //
-        //     fill = "url('#red')";
-        //     // newInterval = Math.max(975, newIterval);
-        //
-        // }
-
-        if (closeBlinks.length > 0){
-            newInterval = equilibrum - 25;
-            fill = "url('#red')";
-        }
-
-
-
-        // console.log("MAX", newInterval, closeBlinks);
-
-        // show the firely and update the interval for display purposes
-        if (this.isMounted()){
-            this.setState({
-                fill: fill,
-                fillOpacity: 1,
-                interval: newInterval
-            });
-        }
-
-        // blink off
+        // blink off in some time
         setTimeout(() => {
             if (this.isMounted() && this.state.isBlinking){
                 this.setState({
-                    fillOpacity: offOpacity,
-                    interval: newInterval
+                    fillOpacity: offOpacity
                 });
             }
         }, 350);
@@ -227,15 +186,101 @@ export default React.createClass({
             }
         }, newInterval);
 
-
-        // console.log("firefly #", this.props.id);
-        // closeBlinks.forEach((b) => {
-        //     console.log(b.id, Date.now() - b.timestamp);
-        // });
-        // console.log("new interval", newInterval)
-
         // record this blink to the blink log
         this.props.onBlink();
+    },
+
+    processBlink: function(){
+
+        let blinkLog = this.context.store.getState().blinkLog;
+
+        // check the blink log for a blink that happened in the last 500ms
+        // blink log is an array of { id, timestamp } objects
+        let allNeighborBlinks = blinkLog
+            // add deviation to the blinks
+            .map((b) => {
+                // add time deviation from this blink
+                let deviation = Date.now() - b.timestamp;
+                // positive is BEFORE this blink, negative is AFTER
+                return Object.assign({}, b, { deviation });
+            })
+            // keep only the neighbors that didn't blink in the first 100ms
+            // when the firefly is blind
+            .filter((b) => {
+                let isNeighbor = this.props.neighbors.find((n) => n.id === b.id);
+                let isSelf = (this.props.id === b.id);
+                // the firefly is blind in the first 100ms
+                let isInLastInterval = (b.deviation) < (this.state.interval - 100);
+                return isNeighbor && !isSelf && isInLastInterval;
+            })
+            // convert blinks in the first half to be negative
+            .map((b) => {
+                // eg. convert 900 (before) to -100 (after)
+                let deviationAfter = (b.deviation - this.state.interval);
+
+                if (deviationAfter > (this.state.interval/-4)){
+                    b.deviation = deviationAfter;
+                }
+                return b;
+            });
+
+
+        let closeBlinks = allNeighborBlinks.filter((b) => {
+            // if this blink is detected in the 2nd half
+            let isIn2ndHalf = b.deviation > 0
+                           && b.deviation < (this.state.interval/2);
+            // let isInLastQuarter = b.deviation < (this.state.interval/4);
+
+            // and is less eg. 250ms (won't include the first 100ms)
+            let isInFirstQuarter = b.deviation < 0
+                                && b.deviation > (-1*(this.state.interval/4));
+
+            return isIn2ndHalf || isInFirstQuarter;
+        });
+
+
+        // blue (default) if they can't see anything
+        let fill = "url('#blue')";
+        let newInterval = equalibrum;
+
+        // green if they see some
+        if (allNeighborBlinks.length > 0) {
+            fill = "url('#green')";
+        }
+
+
+        // red if they see some close
+        if (closeBlinks.length > 0) {
+            // find the closest deviation
+            const closest = closeBlinks
+                // .map((b) => b.deviation)
+                .reduce((closest, blink) => {
+                    let b = Math.abs(blink.deviation);
+                    let s = Math.abs(closest.deviation);
+
+                    return (b < s) ? blink : closest;
+                });
+
+            newInterval = equalibrum - Math.ceil((closest.deviation / 2));
+            // newInterval = equalibrum;
+
+            // if it's not near the equalibrum, make it red
+            if (Math.abs(equalibrum - newInterval) > 2){
+                fill = "url('#red')";
+            }
+            else {
+                fill = "url('#blue')";
+            }
+            // newInterval = Math.max(975, newIterval);
+
+        }
+
+        // if (closeBlinks.length > 0){
+        //     newInterval = equalibrum - 25;
+        //     fill = "url('#red')";
+        // }
+
+        return { fill, newInterval };
     },
 
     render: function(){
@@ -245,7 +290,7 @@ export default React.createClass({
 
                 { // only show the signal radius cirle on hover
                   // and if this firefly is not in the light
-                (!this.props.isInTheLight && (this.props.showSignalRadius || this.state.showSignalRadius))
+                (!this.props.isInTheLight && (this.props.showSignalRadius || this.state.isHovering))
                     ? (
                         <circle
                             className="firefly__signal-radius"
@@ -272,13 +317,13 @@ export default React.createClass({
 
                 { // only show the text in debug mode,
                   // and this firefly isn't in the light
-                (this.props.debug && !this.props.isInTheLight)
+                ((this.props.debug && !this.props.isInTheLight) || this.state.isHovering)
                     ? (
                         <text
                             x = {this.props.x - 8}
                             y = {this.props.y + 30}
                         >
-                            {this.props.id + ": " + this.state.interval}
+                            {this.state.interval}
                         </text>
                     )
                     : null
