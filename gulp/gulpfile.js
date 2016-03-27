@@ -27,8 +27,8 @@ var gulp    = require("gulp"),
 
 // set some defaults
 utils.setConfig({
-    root  : path.resolve("../app"),
-    dest  : path.resolve("../build"),
+    root  : path.resolve(__dirname, "../app"),
+    dest  : path.resolve(__dirname, "../build"),
     env   : ""
 });
 
