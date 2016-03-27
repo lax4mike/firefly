@@ -1,7 +1,7 @@
 import React, { PropTypes } from "react";
 import getOffset from "../offset.js";
 
-let equilibrum = 1000;
+let equilibrium = 1000;
 let offOpacity = 0.1;
 
 export default React.createClass({
@@ -40,7 +40,7 @@ export default React.createClass({
             isBlinking: (this.props.blinkStatus === "blink"),
             fill: "url('#yellow')",
             fillOpacity: 0, // start off
-            interval: equalibrum,
+            interval: equilibrium,
             // fill: this.props.fill, // start on
             isHovering: false // for this individual firefly
         };
@@ -77,7 +77,7 @@ export default React.createClass({
             this.setState({
                 fillOpacity: offOpacity
             });
-            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equalibrum));
+            this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equilibrium));
         }
         else {
             this.stopBlink(status);
@@ -241,7 +241,7 @@ export default React.createClass({
 
         // blue (default) if they can't see anything
         let fill = "url('#blue')";
-        let newInterval = equalibrum;
+        let newInterval = equilibrium;
 
         // green if they see some
         if (allNeighborBlinks.length > 0) {
@@ -261,11 +261,11 @@ export default React.createClass({
                     return (b < s) ? blink : closest;
                 });
 
-            newInterval = equalibrum - Math.ceil((closest.deviation / 2));
-            // newInterval = equalibrum;
+            newInterval = equilibrium - Math.ceil((closest.deviation / 2));
+            // newInterval = equilibrium;
 
-            // if it's not near the equalibrum, make it red
-            if (Math.abs(equalibrum - newInterval) > 2){
+            // if it's not near the equilibrium, make it red
+            if (Math.abs(equilibrium - newInterval) > 2){
                 fill = "url('#red')";
             }
             else {
@@ -276,7 +276,7 @@ export default React.createClass({
         }
 
         // if (closeBlinks.length > 0){
-        //     newInterval = equalibrum - 25;
+        //     newInterval = equilibrium - 25;
         //     fill = "url('#red')";
         // }
 

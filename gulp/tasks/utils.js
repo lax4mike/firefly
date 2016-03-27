@@ -160,8 +160,13 @@ module.exports.loadTasks = function loadTasks(tasks) {
 // load and start tasks
 module.exports.build = function build() {
 
-    // if config.tasks isn't defined, use the loadedTasks
+    // if config.tasks isn't defined, use the loadedTasks, if still not defined, exit
     if (!config.tasks){ config.tasks = config.loadedTasks; }
+    if (!config.tasks || config.tasks.length === 0){
+        logError("No tasks loaded!");
+        return;
+    }
+
 
     // browserSync needs special treatment because it needs to be started AFTER the
     // build directory has been created and filled (for livereload to work)
@@ -176,22 +181,25 @@ module.exports.build = function build() {
         // console.log("[" + color.yellow("registered watchers") + "]\n", config.watchers);
 
         // start the gulp watch for each registered watcher
-        config.watchers.forEach(function(watcher){
+        if (config.watchers){
+            config.watchers.forEach(function(watcher){
 
-            // only watch this task if it's in our task list
-            if (config.tasks.indexOf(watcher.task) !== -1) {
-                this.logYellow("watching", watcher.task + ":", watcher.files);
+                // only watch this task if it's in our task list
+                if (config.tasks.indexOf(watcher.task) !== -1) {
+                    this.logYellow("watching", watcher.task + ":", JSON.stringify(watcher.files, null, 2));
 
-                // using gulp-watch instead of gulp.watch because gulp-watch will
-                // recognize when new files are added/deleted.
-                watch(watcher.files, function(){
-                    gulp.start([watcher.task]);
-                });
-            }
-        }.bind(this));
+                    // using gulp-watch instead of gulp.watch because gulp-watch will
+                    // recognize when new files are added/deleted.
+                    watch(watcher.files, function(){
+                        gulp.start([watcher.task]);
+                    });
+                }
+            }.bind(this));
+        }
 
-
-        runSequence(config.tasks, "browserSync");
+        if (config.tasks){
+            runSequence(config.tasks, "browserSync");
+        }
     }
     else {
         gulp.start(config.tasks);
@@ -226,6 +234,24 @@ module.exports.logYellow = function logYellow(){
 
         console.log("[" + color.yellow(first) + "]", argString);
     }
+};
+
+
+var logError = module.exports.logError = function logError() {
+
+    var args = (Array.prototype.slice.call(arguments));
+
+    if (args.length){
+
+        var argString = args.map(function(arg){
+            // return (typeof arg  === "object") ? JSON.stringify(arg) : arg.toString();
+            return arg.toString();
+        }).join("");
+
+        console.log(color.red(argString));
+    }
+
+
 };
 
 
@@ -264,3 +290,20 @@ if (!Object.assign) {
     }
   });
 }
+
+
+// looks for package.json in this directory and in parent directories
+// returns an array of package names (strings). eg ["react", "react-dom", "classnames"]
+module.exports.getInstalledNPMPackages = function getInstalledNPMPackages(filePath){
+
+    // TODO make this find package.json in parent directories
+    // // default to this directory if one wasn't provided
+    // if (typeof(directory) === "undefined"){
+    //     directory = path.join(__dirname);
+    // }
+
+    var packageJson = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    var dependencies = packageJson.dependencies;
+
+    return Object.keys(dependencies);
+};

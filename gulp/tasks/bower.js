@@ -1,28 +1,16 @@
 var gulp           = require("gulp"),
     utils          = require("./utils"),
     config         = utils.loadConfig(),
-    browserify     = require("browserify"),
     concat         = require("gulp-concat"),
+    filter         = require("gulp-filter"),
     rename         = require("gulp-rename"),
+    debug          = require("gulp-debug"),
     gulpif         = require("gulp-if"),
     uglify         = require("gulp-uglify"),
     sourcemaps     = require("gulp-sourcemaps"),
-    source         = require("vinyl-source-stream"),
-    buffer         = require("vinyl-buffer"),
-    mainBowerFiles = require("main-bower-files"),
-    stringifyAligned = require("json-align"),
-    mergeStream    = require("merge-stream") ;
+    mainBowerFiles = require("main-bower-files");
 
-var path = require("path");
-
-
-// inside bowerRoot should be two directories:
-//  - global - Files in here will be concated to vendor-generated.js as is so they will be available
-//             as global variables in the browser.  This should be used to include polyfills and
-//             jquery plugins, etc
-//  - import - Files in here will be bundled and exposed by browserify.  This allows them to be imported
-//             via es6 module import syntax.  EG. import React from "react";
-var bowerRoot = config.root + "/vendor";
+var bowerRoot = config.root + "/polyfill";
 
 // bower settings
 utils.setTaskConfig("bower", {
@@ -30,29 +18,24 @@ utils.setTaskConfig("bower", {
     default: {
         root: bowerRoot,
 
-        filename: "vendor.js",
-        dest: config.dest + "/js",
+        js: {
+            filename: "polyfill.js",
+            dest: config.dest + "/js"
+        },
 
         // to skip, set value to false or omit entirely
         // otherwise, pass options object (can be empty {})
-        uglify: false,
-
-        browserify: {
-            debug: true // include sourcemaps
-        }
+        uglify: false
     },
 
     prod: {
-        uglify: {},
-        browserify: {
-            debug: false // don't sourcemaps
-        }
+        uglify: {}
     }
 });
 
 // watch bower.json to regenerate bundle
 utils.registerWatcher("bower", [
-    bowerRoot + "/**/bower.json" // watch both "global" and "import" directories
+    bowerRoot + "/bower.json"
 ]);
 
 
@@ -69,91 +52,41 @@ gulp.task("bower", function(next){
 
     // https://github.com/ck86/main-bower-files
     // mainBowerFiles returns array of "main" files from bower.json
-    // these files are in /vendor/import and should be bundled via browserify
-    var importfiles = mainBowerFiles({
+    var bowerfiles = mainBowerFiles({
         checkExistence: true,
-        paths: bower.root + "/import",
+        paths: bower.root,
         debugging: false
-    }).filter(byExtention("js"));
+    });
 
-    // // log the bower files to the gulp output
-    // utils.logYellow("bower files", "\n\t" + bowerfiles.join("\n\t"));
+    if (bowerfiles.length === 0){
+        next(); return;
+    }
 
-    var browserifiedStream = getBrowserifiedStream(importfiles, bower);
+    // log the bower files to the gulp output
+    utils.logYellow("polyfill files", "\n\t" + bowerfiles.join("\n\t"));
 
-   var globalFiles = mainBowerFiles({
-       checkExistence: true,
-       paths: bower.root + "/global",
-       debugging: false
-   }).filter(byExtention("js"));
+    // make js
+    return gulp.src(bowerfiles)
+        .pipe(utils.drano())
+        .pipe(filterByExtension("js"))
+        .pipe(sourcemaps.init())  // start sourcemaps
 
-   utils.logYellow("global", JSON.stringify(globalFiles, null, 2));
+        // putting a ; between each file to avoid problems when a library doesn't end in ;
+        .pipe(concat(bower.js.filename, {newLine: ";"}))
 
-   var globalStream = gulp.src(globalFiles);
-
-   // make js
-   mergeStream(browserifiedStream, globalStream)
-       .pipe(utils.drano())
-       .pipe(sourcemaps.init({ loadMaps: true })) // loads map from browserify file
-
-       // putting a ; between each file to avoid problems when a library doesn't end in ;
-       .pipe(concat(bower.filename, { newLine: ";" }))
-
-       .pipe(gulpif((bower.uglify), uglify(bower.uglify)))
-       .pipe(rename({
-           suffix: "-generated"
-       }))
-       .pipe(sourcemaps.write("./")) // end sourcemaps
-       .pipe(gulp.dest(bower.dest));
-
-    next();
+        .pipe(gulpif((bower.uglify), uglify(bower.uglify)))
+        .pipe(rename({
+            suffix: "-generated"
+        }))
+        .pipe(sourcemaps.write("./")) // end sourcemaps
+        .pipe(gulp.dest(bower.js.dest))
+        .pipe(debug({title: "bower: "}));
 
 });
 
-// create browserify bundle with the bower packages exposed
-function getBrowserifiedStream(importFiles, bower){
 
-    var b = browserify(bower.browserify || {}); // pass options
-
-    var bowerInfo = importFiles
-        .map(function(filepath){
-            var exposeName = getBowerPackageName(filepath);
-
-            // HACK * for react-dom
-            if (exposeName === "react"){
-                exposeName = path.basename(filepath, ".js");
-            }
-
-            return {
-                filepath: filepath,
-                exposeName: exposeName
-            };
-        });
-
-    var bowerLog = bowerInfo.reduce(function(obj, info){
-        obj[info.exposeName] = info.filepath;
-        return obj;
-    }, {});
-
-    utils.logYellow("exposing", stringifyAligned(bowerLog));
-
-    bowerInfo.forEach(function(info){
-        // use .require instead of .add so it'a available from other bundles
-        b.require(info.filepath, { expose: info.exposeName });
+function filterByExtension(extension){
+    return filter(function(file){
+        return file.path.match(new RegExp("." + extension + "$"));
     });
-
-    return b.bundle()
-        .pipe(source(bower.filename)) // bs to make it work with gulp
-        .pipe(buffer()); // https://github.com/gulpjs/gulp/issues/369 more bs to make it work with gulp;
-}
-
-function byExtention(extension){
-    return function(filepath){
-        return filepath.match(new RegExp("."+extension+"$"));
-    };
-}
-
-// given /app/vendor/bower_components/classnames/index.js returns "classnames"
-function getBowerPackageName(filepath) {
-    return filepath.replace(/.*?[\/|\\]bower_components[\/|\\](.*?)[\/|\\].*/, "$1");
 }
