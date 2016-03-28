@@ -1,4 +1,4 @@
-
+import { initialState as signalRadiusInitialState } from "./signalRadius.js";
 
 // action constants
 const FIREFLIES_SET = "FIREFLIES_SET";
@@ -56,6 +56,45 @@ export function addBoxOfFireflies({width, height}){
             y: (height/2) + ((i < 2) ? -50 : 50)
         };
     });
+
+    return {
+        type: FIREFLIES_SET,
+        fireflies
+    };
+}
+
+export function addTrianglePatternOfFireflies({width, height}){
+
+    const radius = signalRadiusInitialState.radius - 20;
+    const padding = 60;
+
+    let fireflies = [];
+
+    let x = padding;
+    let y = padding;
+
+    // pthag, 30-60-90 triange, 1-2-rad(3)
+    const rowheight = (radius/2) * Math.sqrt(3);
+
+    // break when y is off the canvas
+    while (height - y > padding) {
+
+        fireflies.push({
+            id: fireflyId++,
+            x: x,
+            y: y
+        });
+
+        x += radius;
+
+        // if the x is off the canvas, reset
+        if (width - x < padding){
+            y += rowheight;
+            // indent every other row
+            const isEvenRow = Math.round((y-padding) / rowheight) % 2 === 1;
+            x = (isEvenRow) ? padding + (radius/2) : padding;
+        }
+    }
 
     return {
         type: FIREFLIES_SET,

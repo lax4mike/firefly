@@ -8,7 +8,7 @@ import {
     addFirefly,
     deleteFirefly,
     setFireflyPosition,
-    addBoxOfFireflies } from "../redux/modules/fireflies.js";
+    addTrianglePatternOfFireflies } from "../redux/modules/fireflies.js";
 
 import Canvas from "./Canvas.jsx";
 
@@ -32,7 +32,7 @@ function mapDispatchToProps(dispatch, ownProps){
         },
         onInit: function({width, height}){
             dispatch(
-                addBoxOfFireflies({width, height})
+                addTrianglePatternOfFireflies({width, height})
             );
         },
         onFlashlightUpdate: function(flashlight){
