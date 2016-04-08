@@ -1,4 +1,4 @@
-import { initialState as signalRadiusInitialState } from "./signalRadius.js";
+import { initialState as signalRadiusInitialState } from "./signal-radius.js";
 
 // action constants
 const FIREFLIES_SET = "FIREFLIES_SET";

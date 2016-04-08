@@ -14,7 +14,7 @@ export function setFireflyBlink(status){
     return {
         type: FIREFLY_BLINK,
         status
-    }
+    };
 }
 
 // inital state

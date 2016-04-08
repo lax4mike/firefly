@@ -8,11 +8,20 @@ export default React.createClass({
 
     propTypes: {
         signalRadius         : PropTypes.number.isRequired,
-        showSignalRadius     : PropTypes.bool.isRequired,
-        blinkStatus          : PropTypes.string.isRequired,
         onSignalRadiusChange : PropTypes.func.isRequired,
+        showSignalRadius     : PropTypes.bool.isRequired,
         onSignalRadiusVisibilityChange: PropTypes.func.isRequired,
+
+        blinkStatus          : PropTypes.string.isRequired,
         onBlinkStatusChange  : PropTypes.func.isRequired,
+
+        dissipationFactor    : PropTypes.number.isRequired,
+        onDissipationFactorChange: PropTypes.func.isRequired,
+        amplitudeIncrement   : PropTypes.number.isRequired,
+        onAmplitudeIncrementChange: PropTypes.func.isRequired,
+        alpha                : PropTypes.number.isRequired,
+        beta                : PropTypes.number.isRequired,
+
         onDebugChange        : PropTypes.func.isRequired,
 
         flashlight: PropTypes.shape({
@@ -23,6 +32,8 @@ export default React.createClass({
 
     getInitialState: function(){
 
+        formatPrecision(4, 10);
+        formatPrecision(4, 10.12);
 
         let onOffStatus = (this.props.blinkStatus !== "blink") ? this.props.blinkStatus : "on";
 
@@ -59,12 +70,13 @@ export default React.createClass({
         }
     },
 
-    handleSignalRadiusChange: function(e){
-        this.props.onSignalRadiusChange(Number(e.target.value));
-    },
-
     handleDebugChange: function(e){
         this.props.onDebugChange(e.target.checked);
+    },
+
+    // signalRadius handlers
+    handleSignalRadiusChange: function(e){
+        this.props.onSignalRadiusChange(Number(e.target.value));
     },
 
     handleSignalRadiusVisibilityChange: function(e){
@@ -88,6 +100,7 @@ export default React.createClass({
         this.props.onSignalRadiusVisibilityChange(this.state.showSignalRadius);
     },
 
+    // flashlight handlers
     handleFlashlightMouseDown: function(){
         this.props.onFlashlightChange({ isResizing: true });
     },
@@ -99,6 +112,16 @@ export default React.createClass({
     handleFlashlightMouseUp: function(){
         this.props.onFlashlightChange({ isResizing: false });
     },
+
+    // phase parameters
+    handleDissipationFactorChange: function(e){
+        this.props.onDissipationFactorChange(Number(e.target.value));
+    },
+
+    handleAmplitudeIncrementChange: function(e){
+        this.props.onAmplitudeIncrementChange(Number(e.target.value));
+    },
+
 
     render: function(){
 
@@ -188,8 +211,81 @@ export default React.createClass({
                     </label>
                 </div>
 
+
+                <hr />
+
+                <div className="control">
+                    <label>
+                        <div className="label">Dissipation Factor </div>
+                        <div className="number">{formatPrecision(2, this.props.dissipationFactor)}</div>
+                        <input type="range" min={0.01} max={1} step={0.01}
+                            value={this.props.dissipationFactor}
+                            onChange={this.handleDissipationFactorChange} />
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div className="label">Amplitude Increment </div>
+                        <div className="number">{formatPrecision(2, this.props.amplitudeIncrement)}</div>
+                        <input type="range" min={0.01} max={1} step={0.01}
+                            value={this.props.amplitudeIncrement}
+                            onChange={this.handleAmplitudeIncrementChange} />
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div className="label">Alpha </div>
+                        <div className="number">{formatPrecision(4, this.props.alpha)}</div>
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div className="label">Beta </div>
+                        <div className="number">{formatPrecision(4, this.props.beta)}</div>
+                    </label>
+                </div>
+
+                <div className="control">
+                    <label>
+                        <div className="label">Jump from 500 </div>
+                        <div className="number">{formatPrecision(4, this.props.alpha * 500 + this.props.beta)}</div>
+                    </label>
+                </div>
+
+
             </div>
         );
     }
-
 });
+
+
+
+function formatPrecision(precision, number){
+    const tens = Math.pow(10, precision);
+    const rounded = Math.round(number*tens)/tens;
+
+    const [left, right] = String(rounded).split(".")
+
+    const formatted = left + "." + rightPad(right || "", precision, "0");
+
+    return formatted;
+}
+
+function rightPad(str, len, ch){
+    str = String(str);
+
+    var i = -1;
+
+    if (!ch && ch !== 0) ch = " ";
+
+    len = len - str.length;
+
+    while (++i < len) {
+    str = str + ch;
+    }
+
+    return str;
+}

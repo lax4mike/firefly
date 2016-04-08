@@ -5,7 +5,7 @@ const BLINK_LOGIT = "BLINK_LOGIT";
 // action creators
 export function logBlink(firefly){
 
-    let blink = {
+    const blink = {
         id: firefly.id,
         timestamp: Date.now()
     };
@@ -25,7 +25,7 @@ function reducer(state = initialState, action) {
     switch(action.type) {
 
         case BLINK_LOGIT: {
-            let pruned = pruneLog(state);
+            const pruned = pruneLog(state);
             return pruned.concat(action.blink);
         }
 
@@ -37,7 +37,7 @@ function reducer(state = initialState, action) {
 
 // remove all entries older than 2000ms
 function pruneLog(log){
-    let now = Date.now();
+    const now = Date.now();
     return log.filter((b) => {
         return now - b.timestamp < 2000 ;
     });

@@ -1,18 +1,14 @@
 {
-  "ecmaFeatures": {
-    "jsx": true,
-    "modules": true,
-    "destructuring": true,
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "restParams": true,
-    "spread": true,
-    "templateStrings": true,
-    "forOf": true
+  "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module",
+      "ecmaFeatures": {
+        "jsx": true
+      }
   },
   "env": {
-    "node": true,
-    "browser": true
+    "browser": true,
+    "es6": true
   },
   "plugins": [
     "react"
@@ -24,7 +20,6 @@
     "react/jsx-max-props-per-line": [0, { "maximum": 3 }],
     "react/jsx-no-duplicate-props": 1,
     "react/jsx-no-undef": 1,
-    "react/jsx-quotes": 1,
     "react/jsx-sort-prop-types": 0,
     "react/jsx-sort-props": 0,
     "react/jsx-uses-react": 1,
@@ -90,7 +85,6 @@
     "no-else-return": 0,
     "no-empty": 0,
     "no-empty-character-class": 2,
-    "no-empty-label": 0,
     "no-eq-null": 0,
     "no-eval": 0,
     "no-ex-assign": 2,
@@ -98,7 +92,7 @@
     "no-extra-bind": 0,
     "no-extra-boolean-cast": 2,
     "no-extra-parens": 0,
-    "no-extra-semi": 2,
+    "no-extra-semi": 1,
     "no-extra-strict": 0,
     "no-fallthrough": 2,
     "no-floating-decimal": 0,
@@ -164,7 +158,7 @@
     "no-unneeded-ternary": 0,
     "no-unreachable": 1,
     "no-unused-expressions": 0,
-    "no-unused-vars": [1, {"vars": "all", "args": "none"}],
+    "no-unused-vars": [0, {"vars": "all", "args": "none"}],
     "no-use-before-define": 0,
     "no-useless-call": 0,
     "no-void": 0,
@@ -201,7 +195,9 @@
     "id-length": 0,
     "indent": 0,
     "init-declarations": 0,
+    "jsx-quotes": [1, "prefer-double"],
     "key-spacing": [0, { "beforeColon": false, "afterColon": true }],
+    "keyword-spacing": [0, {"before": true, "after": true, "overrides": {}}],
     "lines-around-comment": 0,
     "max-depth": [0, 4],
     "max-len": [0, 80, 4],
@@ -221,18 +217,16 @@
     "prefer-spread": 0,
     "prefer-reflect": 0,
     "quote-props": 0,
-    "quotes": [0, "double"],
+    "quotes": [1, "double", "avoid-escape"],
     "radix": 0,
     "require-yield": 0,
     "semi": 1,
     "semi-spacing": [0, {"before": false, "after": true}],
     "sort-vars": 0,
-    "space-after-keywords": [0, "always"],
     "space-before-blocks": [0, "always"],
     "space-before-function-paren": [0, "always"],
     "space-in-parens": [0, "never"],
     "space-infix-ops": 0,
-    "space-return-throw-case": 0,
     "space-unary-ops": [0, { "words": true, "nonwords": false }],
     "spaced-comment": 0,
     "strict": 0,

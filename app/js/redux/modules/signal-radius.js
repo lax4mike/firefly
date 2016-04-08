@@ -41,8 +41,9 @@ function reducer(state = initialState, action) {
             });
         }
 
-        default:
+        default: {
             return state;
+        }
     }
 
 }
