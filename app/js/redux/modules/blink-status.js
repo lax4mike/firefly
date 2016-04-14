@@ -1,18 +1,18 @@
 
 // action constants
-const FIREFLY_BLINK = "FIREFLY_BLINK";
+const SET_BLINKSTATUS = "SET_BLINKSTATUS";
 
 import blinks from "../../blink-status.js";
 
 // action creators
-export function setFireflyBlink(status){
+export function setBlinkStatus(status){
 
     if (blinks.indexOf(status) === -1){
         throw new Error("Firely blink must be one of ", blinks.join(", "));
     }
 
     return {
-        type: FIREFLY_BLINK,
+        type: SET_BLINKSTATUS,
         status
     };
 }
@@ -25,7 +25,7 @@ function reducer(state = initialState, action) {
 
     switch(action.type) {
 
-        case FIREFLY_BLINK: {
+        case SET_BLINKSTATUS: {
             return action.status;
         }
 

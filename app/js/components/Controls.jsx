@@ -32,9 +32,6 @@ export default React.createClass({
 
     getInitialState: function(){
 
-        formatPrecision(4, 10);
-        formatPrecision(4, 10.12);
-
         let onOffStatus = (this.props.blinkStatus !== "blink") ? this.props.blinkStatus : "on";
 
         return {
@@ -217,7 +214,7 @@ export default React.createClass({
                 <div className="control">
                     <label>
                         <div className="label">Dissipation Factor </div>
-                        <div className="number">{formatPrecision(2, this.props.dissipationFactor)}</div>
+                        <div className="number">{this.props.dissipationFactor.toFixed(2)}</div>
                         <input type="range" min={0.01} max={1} step={0.01}
                             value={this.props.dissipationFactor}
                             onChange={this.handleDissipationFactorChange} />
@@ -227,7 +224,7 @@ export default React.createClass({
                 <div className="control">
                     <label>
                         <div className="label">Amplitude Increment </div>
-                        <div className="number">{formatPrecision(2, this.props.amplitudeIncrement)}</div>
+                        <div className="number">{this.props.amplitudeIncrement.toFixed(2)}</div>
                         <input type="range" min={0.01} max={1} step={0.01}
                             value={this.props.amplitudeIncrement}
                             onChange={this.handleAmplitudeIncrementChange} />
@@ -237,21 +234,21 @@ export default React.createClass({
                 <div className="control">
                     <label>
                         <div className="label">Alpha </div>
-                        <div className="number">{formatPrecision(4, this.props.alpha)}</div>
+                        <div className="number">{this.props.alpha.toFixed(4)}</div>
                     </label>
                 </div>
 
                 <div className="control">
                     <label>
                         <div className="label">Beta </div>
-                        <div className="number">{formatPrecision(4, this.props.beta)}</div>
+                        <div className="number">{this.props.beta.toFixed(4)}</div>
                     </label>
                 </div>
 
                 <div className="control">
                     <label>
                         <div className="label">Jump from 500 </div>
-                        <div className="number">{formatPrecision(4, this.props.alpha * 500 + this.props.beta)}</div>
+                        <div className="number">{(this.props.alpha * 500 + this.props.beta).toFixed(4)}</div>
                     </label>
                 </div>
 
@@ -260,32 +257,3 @@ export default React.createClass({
         );
     }
 });
-
-
-
-function formatPrecision(precision, number){
-    const tens = Math.pow(10, precision);
-    const rounded = Math.round(number*tens)/tens;
-
-    const [left, right] = String(rounded).split(".")
-
-    const formatted = left + "." + rightPad(right || "", precision, "0");
-
-    return formatted;
-}
-
-function rightPad(str, len, ch){
-    str = String(str);
-
-    var i = -1;
-
-    if (!ch && ch !== 0) ch = " ";
-
-    len = len - str.length;
-
-    while (++i < len) {
-    str = str + ch;
-    }
-
-    return str;
-}

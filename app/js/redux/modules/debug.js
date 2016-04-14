@@ -19,7 +19,7 @@ function reducer(state = initialState, action) {
     switch(action.type) {
 
         case DEBUG_TOGGLE: {
-            return action.bool
+            return action.bool;
         }
 
         default:

@@ -163,12 +163,7 @@ export default React.createClass({
                 this.props.fireflies.map((firefly, i) => (
                     <Firefly
                         key              = {firefly.id}
-                        id               = {firefly.id}
-                        x                = {firefly.x}
-                        y                = {firefly.y}
-                        neighbors        = {firefly.neighbors}
-                        interval         = {firefly.interval}
-                        isInTheLight     = {firefly.isInTheLight}
+                        firefly          = {firefly}
                         radius           = {RADIUS}
                         canvas           = {this.refs.canvas}
                         signalRadius     = {this.props.signalRadius}

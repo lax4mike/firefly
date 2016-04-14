@@ -1,9 +1,10 @@
 import { initialState as signalRadiusInitialState } from "./signal-radius.js";
+import { PHI_THRESHOLD, tickNextPhi } from "../../utils/phi.js";
+import { TICK } from "./time.js";
 
 // action constants
 const FIREFLIES_SET = "FIREFLIES_SET";
 const FIREFLY_SET_POSITION = "FIREFLY_SET_POSITION";
-const FIREFLY_ADD_RANDOM = "FIREFLY_ADD_RANDOM";
 const FIREFLY_ADD = "FIREFLY_ADD";
 const FIREFLY_DELETE = "FIREFLY_DELETE";
 
@@ -11,16 +12,28 @@ const FIREFLY_DELETE = "FIREFLY_DELETE";
 // action creators
 let fireflyId = 0;
 
+
+// all fireflies should start at a random time.
+function getRandomPhi(){
+    return Math.round(Math.random() * PHI_THRESHOLD);
+}
+
 export function setFireflies(fireflies) {
     return {
         type: FIREFLIES_SET,
-        fireflies: fireflies.map((f) => Object.assign(f, { id: fireflyId++ }))
+        fireflies: fireflies.map((f) => Object.assign(f, {
+            id: fireflyId++,
+            phi: getRandomPhi()
+        }))
     };
 }
 
 export function addFirefly({x, y}){
-
-    let firefly = {x, y};
+    const firefly = {
+        id: fireflyId++,
+        phi: getRandomPhi(),
+        x, y
+    };
     return {
         type: FIREFLY_ADD,
         firefly
@@ -53,7 +66,8 @@ export function addBoxOfFireflies({width, height}){
         return {
             id: fireflyId++,
             x: (width/2) + ((isEven) ? -50 : 50),
-            y: (height/2) + ((i < 2) ? -50 : 50)
+            y: (height/2) + ((i < 2) ? -50 : 50),
+            phi: getRandomPhi()
         };
     });
 
@@ -82,7 +96,8 @@ export function addTrianglePatternOfFireflies({width, height}){
         fireflies.push({
             id: fireflyId++,
             x: x,
-            y: y
+            y: y,
+            phi: getRandomPhi()
         });
 
         x += radius;
@@ -104,7 +119,6 @@ export function addTrianglePatternOfFireflies({width, height}){
 
 
 
-
 // inital state
 let initialState = [];
 
@@ -113,23 +127,20 @@ function reducer(state = initialState, action, canvas) {
 
     switch(action.type) {
 
+        case TICK: {
+            // increment phi for each firefly
+            return state.map((ff) => Object.assign({}, ff, {
+                phi: tickNextPhi(ff.phi)
+            }));
+        }
+
         case FIREFLIES_SET: {
             return action.fireflies;
         }
 
-        case FIREFLY_ADD_RANDOM: {
-            let firefly = {
-                id: fireflyId++,
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height
-            };
-
-            return state.concat(firefly);
-        }
-
         case FIREFLY_ADD: {
             return state.concat(
-                Object.assign(action.firefly, { id: fireflyId++ })
+                Object.assign(action.firefly)
             );
         }
 

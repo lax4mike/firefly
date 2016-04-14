@@ -4,10 +4,11 @@ import canvasReducer     from "./modules/canvas.js";
 import flashlightReducer from "./modules/flashlight.js";
 
 import blinkLog         from "./modules/blink-log.js";
-import blinkStatus      from "./modules/fireflies-blink-status.js";
+import blinkStatus      from "./modules/blink-status.js";
 import debug            from "./modules/debug.js";
 import signalRadius     from "./modules/signal-radius.js";
 import phaseParameters  from "./modules/phase-parameters.js";
+import time             from "./modules/time.js";
 
 export default function reducer(state = {}, action) {
 
@@ -16,7 +17,8 @@ export default function reducer(state = {}, action) {
         blinkStatus,
         debug,
         signalRadius,
-        phaseParameters
+        phaseParameters,
+        time
     })(state, action);
 
     let canvas    = canvasReducer(state.canvas, action);

@@ -11,7 +11,7 @@ export function updateFlashlight(flashlight){
 }
 
 // inital state
-let initialState = {
+const initialState = {
     isShining: false,
     isResizing: false, // visible, but won't stop blinking
     x: 0,
