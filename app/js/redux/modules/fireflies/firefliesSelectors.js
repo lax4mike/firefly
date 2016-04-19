@@ -1,5 +1,7 @@
 import { createSelector } from "reselect";
-import { tickNextPhi } from "../../utils/phi.js";
+import { tickNextPhi } from "../../../utils/phi.js";
+
+
 
 // selectors
 const radiusSelector     = (state) => state.signalRadius.radius;
@@ -22,8 +24,6 @@ export const getFireflies = (state) => {
     return state.fireflies.map(ff => getFirefly(ff, state));
 };
 
-// const fireflySelector = (firefly, state) => firefly;
-// const firefliesSelector = (firefly, state) => fireflies;
 
 const getFirefly = function(firefly, state){
 
@@ -52,7 +52,7 @@ const getFirefly = function(firefly, state){
     })();
 
     return Object.assign({}, firefly, { neighbors, isInTheLight });
-}
+};
 
 
 

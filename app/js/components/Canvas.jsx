@@ -160,21 +160,30 @@ export default React.createClass({
                 : null}
 
                 { // generate some random fireflies
-                this.props.fireflies.map((firefly, i) => (
-                    <Firefly
-                        key              = {firefly.id}
-                        firefly          = {firefly}
-                        radius           = {RADIUS}
-                        canvas           = {this.refs.canvas}
-                        signalRadius     = {this.props.signalRadius}
-                        showSignalRadius = {this.props.showSignalRadius}
-                        debug            = {this.props.debug}
-                        blinkStatus      = {this.props.blinkStatus}
-                        onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
-                        onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
-                        onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
-                    />
-                ))}
+                this.props.fireflies.map((firefly, i) => {
+
+                    // if the firefly should be on or off
+                    const blinkStatus =
+                        (this.props.blinkStatus === "blink")
+                            ? (firefly.phi < 200) ? "on" : "off"
+                            : this.props.blinkStatus;
+
+                    return (
+                        <Firefly
+                            key              = {firefly.id}
+                            firefly          = {firefly}
+                            radius           = {RADIUS}
+                            canvas           = {this.refs.canvas}
+                            signalRadius     = {this.props.signalRadius}
+                            showSignalRadius = {this.props.showSignalRadius}
+                            debug            = {this.props.debug}
+                            blinkStatus      = {blinkStatus}
+                            onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
+                            onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
+                            onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
+                        />
+                    );
+                })}
 
             </svg>
         );

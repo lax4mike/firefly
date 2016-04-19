@@ -20,6 +20,7 @@ function mapStateToProps(state) {
         showSignalRadius   : state.signalRadius.isVisible,
         blinkStatus        : state.blinkStatus,
         debug              : state.debug,
+        time               : state.time,
         flashlight         : state.flashlight,
         dissipationFactor  : phaseParameters.dissipationFactor,
         amplitudeIncrement : phaseParameters.amplitudeIncrement,

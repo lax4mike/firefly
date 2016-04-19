@@ -1,5 +1,5 @@
 
-import firefliesReducer  from "./modules/fireflies.js";
+import firefliesReducer  from "./modules/fireflies/firefliesReducer.js";
 import canvasReducer     from "./modules/canvas.js";
 import flashlightReducer from "./modules/flashlight.js";
 

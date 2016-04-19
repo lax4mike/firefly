@@ -25,7 +25,7 @@ export default React.createClass({
         }),
 
         onBlink      : PropTypes.func.isRequired,
-        blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
+        blinkStatus  : PropTypes.oneOf(["on", "off"]).isRequired,
 
         debug            : PropTypes.bool.isRequired,
         signalRadius     : PropTypes.number.isRequired,
@@ -41,51 +41,9 @@ export default React.createClass({
 
     getInitialState: function(){
         return {
-            isBlinking: (this.props.blinkStatus === "blink"),
             fill: "url('#yellow')",
-            fillOpacity: 0, // start off
-            interval: equilibrium,
-            // fill: this.props.fill, // start on
             isHovering: false // for this individual firefly
         };
-    },
-
-    componentDidMount: function(){
-        this.handleBlinKStatusChange(this.props.blinkStatus);
-    },
-
-    componentWillUnmount: function(){
-        // this.stopBlink();
-    },
-
-    componentWillReceiveProps: function(nextProps){
-
-        // const blinkStatusChanged = nextProps.blinkStatus !== this.props.blinkStatus;
-        // const isInTheLightChanged = nextProps.isInTheLight !== this.props.isInTheLight;
-        //
-        // // if the blink status has changed
-        // if (blinkStatusChanged || isInTheLightChanged){
-        // //     this.stopBlink();
-        //     this.handleBlinKStatusChange(nextProps.blinkStatus, nextProps.isInTheLight);
-        // }
-    },
-
-    handleBlinKStatusChange: function(status, isInTheLight){
-
-        if (isInTheLight) {
-            this.stopBlink("off");
-            return;
-        }
-
-        if (status === "blink"){
-            this.setState({
-                fillOpacity: offOpacity
-            });
-            // this.startBlinkTimeoutId = setTimeout(this.startBlink, Math.round(Math.random() * equilibrium));
-        }
-        else {
-            // this.stopBlink(status);
-        }
     },
 
     handleMouseEnter: function(){
@@ -291,7 +249,8 @@ export default React.createClass({
 
         const { firefly, signalRadius, radius, blinkStatus } = this.props;
 
-        const fillOpacity = (firefly.phi < 200) ? 1 : offOpacity
+        const fillOpacity = (blinkStatus === "off" || firefly.isInTheLight)
+            ? offOpacity : 1;
 
         return (
             <g className="firefly">

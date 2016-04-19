@@ -3,7 +3,7 @@
 export const PHI_THRESHOLD = 1000;
 
 // how much to go up when there are no neighbor blinks detected
-export const PHI_TICK = 64;
+export const PHI_TICK = 16;
 
 // http://web.cs.sunyit.edu/~sengupta/swarm/firefly_alogorithms.pdf
 // increment a bunch (when a neighbor blink is detected)

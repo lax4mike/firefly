@@ -1,6 +1,6 @@
 import { connect } from "react-redux";
 
-import { getFireflies }        from "../redux/modules/fireflies-selectors.js";
+import { getFireflies }        from "../redux/modules/fireflies/firefliesSelectors.js";
 import { logBlink }            from "../redux/modules/blink-log.js";
 import { setCanvasDimensions } from "../redux/modules/canvas.js";
 import { updateFlashlight  }   from "../redux/modules/flashlight.js";
@@ -9,7 +9,7 @@ import {
     deleteFirefly,
     setFireflyPosition,
     addBoxOfFireflies,
-    addTrianglePatternOfFireflies } from "../redux/modules/fireflies.js";
+    addTrianglePatternOfFireflies } from "../redux/modules/fireflies/firefliesActions.js";
 
 import Canvas from "./Canvas.jsx";
 

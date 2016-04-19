@@ -1,15 +1,14 @@
-import { initialState as signalRadiusInitialState } from "./signal-radius.js";
-import { PHI_THRESHOLD, tickNextPhi } from "../../utils/phi.js";
-import { TICK } from "./time.js";
+import { PHI_THRESHOLD } from "../../../utils/phi.js";
 
 // action constants
-const FIREFLIES_SET = "FIREFLIES_SET";
-const FIREFLY_SET_POSITION = "FIREFLY_SET_POSITION";
-const FIREFLY_ADD = "FIREFLY_ADD";
-const FIREFLY_DELETE = "FIREFLY_DELETE";
-
+export const FIREFLIES_SET = "FIREFLIES_SET";
+export const FIREFLY_SET_POSITION = "FIREFLY_SET_POSITION";
+export const FIREFLY_ADD = "FIREFLY_ADD";
+export const FIREFLY_DELETE = "FIREFLY_DELETE";
 
 // action creators
+
+// increment the id for every new firely
 let fireflyId = 0;
 
 
@@ -116,56 +115,3 @@ export function addTrianglePatternOfFireflies({width, height}){
         fireflies
     };
 }
-
-
-
-// inital state
-let initialState = [];
-
-// reducer function
-function reducer(state = initialState, action, canvas) {
-
-    switch(action.type) {
-
-        case TICK: {
-            // increment phi for each firefly
-            return state.map((ff) => Object.assign({}, ff, {
-                phi: tickNextPhi(ff.phi)
-            }));
-        }
-
-        case FIREFLIES_SET: {
-            return action.fireflies;
-        }
-
-        case FIREFLY_ADD: {
-            return state.concat(
-                Object.assign(action.firefly)
-            );
-        }
-
-        case FIREFLY_DELETE: {
-            return state.filter((ff) => ff.id !== action.id);
-        }
-
-        case FIREFLY_SET_POSITION: {
-            let { fireflyId, x, y } = action;
-            let newState = state.slice();
-
-            let firefly = newState.find((f) => f.id === fireflyId);
-            Object.assign(firefly, {
-                x: x,
-                y: y
-            });
-
-            return newState;
-
-        }
-
-        default:
-            return state;
-    }
-
-}
-
-export default reducer;

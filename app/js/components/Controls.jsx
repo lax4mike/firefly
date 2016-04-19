@@ -20,8 +20,9 @@ export default React.createClass({
         amplitudeIncrement   : PropTypes.number.isRequired,
         onAmplitudeIncrementChange: PropTypes.func.isRequired,
         alpha                : PropTypes.number.isRequired,
-        beta                : PropTypes.number.isRequired,
+        beta                 : PropTypes.number.isRequired,
 
+        time                 : PropTypes.number.isRequired,
         onDebugChange        : PropTypes.func.isRequired,
 
         flashlight: PropTypes.shape({
@@ -125,6 +126,41 @@ export default React.createClass({
         return (
             <div className="controls">
 
+
+                <div className="control control--blink-status">
+
+                    <div className="label">Blink status</div>
+
+                    <button type="button" onClick={this.handleStartStopClick}>
+                        {(this.props.blinkStatus === "blink") ? "Stop": "Start"}
+                    </button>
+
+                    { // show "on" and "off" radios if it's not blinking
+                    (this.props.blinkStatus !== "blink")
+                    ? (
+                        blinks
+                            .filter((b) => (b !== "blink"))
+                            .map((b) => (
+                                <label className="radio" key={b}>
+                                    <input
+                                    type="radio"
+                                    name="blink-status"
+                                    checked={b === this.props.blinkStatus}
+                                    value={b}
+                                    onChange={this.handleBlinkStatusChange} />
+                                    {b}
+                                </label>
+                            ))
+                    )
+                    : null
+                    }
+
+                    <div className="number" style={{textAlign: "right"}}>
+                        {(this.props.time/1000).toFixed(3)}
+                    </div>
+                </div>
+
+
                 <div className="control">
                     <label>
                         <div>
@@ -155,36 +191,6 @@ export default React.createClass({
                             onChange={this.handleDebugChange} />
                         <span className="label">Show Debug info </span>
                     </label>
-                </div>
-
-                <div className="control control--blink-status">
-
-                    <div className="label">Blink status</div>
-
-
-                    <button type="button" onClick={this.handleStartStopClick}>
-                        {(this.props.blinkStatus === "blink") ? "Stop": "Start"}
-                    </button>
-
-                    { // show "on" and "off" radios if it's not blinking
-                    (this.props.blinkStatus !== "blink")
-                    ? (
-                        blinks
-                            .filter((b) => (b !== "blink"))
-                            .map((b) => (
-                                <label className="radio" key={b}>
-                                    <input
-                                    type="radio"
-                                    name="blink-status"
-                                    checked={b === this.props.blinkStatus}
-                                    value={b}
-                                    onChange={this.handleBlinkStatusChange} />
-                                    {b}
-                                </label>
-                            ))
-                    )
-                    : null
-                    }
                 </div>
 
                 <div className="control">
