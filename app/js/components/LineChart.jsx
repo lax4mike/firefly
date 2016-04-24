@@ -1,7 +1,7 @@
 import React, { PropTypes } from "react";
 import d3 from "d3";
 
-import { jumpNextPhi, tickNextPhi } from "../utils/phi.js";
+import { jumpNextPhi, tickNextPhi, PHI_THRESHOLD } from "../utils/phi.js";
 
 export default React.createClass({
 
@@ -66,7 +66,7 @@ export default React.createClass({
         // generate the data for the jump and tick
         let jumpData = [];
         let tickData = [];
-        for(let i = 0; i <= 1000; i += 10){
+        for(let i = 0; i <= PHI_THRESHOLD; i += 10){
             jumpData.push({
                 time: i,
                 phi: jumpNextPhi(i, alpha, beta)
@@ -81,7 +81,7 @@ export default React.createClass({
             .map(data => d3.max(data, d => d.phi));
 
         const xScale = d3.scale.linear()
-            .domain([0, 1000])
+            .domain([0, PHI_THRESHOLD])
             .range([0, plotWidth]);
 
         const yScale = d3.scale.linear()

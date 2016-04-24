@@ -1,8 +1,8 @@
 import React, { PropTypes } from "react";
 import getOffset from "../offset.js";
 
-const equilibrium = 1000;
-const offOpacity = 0.1;
+const OFF_OPACITY = 0.1;
+const FADEOUT_TIME = 400; // ms
 
 export default React.createClass({
 
@@ -20,7 +20,7 @@ export default React.createClass({
             isInTheLight : PropTypes.bool.isRequired
         }),
 
-        blinkStatus  : PropTypes.oneOf(["on", "off"]).isRequired,
+        blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
 
         debug            : PropTypes.bool.isRequired,
         signalRadius     : PropTypes.number.isRequired,
@@ -101,7 +101,7 @@ export default React.createClass({
     //         isBlinking: false,
     //         // fill: "url('#yellow')"
     //         fill: this.state.fill,
-    //         fillOpacity: (status === "off") ? offOpacity : 1
+    //         fillOpacity: (status === "off") ? OFF_OPACITY : 1
     //     });
     // },
     //
@@ -136,7 +136,7 @@ export default React.createClass({
     //     setTimeout(() => {
     //         if (this.isMounted() && this.state.isBlinking){
     //             this.setState({
-    //                 fillOpacity: offOpacity
+    //                 fillOpacity: OFF_OPACITY
     //             });
     //         }
     //     }, 350);
@@ -247,10 +247,22 @@ export default React.createClass({
 
     render: function(){
 
+        const getBlinkOpacity = function(phi){
+            const isOff = (blinkStatus === "off" || firefly.isInTheLight);
+            const isOn = (blinkStatus === "on");
+            if (isOff){ return OFF_OPACITY; }
+            if (isOn) { return 1; }
+
+            // start at 1, then fade down to FADEOUT_TIME
+            const fadeOut = (-1/FADEOUT_TIME)*phi + 1;
+
+            // but never go below OFF_OPACITY;
+            return Math.max(fadeOut, OFF_OPACITY);
+        };
+
         const { firefly, signalRadius, radius, blinkStatus } = this.props;
 
-        const fillOpacity = (blinkStatus === "off" || firefly.isInTheLight)
-            ? offOpacity : 1;
+        const fillOpacity = getBlinkOpacity(firefly.phi);
 
         return (
             <g className="firefly">
