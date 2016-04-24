@@ -1,34 +1,37 @@
 
-import firefliesReducer  from "./modules/fireflies/firefliesReducer.js";
-import canvasReducer     from "./modules/canvas.js";
-import flashlightReducer from "./modules/flashlight.js";
+import firefliesReducer    from "./modules/fireflies/firefliesReducer.js";
+import canvasReducer       from "./modules/canvas.js";
+import flashlightReducer   from "./modules/flashlight.js";
+import signalRadiusReducer from "./modules/signal-radius.js";
+import phaseReducer        from "./modules/phase-parameters.js";
 
-import blinkLog         from "./modules/blink-log.js";
-import blinkStatus      from "./modules/blink-status.js";
-import debug            from "./modules/debug.js";
-import signalRadius     from "./modules/signal-radius.js";
-import phaseParameters  from "./modules/phase-parameters.js";
-import time             from "./modules/time.js";
+import blinkStatus  from "./modules/blink-status.js";
+import debug        from "./modules/debug.js";
+import time         from "./modules/time.js";
 
 export default function reducer(state = {}, action) {
 
-    let simpleReducerState = combineSimpleReducers({
-        blinkLog,
+    const simpleReducerState = combineSimpleReducers({
         blinkStatus,
         debug,
-        signalRadius,
-        phaseParameters,
         time
     })(state, action);
 
-    let canvas    = canvasReducer(state.canvas, action);
-    let fireflies = firefliesReducer(state.fireflies, action, canvas);
-    let flashlight = flashlightReducer(state.flashlight, action, canvas);
+    // get the radius from the state if it's defined
+    // and pass to the fireflies reduce
+    const signalRadius = signalRadiusReducer(state.signalRadius, action);
+    const phaseParameters = phaseReducer(state.phaseParameters, action);
+    const canvas     = canvasReducer(state.canvas, action);
+    const flashlight = flashlightReducer(state.flashlight, action, canvas);
+    const fireflies  = firefliesReducer(state.fireflies, action,
+        canvas, signalRadius, phaseParameters);
 
     return Object.assign({}, simpleReducerState, {
         canvas,
         fireflies,
-        flashlight
+        flashlight,
+        signalRadius,
+        phaseParameters
     });
 
 }

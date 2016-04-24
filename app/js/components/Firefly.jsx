@@ -17,14 +17,9 @@ export default React.createClass({
             x         : PropTypes.number.isRequired,
             y         : PropTypes.number.isRequired,
             phi       : PropTypes.number.isRequired,
-            neighbors : PropTypes.arrayOf(PropTypes.shape({
-                id       : PropTypes.number.isRequired,
-                distance : PropTypes.number.isRequired
-            })),
             isInTheLight : PropTypes.bool.isRequired
         }),
 
-        onBlink      : PropTypes.func.isRequired,
         blinkStatus  : PropTypes.oneOf(["on", "off"]).isRequired,
 
         debug            : PropTypes.bool.isRequired,
@@ -291,7 +286,7 @@ export default React.createClass({
                             x = {firefly.x - 8}
                             y = {firefly.y + 30}
                         >
-                            {firefly.phi}
+                            {firefly.id + ":" + Math.round(firefly.phi)}
                         </text>
                     )
                     : null

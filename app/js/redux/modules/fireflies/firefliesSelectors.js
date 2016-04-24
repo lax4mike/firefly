@@ -1,6 +1,6 @@
 import { createSelector } from "reselect";
 import { tickNextPhi } from "../../../utils/phi.js";
-
+import { mapObject, filterObject, asArray } from "../../../utils/object.js";
 
 
 // selectors
@@ -21,7 +21,7 @@ const flashlightSelector = (state) => state.flashlight;
 // );
 
 export const getFireflies = (state) => {
-    return state.fireflies.map(ff => getFirefly(ff, state));
+    return asArray(mapObject(state.fireflies, ff => getFirefly(ff, state)));
 };
 
 
@@ -29,8 +29,24 @@ const getFirefly = function(firefly, state){
 
     // console.log("calulating firefly neighbors!");
 
-    let neighbors = state.fireflies
-        // we only need the id, calculate the distance from firefly
+    // this is now being stored in the state so the reducers can use it (TICK action)
+    // let neighbors = getNeighbors(firefly, state.fireflies, state.signalRadius.radius);
+
+    // check to see if this firefly is being shinned on
+    let isInTheLight = getIsInTheLight(firefly, state.flashlight);
+
+    return Object.assign({}, firefly, { isInTheLight });
+};
+
+
+export function getNeighbors(firefly, fireflies, radius) {
+
+    if (typeof(radius) === "undefined") {
+        throw new Error("getNeighbors: radius is required!");
+    }
+
+    // we only need the id, calculate the distance from firefly
+    return asArray(fireflies)
         .map(f2 => {
             return Object.assign({}, {
                 id: f2.id,
@@ -39,25 +55,23 @@ const getFirefly = function(firefly, state){
         })
         // only keep the fireflies that are close to firefly
         .filter(f3 => {
-            return (f3.id !== firefly.id) && (f3.distance < state.signalRadius.radius);
+            return (f3.id !== firefly.id) && (f3.distance < radius);
         })
         .sort((a, b) => b.distance - a.distance);
+}
 
-    // check to see if this firefly is being shinned on
-    let isInTheLight = (() => {
-        if (!state.flashlight.isShining) { return false; }
+function getIsInTheLight(firefly, flashlight){
+    // definitely not in the light if the flashlight isn't on...
+    if (!flashlight.isShining) { return false; }
 
-        let distance = getDistance(firefly, state.flashlight);
-        return distance < state.flashlight.radius;
-    })();
-
-    return Object.assign({}, firefly, { neighbors, isInTheLight });
-};
+    let distance = getDistance(firefly, flashlight);
+    return distance < flashlight.radius;
+}
 
 
 
 
-function getDistance(f1, f2){
+export function getDistance(f1, f2){
     const distY = Math.abs(f1.y - f2.y);
     const distX = Math.abs(f1.x - f2.x);
     return Math.sqrt(Math.pow(distX, 2) + Math.pow(distY, 2));

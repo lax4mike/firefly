@@ -1,7 +1,6 @@
 import { connect } from "react-redux";
 
 import { getFireflies }        from "../redux/modules/fireflies/firefliesSelectors.js";
-import { logBlink }            from "../redux/modules/blink-log.js";
 import { setCanvasDimensions } from "../redux/modules/canvas.js";
 import { updateFlashlight  }   from "../redux/modules/flashlight.js";
 import {
@@ -33,18 +32,13 @@ function mapDispatchToProps(dispatch, ownProps){
         },
         onInit: function({width, height}){
             dispatch(
-                // addTrianglePatternOfFireflies({width, height})
-                addBoxOfFireflies({width, height})
+                addTrianglePatternOfFireflies({width, height})
+                // addBoxOfFireflies({width, height})
             );
         },
         onFlashlightUpdate: function(flashlight){
             dispatch(
                 updateFlashlight(flashlight)
-            );
-        },
-        onFireflyBlink: function(firefly){
-            dispatch(
-                logBlink(firefly)
             );
         },
         onFireflyDrag: function(fireflyId, x, y){

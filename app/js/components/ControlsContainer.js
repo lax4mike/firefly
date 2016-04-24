@@ -13,7 +13,7 @@ import { getPhaseParameters }   from "../redux/modules/phase-selectors.js";
 
 function mapStateToProps(state) {
 
-    const phaseParameters = getPhaseParameters(state);
+    const phaseParameters = getPhaseParameters(state.phaseParameters);
 
     return {
         signalRadius       : state.signalRadius.radius,

@@ -3,15 +3,19 @@
 export const PHI_THRESHOLD = 1000;
 
 // how much to go up when there are no neighbor blinks detected
-export const PHI_TICK = 16;
+export const PHI_TICK = 64;
 
 // http://web.cs.sunyit.edu/~sengupta/swarm/firefly_alogorithms.pdf
 // increment a bunch (when a neighbor blink is detected)
-export function getNextPhi(phi, alpha, beta){
-    return Math.min(alpha * phi + beta, PHI_THRESHOLD);
+export function jumpNextPhi(phi, alpha, beta){
+    const next = Math.min(alpha * phi + beta, PHI_THRESHOLD);
+    // console.log("jump!", phi, next);
+    return next;
 }
 
 // increment the regular amount (without a neighbor detection)
 export function tickNextPhi(phi){
-    return (phi + PHI_TICK) % PHI_THRESHOLD;
+    const next = (phi + PHI_TICK) % PHI_THRESHOLD;
+    // console.log("TICK", phi, next);
+    return next;
 }

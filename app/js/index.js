@@ -36,7 +36,7 @@ const timeStream = stateStream
     .map(state => state.time)   // get time
     .skipDuplicates()           // don't continue if the time hasn't changed.
     // .log("time")
-    .flatMapLatest(time => Kefir.later(16, time)) // in some time...
+    .flatMapLatest(time => Kefir.later(PHI_TICK, time)) // in some time...
     .filterBy(isBlinkingStream) // if we're blinkin'
     .onValue((v) => {           // tick again
         store.dispatch(tick());

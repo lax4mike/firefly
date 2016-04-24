@@ -17,7 +17,6 @@ export default React.createClass({
         blinkStatus      : PropTypes.string.isRequired,
 
         fireflies: PropTypes.arrayOf(PropTypes.object).isRequired,
-        onFireflyBlink : PropTypes.func.isRequired,
         onFireflyDrag  : PropTypes.func.isRequired,
         onFireflyAdd   : PropTypes.func.isRequired,
         onFireflyDelete: PropTypes.func.isRequired,
@@ -180,7 +179,6 @@ export default React.createClass({
                             blinkStatus      = {blinkStatus}
                             onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
                             onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
-                            onBlink          = {this.props.onFireflyBlink.bind(null, firefly)}
                         />
                     );
                 })}

@@ -1,8 +1,8 @@
 import { createSelector } from "reselect";
 
 // phase selectors
-const dissipationFactorSelector = (state) => state.phaseParameters.dissipationFactor;
-const amplitudeIncrementSelector = (state) => state.phaseParameters.amplitudeIncrement;
+const dissipationFactorSelector = (phaseParameters) => phaseParameters.dissipationFactor;
+const amplitudeIncrementSelector = (phaseParameters) => phaseParameters.amplitudeIncrement;
 
 
 // http://web.cs.sunyit.edu/~sengupta/swarm/firefly_alogorithms.pdf
@@ -21,8 +21,5 @@ export const getPhaseParameters = createSelector(
             alpha,
             beta
         };
-
-
-
     }
 );

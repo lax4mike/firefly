@@ -1,3 +1,5 @@
+import { PHI_TICK } from "../../utils/phi.js";
+
 // action constant
 export const TICK = "TICK";
 
@@ -9,7 +11,7 @@ export function tick(){
     };
 }
 
-const TICK_INCREMENT = 16;
+const TICK_INCREMENT = PHI_TICK;
 
 
 // inital state

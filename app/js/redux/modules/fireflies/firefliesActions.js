@@ -1,4 +1,5 @@
 import { PHI_THRESHOLD } from "../../../utils/phi.js";
+import { initialState as signalRadiusInitialState } from "../signal-radius.js";
 
 // action constants
 export const FIREFLIES_SET = "FIREFLIES_SET";
@@ -16,6 +17,7 @@ let fireflyId = 0;
 function getRandomPhi(){
     return Math.round(Math.random() * PHI_THRESHOLD);
 }
+
 
 export function setFireflies(fireflies) {
     return {

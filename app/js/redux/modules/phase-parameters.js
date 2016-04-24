@@ -23,8 +23,8 @@ export function setAmplitudeIncrement(amplitudeIncrement){
 
 // initialState
 export const initialState = {
-    dissipationFactor: 1,
-    amplitudeIncrement: 1
+    dissipationFactor: 0.15,
+    amplitudeIncrement: 0.75
 };
 
 // reducer function
