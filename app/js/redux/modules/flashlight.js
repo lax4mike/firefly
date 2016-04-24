@@ -1,6 +1,6 @@
 
 // action constants
-const FLASHLIGHT_UPDATE = "FLASHLIGHT_UPDATE";
+export const FLASHLIGHT_UPDATE = "FLASHLIGHT_UPDATE";
 
 // action creators
 export function updateFlashlight(flashlight){
@@ -26,7 +26,7 @@ function reducer(state = initialState, action, canvas) {
 
         case FLASHLIGHT_UPDATE: {
 
-            let newState = Object.assign({}, state, action.flashlight);
+            const newState = Object.assign({}, state, action.flashlight);
 
             // if this is the first call with isResizing, center then flashlight
             if (state.isResizing === false && action.flashlight.isResizing === true){
@@ -34,7 +34,6 @@ function reducer(state = initialState, action, canvas) {
             }
 
             return newState;
-
         }
 
         default:

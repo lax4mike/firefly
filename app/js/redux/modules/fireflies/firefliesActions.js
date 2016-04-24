@@ -18,16 +18,32 @@ function getRandomPhi(){
     return Math.round(Math.random() * PHI_THRESHOLD);
 }
 
+function makeFirefly(props){
 
-export function setFireflies(fireflies) {
-    return {
-        type: FIREFLIES_SET,
-        fireflies: fireflies.map((f) => Object.assign(f, {
-            id: fireflyId++,
-            phi: getRandomPhi()
-        }))
+    const defaultFirefly = {
+        id: -1,
+        isInTheLight: false,
+        phi: 0,
+        x: 0,
+        y: 0,
+        neighbors: []
     };
+    
+    return Object.assign({}, defaultFirefly, props);
 }
+
+
+// NOT USED, in the future if i implement this, use makeFirefly()
+// export function setFireflies(fireflies) {
+//     console.log(fireflies);
+//     return {
+//         type: FIREFLIES_SET,
+//         fireflies: fireflies.map((f) => Object.assign(f, {
+//             id: fireflyId++,
+//             phi: getRandomPhi()
+//         }))
+//     };
+// }
 
 export function addFirefly({x, y}){
     const firefly = {
@@ -37,7 +53,7 @@ export function addFirefly({x, y}){
     };
     return {
         type: FIREFLY_ADD,
-        firefly
+        firefly: makeFirefly(firefly)
     };
 }
 
@@ -62,14 +78,14 @@ export function addBoxOfFireflies({width, height}){
 
     const fireflies = Array(4).fill().map((zero, i) => {
 
-        let isEven = i%2;
+        const isEven = i%2;
 
-        return {
+        return makeFirefly({
             id: fireflyId++,
             x: (width/2) + ((isEven) ? -50 : 50),
             y: (height/2) + ((i < 2) ? -50 : 50),
             phi: getRandomPhi()
-        };
+        });
     });
 
     return {
@@ -94,12 +110,12 @@ export function addTrianglePatternOfFireflies({width, height}){
     // break when y is off the canvas
     while (height - y > padding) {
 
-        fireflies.push({
+        fireflies.push(makeFirefly({
             id: fireflyId++,
             x: x,
             y: y,
             phi: getRandomPhi()
-        });
+        }));
 
         x += radius;
 

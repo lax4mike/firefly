@@ -26,7 +26,7 @@ export default function reducer(state = {}, action) {
     const canvas     = canvasReducer(state.canvas, action);
     const flashlight = flashlightReducer(state.flashlight, action, canvas);
     const fireflies  = firefliesReducer(state.fireflies, action,
-        {canvas, signalRadius, phaseParameters, hoveredFirefly});
+        {canvas, signalRadius, phaseParameters, hoveredFirefly, flashlight});
 
     return Object.assign({}, simpleReducerState, {
         hoveredFirefly,

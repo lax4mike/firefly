@@ -1,41 +1,9 @@
 import { createSelector } from "reselect";
-import { tickNextPhi } from "../../../utils/phi.js";
-import { mapObject, filterObject, asArray } from "../../../utils/object.js";
+import { asArray } from "../../../utils/object.js";
 
-
-// selectors
-const radiusSelector     = (state) => state.signalRadius.radius;
-const firefliesSelector  = (state) => state.fireflies;
-const flashlightSelector = (state) => state.flashlight;
-
-// derive the firefly neighbors (fireflies that are withing the signalRadius
-// of each firelfly)
-// export const getFireflies = createSelector(
-//     [firefliesSelector, radiusSelector, flashlightSelector],
-//
-//     (fireflies, radius, flashlight) => {
-//
-//
-//         return fireflies.map(ff => getFirefly(ff, state));
-//     }
-// );
 
 export const getFireflies = (state) => {
-    return asArray(mapObject(state.fireflies, ff => getFirefly(ff, state)));
-};
-
-
-const getFirefly = function(firefly, state){
-
-    // console.log("calulating firefly neighbors!");
-
-    // this is now being stored in the state so the reducers can use it (TICK action)
-    // let neighbors = getNeighbors(firefly, state.fireflies, state.signalRadius.radius);
-
-    // check to see if this firefly is being shinned on
-    let isInTheLight = getIsInTheLight(firefly, state.flashlight);
-
-    return Object.assign({}, firefly, { isInTheLight });
+    return asArray(state.fireflies);
 };
 
 
@@ -60,7 +28,7 @@ export function getNeighbors(firefly, fireflies, radius) {
         .sort((a, b) => b.distance - a.distance);
 }
 
-function getIsInTheLight(firefly, flashlight){
+export function getIsInTheLight(firefly, flashlight){
     // definitely not in the light if the flashlight isn't on...
     if (!flashlight.isShining) { return false; }
 
