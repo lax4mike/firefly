@@ -27,7 +27,8 @@ export default React.createClass({
         showSignalRadius : PropTypes.bool.isRequired,
 
         onDrag   : PropTypes.func.isRequired,
-        onDelete : PropTypes.func.isRequired
+        onDelete : PropTypes.func.isRequired,
+        onHoverChange : PropTypes.func.isRequired
     },
 
     contextTypes: {
@@ -42,11 +43,15 @@ export default React.createClass({
     },
 
     handleMouseEnter: function(){
+
+        this.props.onHoverChange();
+
         // show signal radius on hover
         this.setState({ isHovering: true });
     },
 
     handleMouseLeave: function(){
+        this.props.onHoverChange();
         // hide signal radius
         this.setState({ isHovering: false });
     },

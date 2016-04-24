@@ -20,6 +20,7 @@ export default React.createClass({
         onFireflyDrag  : PropTypes.func.isRequired,
         onFireflyAdd   : PropTypes.func.isRequired,
         onFireflyDelete: PropTypes.func.isRequired,
+        onFireflyHover : PropTypes.func.isRequired,
 
         flashlight : PropTypes.shape({
             isResizing: PropTypes.bool.isRequired,
@@ -37,7 +38,8 @@ export default React.createClass({
     getInitialState: function(){
         return {
             width: 0,
-            height: 0
+            height: 0,
+            hoveredFirefly: null
         };
     },
 
@@ -55,6 +57,13 @@ export default React.createClass({
 
     componentWillUnmount: function(){
         window.removeEventListener("resize", this.onResize);
+    },
+
+    componentDidUpdate: function(prevProps, prevState){
+        // if the hovered firefly has changed, alert the parent
+        if (this.state.hoveredFirefly !== prevState.hoveredFirefly){
+            this.props.onFireflyHover(this.state.hoveredFirefly);
+        }
     },
 
     onResize: function(){
@@ -119,6 +128,16 @@ export default React.createClass({
         window.removeEventListener("mouseup", this.handleWindowMouseUp, true);
     },
 
+    handleFireflyHoverChange: function(id){
+
+        if (id === this.state.hoveredFirefly){
+            this.setState({ hoveredFirefly: null });
+        }
+        else {
+            this.setState({ hoveredFirefly: id });
+        }
+    },
+
 
     render: function(){
 
@@ -177,6 +196,7 @@ export default React.createClass({
                             showSignalRadius = {this.props.showSignalRadius}
                             debug            = {this.props.debug}
                             blinkStatus      = {blinkStatus}
+                            onHoverChange    = {this.handleFireflyHoverChange.bind(null, firefly.id)}
                             onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
                             onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
                         />

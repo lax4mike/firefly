@@ -22,6 +22,8 @@ const initialState = {};
  *    x: number,
  *    y: number,
  *    phi: number,
+ *    justBlinked: boolean, whether this ff fired on this tick
+ *    jumps: number, number of times jumped in this phi cycle
  *    neighbors: [ids] << added by augmentNeighbors()
  * }
  */
@@ -45,7 +47,8 @@ const initialState = {};
  }
 
 // reducer function
-function reducer(state = initialState, action, canvas, signalRadius, phaseParameters) {
+function reducer(state = initialState, action,
+    {canvas, signalRadius, phaseParameters, hoveredFirefly}) {
 
     const radius = signalRadius.radius;
 
@@ -59,35 +62,48 @@ function reducer(state = initialState, action, canvas, signalRadius, phaseParame
             // increment phi for each firefly
             return mapObject(fireflies, (ff) => {
 
+                const justBlinkedNeighbors = ff.neighbors
+                    .filter(n => fireflies[n.id].justBlinked);
+                // add the data of the firefly, just for debugging
+                // .map(f => Object.assign({}, f, fireflies[f.id]) );
+
+                // whether or not this firefly should jump when it see's
+                // it's neighbor blink
+                const shouldJump = justBlinkedNeighbors.length > 0
+                                && ff.phi > 0
+                                // only jump once per cycle
+                                // TODO do we want this? 
+                                // && ff.jumps === 0;
+
                 // all the neighbors that blinked on this tick
-                const justBlinkedNeighbors = ff.neighbors.filter(n => {
-                    // TODO is this correct?
-                    // return fireflies[n.id].phi < PHI_TICK;
-
-                    return fireflies[n.id].justBlinked;
-                })
-                .map(f => Object.assign({}, f, fireflies[f.id]) );
-
                 // *NOTE* if two neightbors blinked on this tick, we're ignoring
                 // it, and only jumping once
-                const phi = (justBlinkedNeighbors.length > 0)
+                const phi = (shouldJump)
                     ? jumpNextPhi(ff.phi, alpha, beta)
                     : tickNextPhi(ff.phi);
 
                 // if this jump pushed phi over the threshold
                 const justBlinked = phi < ff.phi;
 
-                // if (ff.id === 8){
-                //     (justBlinkedNeighbors.length > 0)
-                //         ? console.log("DONG", justBlinkedNeighbors)
-                //         : null;//console.log("ding", ff.phi, phi);
-                //     if (justBlinked){
-                //         console.log("just blinked!");
-                //     }
-                // }
+                // if we just blinked, reset
+                // if we jumped, increment the jumps
+                const jumps = (justBlinked) ? 0
+                            : (shouldJump)  ? ff.jumps + 1
+                            : ff.jumps;
+
+                if (ff.id === hoveredFirefly){
+                    (shouldJump)
+                        ? console.log("DONG", hoveredFirefly, ff.phi, phi, jumps)
+                        : console.log("ding", hoveredFirefly, ff.phi, phi,
+                            "neigh", justBlinkedNeighbors.map(n=>n.id).join(", "));
+
+                    if (justBlinked){
+                        console.log("*blink!", hoveredFirefly);
+                    }
+                }
 
                 // update phis
-                return Object.assign({}, ff, { phi, justBlinked });
+                return Object.assign({}, ff, { phi, justBlinked, jumps });
             });
         }
 

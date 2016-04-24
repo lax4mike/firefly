@@ -10,12 +10,13 @@ export const PHI_TICK = 64;
 export function jumpNextPhi(phi, alpha, beta){
     const next = Math.min(alpha * phi + beta, PHI_THRESHOLD);
     // console.log("jump!", phi, next);
-    return next;
+
+    return (next === PHI_THRESHOLD) ? 0 : Math.floor(next);
 }
 
 // increment the regular amount (without a neighbor detection)
 export function tickNextPhi(phi){
-    const next = (phi + PHI_TICK) % PHI_THRESHOLD;
+    const next = (phi + PHI_TICK);
     // console.log("TICK", phi, next);
-    return next;
+    return (next > PHI_THRESHOLD) ? 0 : next;
 }

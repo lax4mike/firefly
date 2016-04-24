@@ -7,7 +7,6 @@ var gulp           = require("gulp"),
     debug          = require("gulp-debug"),
     sourcemaps     = require("gulp-sourcemaps"),
     browserify     = require("browserify"),
-    envify         = require("envify"),
     vinylSource    = require("vinyl-source-stream"),
     vinylBuffer    = require("vinyl-buffer");
 
@@ -76,9 +75,7 @@ function getCommonStream(externalPackages, filename, browserifyOptions){
 
         // set the node environment variable.
         // https://facebook.github.io/react/downloads.html#npm
-        b.transform(envify({
-            NODE_ENV: (config.env === "prod") ? "production" : "development"
-        }));
+        process.env.NODE_ENV = (config.env === "prod") ? "production" : "development";
 
         utils.logYellow("common npm packages", externalPackages);
 

@@ -4,10 +4,11 @@ import canvasReducer       from "./modules/canvas.js";
 import flashlightReducer   from "./modules/flashlight.js";
 import signalRadiusReducer from "./modules/signal-radius.js";
 import phaseReducer        from "./modules/phase-parameters.js";
+import hoveredFireflyReducer from "./modules/hoveredFirefly.js";
 
-import blinkStatus  from "./modules/blink-status.js";
-import debug        from "./modules/debug.js";
-import time         from "./modules/time.js";
+import blinkStatus    from "./modules/blink-status.js";
+import debug          from "./modules/debug.js";
+import time           from "./modules/time.js";
 
 export default function reducer(state = {}, action) {
 
@@ -21,12 +22,14 @@ export default function reducer(state = {}, action) {
     // and pass to the fireflies reduce
     const signalRadius = signalRadiusReducer(state.signalRadius, action);
     const phaseParameters = phaseReducer(state.phaseParameters, action);
+    const hoveredFirefly = hoveredFireflyReducer(state.hoveredFirefly, action);
     const canvas     = canvasReducer(state.canvas, action);
     const flashlight = flashlightReducer(state.flashlight, action, canvas);
     const fireflies  = firefliesReducer(state.fireflies, action,
-        canvas, signalRadius, phaseParameters);
+        {canvas, signalRadius, phaseParameters, hoveredFirefly});
 
     return Object.assign({}, simpleReducerState, {
+        hoveredFirefly,
         canvas,
         fireflies,
         flashlight,

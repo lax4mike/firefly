@@ -1,4 +1,5 @@
 import React, { PropTypes } from "react";
+import LineChart from "./LineChart.jsx";
 
 import blinks from "../blink-status.js";
 
@@ -221,7 +222,7 @@ export default React.createClass({
                     <label>
                         <div className="label">Dissipation Factor </div>
                         <div className="number">{this.props.dissipationFactor.toFixed(2)}</div>
-                        <input type="range" min={0.01} max={1} step={0.01}
+                        <input type="range" min={0.01} max={2} step={0.01}
                             value={this.props.dissipationFactor}
                             onChange={this.handleDissipationFactorChange} />
                     </label>
@@ -251,11 +252,11 @@ export default React.createClass({
                     </label>
                 </div>
 
-                <div className="control">
-                    <label>
-                        <div className="label">Jump from 500 </div>
-                        <div className="number">{(this.props.alpha * 500 + this.props.beta).toFixed(4)}</div>
-                    </label>
+                <div className="control" ref="chart-container">
+                    <LineChart
+                        alpha={this.props.alpha}
+                        beta={this.props.beta}
+                    />
                 </div>
 
 
