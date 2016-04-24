@@ -2,7 +2,7 @@
 // action constants
 const SET_BLINKSTATUS = "SET_BLINKSTATUS";
 
-import blinks from "../../blink-status.js";
+import blinks from "../../blinkStatus.js";
 
 // action creators
 export function setBlinkStatus(status){

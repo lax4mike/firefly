@@ -3,7 +3,7 @@ import {
     PHI_THRESHOLD, PHI_TICK,
     tickNextPhi, jumpNextPhi } from "../../../utils/phi.js";
 import { getNeighbors } from "./firefliesSelectors.js";
-import { getPhaseParameters } from "../phase-selectors.js";
+import { getPhaseParameters } from "../phaseSelectors.js";
 import { mapObject, filterObject } from "../../../utils/object.js";
 
 import {
@@ -72,7 +72,7 @@ function reducer(state = initialState, action,
                 const shouldJump = justBlinkedNeighbors.length > 0
                                 && ff.phi > 0
                                 // only jump once per cycle
-                                // TODO do we want this? 
+                                // TODO do we want this?
                                 // && ff.jumps === 0;
 
                 // all the neighbors that blinked on this tick

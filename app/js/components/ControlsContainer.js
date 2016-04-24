@@ -3,13 +3,13 @@ import { connect } from "react-redux";
 import Controls from "./Controls.jsx";
 
 import { updateRadius,
-         toggleVisbility }      from "../redux/modules/signal-radius.js";
-import { setBlinkStatus }      from "../redux/modules/blink-status.js";
+         toggleVisbility }      from "../redux/modules/signalRadius.js";
+import { setBlinkStatus }       from "../redux/modules/blinkStatus.js";
 import { updateFlashlight }     from "../redux/modules/flashlight.js";
 import { toggleDebug }          from "../redux/modules/debug.js";
 import { setAmplitudeIncrement,
-         setDissipationFator }  from "../redux/modules/phase-parameters.js";
-import { getPhaseParameters }   from "../redux/modules/phase-selectors.js";
+         setDissipationFator }  from "../redux/modules/phaseParameters.js";
+import { getPhaseParameters }   from "../redux/modules/phaseSelectors.js";
 
 function mapStateToProps(state) {
 

@@ -2,11 +2,11 @@
 import firefliesReducer    from "./modules/fireflies/firefliesReducer.js";
 import canvasReducer       from "./modules/canvas.js";
 import flashlightReducer   from "./modules/flashlight.js";
-import signalRadiusReducer from "./modules/signal-radius.js";
-import phaseReducer        from "./modules/phase-parameters.js";
+import signalRadiusReducer from "./modules/signalRadius.js";
+import phaseReducer        from "./modules/phaseParameters.js";
 import hoveredFireflyReducer from "./modules/hoveredFirefly.js";
 
-import blinkStatus    from "./modules/blink-status.js";
+import blinkStatus    from "./modules/blinkStatus.js";
 import debug          from "./modules/debug.js";
 import time           from "./modules/time.js";
 

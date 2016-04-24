@@ -1,5 +1,5 @@
 import { PHI_THRESHOLD } from "../../../utils/phi.js";
-import { initialState as signalRadiusInitialState } from "../signal-radius.js";
+import { initialState as signalRadiusInitialState } from "../signalRadius.js";
 
 // action constants
 export const FIREFLIES_SET = "FIREFLIES_SET";

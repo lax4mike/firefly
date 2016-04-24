@@ -1,7 +1,7 @@
 import React, { PropTypes } from "react";
 import LineChart from "./LineChart.jsx";
 
-import blinks from "../blink-status.js";
+import blinks from "../blinkStatus.js";
 
 export default React.createClass({
 
