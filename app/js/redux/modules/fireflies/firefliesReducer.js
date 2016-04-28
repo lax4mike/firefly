@@ -2,9 +2,9 @@ import { TICK } from "../time.js";
 import {
     PHI_THRESHOLD, PHI_TICK,
     tickNextPhi, jumpNextPhi } from "../../../utils/phi.js";
-import { getNeighbors, getIsInTheLight } from "./firefliesSelectors.js";
+import { getNeighborsById, getIsInTheLight } from "./firefliesSelectors.js";
 import { getPhaseParameters } from "../phaseSelectors.js";
-import { mapObject, filterObject } from "../../../utils/object.js";
+import { mapObject, filterObject, indexBy, withoutKeys, withKeys } from "../../../utils/object.js";
 
 import {
     FIREFLIES_SET,
@@ -13,75 +13,47 @@ import {
     FIREFLY_DELETE
 } from "./firefliesActions.js";
 
-import { FLASHLIGHT_UPDATE } from "../flashlight.js";
-
 // inital state, fireflies indexed by id
-const initialState = {};
+const initialState = {
+    firefliesById: {},
+    positionsById: {}
+};
 
 /**
- * a firefly = {
+ * state.firefliesById[ffid] = {
+ *    id: number,
+ *    phi: number,
+ *    justBlinked: boolean, whether this ff fired on this tick
+ * }
+ * state.positionsById[ffid] = {
  *    id: number,
  *    x: number,
  *    y: number,
- *    phi: number,
- *    justBlinked: boolean, whether this ff fired on this tick
- *    neighbors: [ids] << added by augmentNeighbors()
  * }
  */
 
 
-
-function augmentNeighbors(fireflies, radius){
-
-    // if we're not provided a radius, just return the fireflies
-    if (typeof(radius) === "undefined"){
-        return fireflies;
-    }
-
-    const newFireflies = mapObject(fireflies, f => Object.assign({}, f, {
-        neighbors: getNeighbors(f, fireflies, radius)
-    }));
-
-    // console.log("calc neighbors", radius, newFireflies)
-
-    return newFireflies;
-}
-
-function augmentIsInTheLight(fireflies, flashlight){
-
-    // if we're not provided a flashlight, just return the fireflies
-    if (typeof(flashlight) === "undefined"){
-        return fireflies;
-    }
-
-    const newFireflies = mapObject(fireflies, f => Object.assign({}, f, {
-        isInTheLight: getIsInTheLight(f, flashlight)
-    }));
-
-    // console.log("calc neighbors", radius, newFireflies)
-
-    return newFireflies;
-}
-
 // reducer function
 function reducer(state = initialState, action,
-    {canvas, signalRadius, phaseParameters, hoveredFirefly, flashlight}) {
-
-    const radius = signalRadius.radius;
+    {canvas, time, phaseParameters, signalRadius, hoveredFirefly, flashlight}) {
 
     switch(action.type) {
 
         case TICK: {
-            const { alpha, beta } = getPhaseParameters(phaseParameters);
 
             const fireflies = state;
+            const firefliesById = fireflies.firefliesById;
+            const { alpha, beta } = getPhaseParameters(phaseParameters);
+
+            const neighborsById = getNeighborsById(fireflies.positionsById, signalRadius.radius);
+
 
             // increment phi for each firefly
-            return mapObject(fireflies, (ff) => {
+            const newFirefliesById = mapObject(firefliesById, (ff) => {
 
                 // all the neighbors that blinked on this tick
-                const justBlinkedNeighbors = ff.neighbors
-                    .filter(n => fireflies[n.id].justBlinked);
+                const justBlinkedNeighbors = neighborsById[ff.id]
+                    .filter(n => firefliesById[n.id].justBlinked);
                     // add the data of the firefly, just for debugging
                     // .map(f => Object.assign({}, f, fireflies[f.id]) );
 
@@ -102,64 +74,101 @@ function reducer(state = initialState, action,
                 // fireflies can see next tick
                 const justBlinked = (!ff.isInTheLight) && (phi === 0);
 
+                // update the lastBlink if we just blinked
+                const lastBlink = Object.assign({}, ff.lastBlink,
+                    (justBlinked) ? {
+                        time: time,
+                        duration: time - ff.lastBlink.time
+                    } : {}
+                );
+
                 // debug info of hovered firefly
                 if (ff.id === hoveredFirefly){
                     (shouldJump)
-                        ? console.log("DONG", hoveredFirefly, ff.phi, phi)
-                        : console.log("ding", hoveredFirefly, ff.phi, phi,
-                            "neighbors", justBlinkedNeighbors.map(n=>n.id).join(", "));
+                        ? console.log(
+                            "DONG", hoveredFirefly, Math.round(ff.phi), Math.round(phi),
+                            "neighbors",
+                            justBlinkedNeighbors.map(n=>n.id).join(", ")
+                        )
+                        : console.log(
+                            "ding", hoveredFirefly, Math.round(ff.phi), Math.round(phi)
+                        );
 
                     if (justBlinked){
-                        console.log("*blink!", hoveredFirefly);
+                        console.log("**********blink**********", hoveredFirefly);
                     }
                 }
 
                 // update this firefly
-                return Object.assign({}, ff, { phi, justBlinked });
+                return Object.assign({}, ff, { phi, justBlinked, lastBlink });
+            });
+
+            return Object.assign({}, state, {
+                firefliesById: newFirefliesById
             });
         }
 
-        case FLASHLIGHT_UPDATE: {
-            return augmentIsInTheLight(state, flashlight);
-        }
-
         case FIREFLIES_SET: {
-            return augmentNeighbors(action.fireflies, radius);
+
+            const newFireflies = action.fireflies;
+
+            // split out the x and y
+            const withoutPosition = newFireflies.map(ff => withoutKeys(ff, ["x", "y"]));
+            const firefliesById = indexBy(withoutPosition, "id");
+
+            const xAndY = newFireflies.map(ff => withKeys(ff, ["id", "x", "y"]));
+            const positionsById = indexBy(xAndY, "id");
+
+            const newState = {
+                firefliesById,
+                positionsById
+            };
+
+            return newState;
         }
 
         case FIREFLY_ADD: {
 
             const { firefly } = action;
 
-            // add this firefly to the map
+            // add this firefly to the maps
             const newState = Object.assign({}, state, {
-                [firefly.id]: firefly
+                firefliesById: Object.assign({}, state.firefliesById, {
+                    [firefly.id]: withoutKeys(firefly, ["x", "y"])
+                }),
+                positionsById: Object.assign({}, state.positionsById, {
+                    [firefly.id]: withKeys(firefly, ["id", "x", "y"])
+                })
             });
 
-            return augmentNeighbors(newState, radius);
+            return Object.assign({}, state, newState);
         }
 
         case FIREFLY_DELETE: {
 
-            const newState = filterObject(state, ff => ff.id !== action.id);
+            const firefliesById = filterObject(state.firefliesById, ff => ff.id !== action.id);
+            const positionsById = filterObject(state.positionsById, ff => ff.id !== action.id);
 
-            return augmentNeighbors(newState, radius);
+            return {
+                firefliesById,
+                positionsById
+            };
         }
 
         case FIREFLY_SET_POSITION: {
             const { fireflyId, x, y } = action;
 
-            const firefly = state[fireflyId];
+            const firefly = state.positionsById[fireflyId];
 
             const newFirefly = Object.assign({}, firefly, {
                 x: x,
                 y: y
             });
 
-            const newState = Object.assign({}, state);
-            newState[fireflyId] = newFirefly;
+            const positionsById = Object.assign({}, state.positionsById);
+            positionsById[fireflyId] = newFirefly;
 
-            return augmentNeighbors(newState, radius);
+            return Object.assign({}, state, { positionsById } );
         }
 
         default:

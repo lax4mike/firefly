@@ -37,12 +37,17 @@ export default React.createClass({
 
         // only update the plot if alpha has changed
         if (this.props.alpha !== nextProps.alpha
-         || this.props.beta !== nextProps.beta
+         || this.props.beta  !== nextProps.beta
         ){
             this.setState({
                 plot: this.getExpensiveD3Calculations(this.state.width, nextProps)
             });
         }
+    },
+
+    shouldComponentUpdate: function(nextProps, nextState){
+        return (this.props.alpha !== nextProps.alpha
+            || this.props.beta !== nextProps.beta);
     },
 
     handleResize: function(){

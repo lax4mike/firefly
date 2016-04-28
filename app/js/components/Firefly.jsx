@@ -13,11 +13,15 @@ export default React.createClass({
         canvas       : PropTypes.object.isRequired, // ref to <svg> element
 
         firefly      : PropTypes.shape({
-            id        : PropTypes.number.isRequired,
+            id        : PropTypes.string.isRequired,
             x         : PropTypes.number.isRequired,
             y         : PropTypes.number.isRequired,
             phi       : PropTypes.number.isRequired,
-            isInTheLight : PropTypes.bool.isRequired
+            isInTheLight : PropTypes.bool.isRequired,
+            lastBlink: PropTypes.shape({
+                time    : PropTypes.number.isRequired,
+                duration: PropTypes.number.isRequired
+            }).isRequired
         }),
 
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
@@ -303,7 +307,7 @@ export default React.createClass({
                             x = {firefly.x - 8}
                             y = {firefly.y + 30}
                         >
-                            {firefly.id + ":" + Math.round(firefly.phi)}
+                            {firefly.id + ":" + Math.round(firefly.lastBlink.duration)}
                         </text>
                     )
                     : null

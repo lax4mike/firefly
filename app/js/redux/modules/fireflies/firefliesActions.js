@@ -22,13 +22,21 @@ function makeFirefly(props){
 
     const defaultFirefly = {
         id: -1,
-        isInTheLight: false,
         phi: 0,
         x: 0,
         y: 0,
-        neighbors: []
+        justBlinked: false,
+        lastBlink: {
+            time: 0,
+            duration: 0
+        }
     };
-    
+
+    // id's should be strings
+    if (typeof(props.id) !== "undefined"){
+        props.id = String(props.id);
+    }
+
     return Object.assign({}, defaultFirefly, props);
 }
 
