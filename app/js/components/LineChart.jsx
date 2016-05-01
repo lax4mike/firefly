@@ -1,4 +1,5 @@
 import React, { PropTypes } from "react";
+import shallowCompare from "react-addons-shallow-compare";
 import d3 from "d3";
 
 import { jumpNextPhi, tickNextPhi, PHI_THRESHOLD } from "../utils/phi.js";
@@ -46,8 +47,7 @@ export default React.createClass({
     },
 
     shouldComponentUpdate: function(nextProps, nextState){
-        return (this.props.alpha !== nextProps.alpha
-            || this.props.beta !== nextProps.beta);
+        return shallowCompare(this, nextProps, nextState);
     },
 
     handleResize: function(){
