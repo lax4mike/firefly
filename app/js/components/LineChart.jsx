@@ -4,6 +4,8 @@ import d3 from "d3";
 
 import { jumpNextPhi, tickNextPhi, PHI_THRESHOLD } from "../utils/phi.js";
 
+import Axis from "./Axis.jsx";
+
 export default React.createClass({
 
     displayName: "LineChart",
@@ -62,15 +64,16 @@ export default React.createClass({
 
     getExpensiveD3Calculations: function(svgWidth, {alpha, beta}){
 
-        const svgHeight = (svgWidth*0.6);
+        const svgHeight = (svgWidth*1);
 
-        const margin = {top: 10, right: 10, bottom: 10, left: 10};
+        const margin = {top: 10, right: 10, bottom: 40, left: 30};
         const plotWidth  = svgWidth - margin.left - margin.right;
         const plotHeight = svgHeight - margin.top - margin.bottom;
 
         // generate the data for the jump and tick
         let jumpData = [];
         let tickData = [];
+        let baseData = [];
         for(let i = 0; i <= PHI_THRESHOLD; i += 10){
             jumpData.push({
                 time: i,
@@ -78,20 +81,42 @@ export default React.createClass({
             });
             tickData.push({
                 time: i,
-                phi: i
+                phi: tickNextPhi(i)
             });
+            baseData.push({
+                time: i,
+                phi: i
+            })
         }
 
-        const yMaxes = [jumpData, tickData]
-            .map(data => d3.max(data, d => d.phi));
+        // was using this for yScale domain max, now using PHI_THRESHOLD
+        // const yMaxes = [jumpData, tickData]
+        //     .map(data => d3.max(data, d => d.phi));
 
         const xScale = d3.scale.linear()
             .domain([0, PHI_THRESHOLD])
             .range([0, plotWidth]);
 
+        const xAxis = d3.svg.axis()
+            .orient("bottom")
+            .scale(xScale)
+            .ticks(2)
+            .innerTickSize(0)
+            .outerTickSize(4)
+            .tickFormat((d) => d/1000);
+
         const yScale = d3.scale.linear()
-            .domain([0, d3.max(yMaxes)])
+            .domain([0, PHI_THRESHOLD])
             .range([plotHeight, 0]);
+
+
+        const yAxis = d3.svg.axis()
+            .orient("left")
+            .scale(yScale)
+            .ticks(2)
+            .innerTickSize(0)
+            .outerTickSize(4)
+            .tickFormat((d) => d/1000);
 
         var line = d3.svg.line()
             .x(d => xScale(d.time))
@@ -99,7 +124,8 @@ export default React.createClass({
 
         return {
             margin, svgWidth, svgHeight, plotWidth, plotHeight,
-            xScale, yScale, line, jumpData, tickData
+            xScale, xAxis, yScale, yAxis, line,
+            jumpData, tickData, baseData
         };
 
     },
@@ -107,7 +133,8 @@ export default React.createClass({
     render: function(){
 
         const { margin, svgWidth, svgHeight, plotWidth, plotHeight,
-            xScale, yScale, line, jumpData, tickData } = this.state.plot;
+            xScale, xAxis, yScale, yAxis, line,
+            jumpData, tickData, baseData } = this.state.plot;
 
         return (
             <div ref="chart-container">
@@ -119,19 +146,47 @@ export default React.createClass({
                         transform={`translate(${margin.left}, ${margin.top})`}
                         width={plotWidth} height={plotHeight}
                         >
+                            <Axis
+                                axis={xAxis}
+                                offset={plotHeight}
+                                tickTextStyles={{
+                                    fontSize: 10
+                                }}
+                            />
+
+                            {/* threshold line*/}
+
+                            <line x1={0} y1={0} x2={plotWidth} y2={0}
+                                stroke="#999" strokeDasharray="2, 4" />
+
+                            <Axis
+                                axis={yAxis}
+                                tickTextStyles={{
+                                    fontSize: 10
+                                }}
+                            />
+
+
+                            <path d={line(baseData)} style={{
+                                fill: "none",
+                                stroke: "#666",
+                                strokeWidth: 1,
+                                strokeLinecap: "round"
+                            }} />
+
+                            <path d={line(tickData)} style={{
+                                fill: "none",
+                                stroke: "#00a",
+                                strokeWidth: 1,
+                                strokeLinecap: "round"
+                            }} />
+
                             <path d={line(jumpData)} style={{
                                 fill: "none",
                                 stroke: "#a00",
                                 strokeWidth: 1,
                                 strokeLinecap: "round"
-                            }}/>
-
-                            <path d={line(tickData)} style={{
-                                fill: "none",
-                                stroke: "#666",
-                                strokeWidth: 1,
-                                strokeLinecap: "round"
-                            }}/>
+                            }} />
 
                         </g>
                     </svg>
