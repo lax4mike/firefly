@@ -68,6 +68,23 @@ gulp.task("prod", function(){
 
 });
 
+/**
+ * prod watch task
+ * react is a lot faster with production build
+ */
+gulp.task("prod-watch", function(){
+
+    // set the prod config (cache in utils.js)
+    utils.setConfig({
+        env   : "prod",
+        watch : true
+    });
+
+    // build with this config
+    utils.build();
+
+});
+
 
 
 

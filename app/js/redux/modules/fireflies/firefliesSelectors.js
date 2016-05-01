@@ -1,22 +1,41 @@
 import { createSelector } from "reselect";
+import d3 from "d3-quadtree";
 import { asArray, mapObject, filterObject } from "../../../utils/object.js";
 
-
+/**
+ * get the fireflies as an array and include the neightbors and isInTheLight
+ */
 export const getFireflies = (state) => {
 
     const { firefliesById, positionsById } = state.fireflies;
-    const neighborsById    = getNeighborsById(positionsById, state.signalRadius.radius);
-    const isInTheLightById = getIsInTheLightById(positionsById, state.flashlight);
+    const neighborsById   = getNeighborsById(positionsById, state.signalRadius.radius);
+    const isInTheLightIds = getIsInTheLightIds(positionsById, state.flashlight);
+
 
     // merge the firefliesById and positionsById
     const fireflies = Object.keys(firefliesById).map(id =>
         Object.assign({}, firefliesById[id], positionsById[id], {
             neightbors: neighborsById[id],
-            isInTheLight: isInTheLightById[id]
-        }));
+            isInTheLight: isInTheLightIds.includes(id)
+        })
+    );
 
-    return asArray(fireflies);
+    return fireflies;
 };
+
+// create a quadtree with the current firefly positions
+export const makeQuadtree = createSelector(
+    (positionsById) => positionsById,
+    (positionsById) => {
+
+        const quadtree = d3.quadtree()
+            .x(d => d.x)
+            .y(d => d.y)
+            .addAll(asArray(positionsById));
+
+        return quadtree;
+    }
+);
 
 /**
  * getNeighborsById[ffid] = [ids]
@@ -25,6 +44,8 @@ export const getNeighborsById = createSelector(
     (positionsById, radius) => positionsById,
     (positionsById, radius) => radius,
     (positionsById, radius) => {
+
+        // TODO? use the quadtree
 
         // we only need the id, calculate the distance from firefly
         return mapObject(positionsById, firefly => {
@@ -43,13 +64,41 @@ export const getNeighborsById = createSelector(
     }
 );
 
-export const getIsInTheLightById = createSelector(
+export const getIsInTheLightIds = createSelector(
     (positionsById, flashlight) => positionsById,
     (positionsById, flashlight) => flashlight,
     (positionsById, flashlight) => {
 
-        // we only need the id, calculate the distance from firefly
-        return mapObject(positionsById, (ff) => getIsInTheLight(ff, flashlight));
+        const quadtree = makeQuadtree(positionsById);
+
+        const checkThese = [];
+        quadtree.visit((node, x0, y0, x1, y1) => {
+
+            // if this is a leaf, add it.
+            if (!node.length){ checkThese.push(node); }
+
+            // find the point in the rectangle that is closet
+            // to the flashlight center
+            const x = flashlight.x < x0 ? x0
+                    : flashlight.x > x1 ? x1
+                    : flashlight.x;
+            const y = flashlight.y < y0 ? y0
+                    : flashlight.y > y1 ? y1
+                    : flashlight.y;
+
+            // the distance between the flashlight center and the
+            // closest point on the rectangle
+            const distance = getDistance(flashlight, {x, y});
+
+            // return true is we should NOT continue down this quadtree node
+            return distance > flashlight.radius;
+        });
+
+        // out of these, check to see which are actually in the light
+        // return array of id strings
+        return checkThese
+            .filter(node => getIsInTheLight(node.data, flashlight))
+            .map(node => node.data.id);
     }
 );
 
@@ -58,7 +107,7 @@ export function getIsInTheLight(firefly, flashlight){
     // definitely not in the light if the flashlight isn't on...
     if (!flashlight.isShining) { return false; }
 
-    let distance = getDistance(firefly, flashlight);
+    const distance = getDistance(firefly, flashlight);
     return distance < flashlight.radius;
 }
 

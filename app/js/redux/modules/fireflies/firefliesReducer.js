@@ -2,7 +2,7 @@ import { TICK } from "../time.js";
 import {
     PHI_THRESHOLD, PHI_TICK,
     tickNextPhi, jumpNextPhi } from "../../../utils/phi.js";
-import { getNeighborsById, getIsInTheLight } from "./firefliesSelectors.js";
+import { getNeighborsById, getIsInTheLightIds } from "./firefliesSelectors.js";
 import { getPhaseParameters } from "../phaseSelectors.js";
 import { mapObject, filterObject, indexBy, withoutKeys, withKeys } from "../../../utils/object.js";
 
@@ -46,7 +46,7 @@ function reducer(state = initialState, action,
             const { alpha, beta } = getPhaseParameters(phaseParameters);
 
             const neighborsById = getNeighborsById(fireflies.positionsById, signalRadius.radius);
-
+            const isInTheLightIds = getIsInTheLightIds(fireflies.positionsById, flashlight);
 
             // increment phi for each firefly
             const newFirefliesById = mapObject(firefliesById, (ff) => {
@@ -57,6 +57,9 @@ function reducer(state = initialState, action,
                     // add the data of the firefly, just for debugging
                     // .map(f => Object.assign({}, f, fireflies[f.id]) );
 
+                // whether or not this firefly is in the light
+                const isInTheLight = isInTheLightIds.includes(ff.id);
+
                 // whether or not this firefly should jump when it see's
                 // it's neighbor blink
                 // *NOTE* if two neightbors blinked on this tick, we're ignoring
@@ -66,13 +69,13 @@ function reducer(state = initialState, action,
 
                 // calculate the next phi.
                 // if it's in the light, reset to 0; or jump; or just tick
-                const phi = (ff.isInTheLight) ? 0
+                const phi = (isInTheLight) ? 0
                           : (shouldJump)      ? jumpNextPhi(ff.phi, alpha, beta)
                           : tickNextPhi(ff.phi);
 
                 // if this tick pushed phi over the threshold, mark it so other
                 // fireflies can see next tick
-                const justBlinked = (!ff.isInTheLight) && (phi === 0);
+                const justBlinked = (!isInTheLight) && (phi === 0);
 
                 // update the lastBlink if we just blinked
                 const lastBlink = Object.assign({}, ff.lastBlink,
