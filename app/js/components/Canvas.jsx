@@ -4,14 +4,14 @@ import colors from "../colors.js";
 import Firefly from "./Firefly.jsx";
 
 
-const RADIUS = 15;
+const FIREFLY_RADIUS = 20;
 
 export default React.createClass({
 
     displayName: "Canvas",
 
     propTypes: {
-        debug            : PropTypes.bool.isRequired,
+        debug            : PropTypes.object.isRequired,
         showSignalRadius : PropTypes.bool.isRequired,
         signalRadius     : PropTypes.number.isRequired,
         blinkStatus      : PropTypes.string.isRequired,
@@ -20,7 +20,7 @@ export default React.createClass({
         onFireflyDrag  : PropTypes.func.isRequired,
         onFireflyAdd   : PropTypes.func.isRequired,
         onFireflyDelete: PropTypes.func.isRequired,
-        onFireflyHover : PropTypes.func.isRequired,
+        onFireflyClick : PropTypes.func.isRequired,
 
         flashlight : PropTypes.shape({
             isResizing: PropTypes.bool.isRequired,
@@ -39,7 +39,7 @@ export default React.createClass({
         return {
             width: 0,
             height: 0,
-            hoveredFirefly: null
+            debugFirefly: null
         };
     },
 
@@ -60,9 +60,9 @@ export default React.createClass({
     },
 
     componentDidUpdate: function(prevProps, prevState){
-        // if the hovered firefly has changed, alert the parent
-        if (this.state.hoveredFirefly !== prevState.hoveredFirefly){
-            this.props.onFireflyHover(this.state.hoveredFirefly);
+        // if the debug firefly has changed, alert the parent
+        if (this.state.debugFirefly !== prevState.debugFirefly){
+            this.props.onFireflyClick(this.state.debugFirefly);
         }
     },
 
@@ -128,27 +128,25 @@ export default React.createClass({
         window.removeEventListener("mouseup", this.handleWindowMouseUp, true);
     },
 
-    handleFireflyHoverChange: function(id){
+    handleFireflyClick: function(id){
 
-        if (id === this.state.hoveredFirefly){
-            this.setState({ hoveredFirefly: null });
+        if (id === this.state.debugFirefly){
+            this.setState({ debugFirefly: null });
         }
         else {
-            this.setState({ hoveredFirefly: id });
+            this.setState({ debugFirefly: id });
         }
     },
 
 
     render: function(){
 
-        let canvasStyles = {
-            "position"  : "relative",
-            // "width"     : this.state.width,
-            // "height"    : this.state.height,
-            "margin"   : RADIUS, // a firefly at 0,0 will not go off the edge
-            "boxSizing" : "border-box",
-            "border"    : "1px solid #aaa"
+        const canvasStyles = {
+            // "margin"   : FIREFLY_RADIUS, // a firefly at 0,0 will not go off the edge
+            // "boxSizing" : "border-box"
         };
+
+        const flashlightColor = "#fcf4bb";
 
         return (
             <svg className="canvas" style={canvasStyles} ref="canvas"
@@ -156,13 +154,20 @@ export default React.createClass({
                 >
 
                 <defs>
-                { // define color gradients for fireflies (see colors variable)
-                colors.map((color) => (
-                    <radialGradient id={color.id} key={color.id}>
-                        <stop offset="0%"   stopColor={color.hex} stopOpacity="1"/>
-                        <stop offset="100%" stopColor={color.hex} stopOpacity="0" />
+                    { // define color gradients for fireflies (see colors variable)
+                    colors.map((color) => (
+                        <radialGradient id={color.id} key={color.id}>
+                            <stop offset="0%"   stopColor={color.hex} stopOpacity="1"/>
+                            <stop offset="40%"  stopColor={color.hex} stopOpacity="0.1" />
+                            <stop offset="100%" stopColor={color.hex} stopOpacity="0" />
+                        </radialGradient>
+                    ))}
+
+                    <radialGradient id="flashlight-fill" key="flashlight-gradient">
+                        <stop offset="0%"   stopColor={flashlightColor} stopOpacity="0.8"/>
+                        <stop offset="85%"  stopColor={flashlightColor} stopOpacity="0.3" />
+                        <stop offset="100%" stopColor={flashlightColor} stopOpacity="0" />
                     </radialGradient>
-                ))}
                 </defs>
 
                 { // show the flashlight if it's being shined or resized
@@ -171,8 +176,8 @@ export default React.createClass({
                     <circle
                         cx={this.props.flashlight.x}
                         cy={this.props.flashlight.y}
-                        r={this.props.flashlight.radius}
-                        fill="rgba(241, 196, 15, 0.1)"
+                        r={this.props.flashlight.radius + 15}
+                        fill="url('#flashlight-fill')"
                     />
                 )
                 : null}
@@ -184,13 +189,13 @@ export default React.createClass({
                         <Firefly
                             key              = {firefly.id}
                             firefly          = {firefly}
-                            radius           = {RADIUS}
+                            radius           = {FIREFLY_RADIUS}
                             canvas           = {this.refs.canvas}
                             signalRadius     = {this.props.signalRadius}
                             showSignalRadius = {this.props.showSignalRadius}
                             debug            = {this.props.debug}
                             blinkStatus      = {this.props.blinkStatus}
-                            onHoverChange    = {this.handleFireflyHoverChange.bind(null, firefly.id)}
+                            onClick          = {this.handleFireflyClick.bind(null, firefly.id)}
                             onDelete         = {this.props.onFireflyDelete.bind(null, firefly.id)}
                             onDrag           = {this.props.onFireflyDrag.bind(null, firefly.id)}
                         />

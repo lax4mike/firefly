@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { getFireflies }        from "../redux/modules/fireflies/firefliesSelectors.js";
 import { setCanvasDimensions } from "../redux/modules/canvas.js";
 import { updateFlashlight  }   from "../redux/modules/flashlight.js";
-import { setHoveredFirefly  }  from "../redux/modules/hoveredFirefly.js";
+import { setDebugFirefly  }    from "../redux/modules/debug.js";
 import {
     addFirefly,
     deleteFirefly,
@@ -54,9 +54,9 @@ function mapDispatchToProps(dispatch, ownProps){
                 addFirefly(firefly)
             );
         },
-        onFireflyHover: function(fireflyId){
+        onFireflyClick: function(fireflyId){
             dispatch(
-                setHoveredFirefly(fireflyId)
+                setDebugFirefly(fireflyId)
             );
         },
         onFireflyDelete: function(id){

@@ -1,6 +1,7 @@
 body {
     font-family: "Open Sans", sans-serif;
-
+    color: #ddd;
+    background-color: #333;
 }
 
 .fireflies-app {
@@ -13,13 +14,17 @@ body {
     flex-direction: row;
 }
 
-.controls {
+.fireflies-app__side {
     flex-basis: auto;
     flex-grow: 0;
     flex-shrink: 0;
+    color: black;
+    background-color: white;
 }
 
-.canvas {
+.fireflies-app__main {
+    position: relative;
+    display: flex;
     flex-basis: auto;
     flex-grow: 1;
     flex-shrink: 1;

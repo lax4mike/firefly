@@ -5,6 +5,7 @@ var gulp           = require("gulp"),
 
 var src = [
     config.root + "/data/**/*.json",
+    config.root + "/img/**/*.svg",
     config.root + "/index.html"
 ];
 

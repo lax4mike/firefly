@@ -26,13 +26,16 @@ export default React.createClass({
 
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
 
-        debug            : PropTypes.bool.isRequired,
+        debug: PropTypes.shape({
+            enabled       : PropTypes.bool.isRequired,
+            debugFirefly  : PropTypes.string
+        }),
         signalRadius     : PropTypes.number.isRequired,
         showSignalRadius : PropTypes.bool.isRequired,
 
         onDrag   : PropTypes.func.isRequired,
         onDelete : PropTypes.func.isRequired,
-        onHoverChange : PropTypes.func.isRequired
+        onClick  : PropTypes.func.isRequired
     },
 
     contextTypes: {
@@ -41,21 +44,17 @@ export default React.createClass({
 
     getInitialState: function(){
         return {
-            fill: "url('#yellow')",
             isHovering: false // for this individual firefly
         };
     },
 
     handleMouseEnter: function(){
 
-        this.props.onHoverChange();
-
         // show signal radius on hover
         this.setState({ isHovering: true });
     },
 
     handleMouseLeave: function(){
-        this.props.onHoverChange();
         // hide signal radius
         this.setState({ isHovering: false });
     },
@@ -90,6 +89,10 @@ export default React.createClass({
         // offset in relation to the canvas
         let offset = getOffset(this.props.canvas, e);
         this.props.onDrag(offset.x, offset.y);
+    },
+
+    handleMouseClick: function(){
+        this.props.onClick();
     },
 
     // startBlink: function(){
@@ -264,8 +267,10 @@ export default React.createClass({
             return Math.max(fadeOut, OFF_OPACITY);
         };
 
-        const { firefly, signalRadius, radius, blinkStatus } = this.props;
+        const { firefly, signalRadius, radius, blinkStatus, debug } = this.props;
 
+        const fill = (debug.enabled && debug.debugFirefly === firefly.id)
+                        ? "url('#green')" : "url('#yellow')";
         const fillOpacity = getBlinkOpacity(firefly.phi);
 
         return (
@@ -291,17 +296,28 @@ export default React.createClass({
                     onMouseEnter = {this.handleMouseEnter}
                     onMouseLeave = {this.handleMouseLeave}
                     onMouseDown  = {this.handleMouseDown}
+                    onClick      = {this.handleMouseClick}
                     cx    = {firefly.x}
                     cy    = {firefly.y}
                     r     = {radius}
-                    fill  = {this.state.fill}
+                    fill  = {fill}
                     fillOpacity = {fillOpacity}
                 />
+
+                {/*  show the firefly svg when it's in the light */}
+                <image x={firefly.x - 7} y={firefly.y - 30}
+                    width="14" height="30" xlinkHref="/img/firefly.svg"
+                    style={{
+                        "opacity"   : (firefly.isInTheLight) ? "0.3" : "0",
+                        "transition": "all 250ms",
+                        "pointer-events": "none"
+                    }}/>
+
 
 
                 { // only show the text in debug mode,
                   // and this firefly isn't in the light
-                ((this.props.debug && !firefly.isInTheLight) || this.state.isHovering)
+                ((debug.enabled && !firefly.isInTheLight) || this.state.isHovering)
                     ? (
                         <text
                             x = {firefly.x - 8}

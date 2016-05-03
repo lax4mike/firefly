@@ -136,6 +136,10 @@ export default React.createClass({
             xScale, xAxis, yScale, yAxis, line,
             jumpData, tickData, baseData } = this.state.plot;
 
+        const axisTextStyles = {
+            fontSize: 10
+        };
+
         return (
             <div ref="chart-container">
 
@@ -149,9 +153,7 @@ export default React.createClass({
                             <Axis
                                 axis={xAxis}
                                 offset={plotHeight}
-                                tickTextStyles={{
-                                    fontSize: 10
-                                }}
+                                tickTextStyles={axisTextStyles}
                             />
 
                             {/* threshold line*/}
@@ -161,9 +163,7 @@ export default React.createClass({
 
                             <Axis
                                 axis={yAxis}
-                                tickTextStyles={{
-                                    fontSize: 10
-                                }}
+                                tickTextStyles={axisTextStyles}
                             />
 
 

@@ -3,7 +3,7 @@
 export default [
     {
         id: "yellow",
-        hex: "#f1c40f"
+        hex: "#fff4c8"
     },
     {
         id: "orange",
