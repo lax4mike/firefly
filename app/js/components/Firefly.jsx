@@ -308,8 +308,7 @@ export default React.createClass({
                 <image x={firefly.x - 7} y={firefly.y - 30}
                     width="14" height="30" xlinkHref="/img/firefly.svg"
                     style={{
-                        "opacity"   : (firefly.isInTheLight) ? "0.3" : "0",
-                        "transition": "all 250ms",
+                        "opacity"   : (firefly.isInTheLight) ? "0.2" : "0",
                         "pointer-events": "none"
                     }}/>
 
