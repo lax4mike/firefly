@@ -35,7 +35,7 @@ const initialState = {
 
 // reducer function
 function reducer(state = initialState, action,
-    {canvas, time, phaseParameters, signalRadius, debugFirefly, flashlight}) {
+    {canvas, time, phaseParameters, signalRadius, flashlight}) {
 
     switch(action.type) {
 
@@ -84,23 +84,6 @@ function reducer(state = initialState, action,
                         duration: time - ff.lastBlink.time
                     } : {}
                 );
-
-                // debug info of hovered firefly
-                if (ff.id === debugFirefly){
-                    (shouldJump)
-                        ? console.log(
-                            "DONG", debugFirefly, Math.round(ff.phi), Math.round(phi),
-                            "neighbors",
-                            justBlinkedNeighbors.map(n=>n.id).join(", ")
-                        )
-                        : console.log(
-                            "ding", debugFirefly, Math.round(ff.phi), Math.round(phi)
-                        );
-
-                    if (justBlinked){
-                        console.log("**********blink**********", debugFirefly);
-                    }
-                }
 
                 // update this firefly
                 return Object.assign({}, ff, { phi, justBlinked, lastBlink });

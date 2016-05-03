@@ -18,15 +18,16 @@ export default function reducer(state = {}, action) {
     // get the radius from the state if it's defined
     // and pass to the fireflies reduce
     const time = timeReducer(state.time, action);
-    const debug = debugReducer(state.debug, action);
     const signalRadius = signalRadiusReducer(state.signalRadius, action);
     const phaseParameters = phaseReducer(state.phaseParameters, action);
     const canvas     = canvasReducer(state.canvas, action);
     const flashlight = flashlightReducer(state.flashlight, action, canvas);
-    const debugFirefly = debug.debugFirefly;
-    const fireflies  = firefliesReducer(state.fireflies, action,
-        {canvas, phaseParameters, signalRadius, debugFirefly, flashlight, time});
 
+    const fireflies  = firefliesReducer(state.fireflies, action,
+        {canvas, phaseParameters, signalRadius, flashlight, time});
+
+    const debug = debugReducer(state.debug, action, fireflies);
+    
     return Object.assign({}, simpleReducerState, {
         time,
         debug,
