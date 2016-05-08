@@ -1,3 +1,4 @@
+
 import React, { PropTypes } from "react";
 import getOffset from "../offset.js";
 
@@ -306,7 +307,7 @@ export default React.createClass({
 
                 {/*  show the firefly svg when it's in the light */}
                 <image x={firefly.x - 7} y={firefly.y - 30}
-                    width="14" height="30" xlinkHref="/img/firefly.svg"
+                    width="14" height="30" xlinkHref="img/firefly.svg"
                     style={{
                         "opacity"   : (firefly.isInTheLight) ? "0.2" : "0",
                         "pointer-events": "none"

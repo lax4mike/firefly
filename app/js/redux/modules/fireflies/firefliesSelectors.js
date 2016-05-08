@@ -77,6 +77,7 @@ export const getIsInTheLightIds = createSelector(
             // if this is a leaf, add it.
             if (!node.length){ checkThese.push(node); }
 
+            // http://www.migapro.com/circle-and-rotated-rectangle-collision-detection/
             // find the point in the rectangle that is closet
             // to the flashlight center
             const x = flashlight.x < x0 ? x0
