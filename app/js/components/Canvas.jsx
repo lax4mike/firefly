@@ -182,7 +182,7 @@ export default React.createClass({
                 )
                 : null}
 
-                { // generate some random fireflies
+                { // show the fireflies
                 this.props.fireflies.map((firefly, i) => {
 
                     return (

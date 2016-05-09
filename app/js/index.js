@@ -52,7 +52,7 @@ isBlinkingStream
 
 ReactDOM.render(
     <Provider store={store}>
-        <App />
+        <App debug={store.getState().debug}/>
     </Provider>,
     mountNode
 );

@@ -1,1 +1,1 @@
-export default ["blink", "on", "off"];
+export default ["blink", "on", "off", "paused"];

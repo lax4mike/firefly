@@ -1,8 +1,9 @@
-import { TICK } from "../time.js";
+import { TICK, RESET_TIME } from "../time.js";
 import {
     PHI_THRESHOLD, PHI_TICK,
     tickNextPhi, jumpNextPhi } from "../../../utils/phi.js";
 import { getNeighborsById, getIsInTheLightIds } from "./firefliesSelectors.js";
+import { getRandomPhi } from "./firefliesActions.js";
 import { getPhaseParameters } from "../phaseSelectors.js";
 import { mapObject, filterObject, indexBy, withoutKeys, withKeys } from "../../../utils/object.js";
 
@@ -91,6 +92,15 @@ function reducer(state = initialState, action,
 
             return Object.assign({}, state, {
                 firefliesById: newFirefliesById
+            });
+        }
+
+        case RESET_TIME: {
+            // when the time gets reset, reset phi to a random number
+            return Object.assign({}, state, {
+                firefliesById: mapObject(state.firefliesById,
+                    (ff) => Object.assign({}, ff, { phi: getRandomPhi() })
+                )
             });
         }
 

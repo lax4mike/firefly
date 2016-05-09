@@ -15,6 +15,7 @@ export default React.createClass({
 
         blinkStatus          : PropTypes.string.isRequired,
         onBlinkStatusChange  : PropTypes.func.isRequired,
+        onTimeReset          : PropTypes.func.isRequired,
 
         dissipationFactor    : PropTypes.number.isRequired,
         onDissipationFactorChange: PropTypes.func.isRequired,
@@ -34,39 +35,41 @@ export default React.createClass({
 
     getInitialState: function(){
 
-        let onOffStatus = (this.props.blinkStatus !== "blink") ? this.props.blinkStatus : "on";
-
         return {
             // remember what this value is from redux
             // use this to revert the status after dragging the range slider
             showSignalRadius: this.props.showSignalRadius,
 
             // remember the on/off preference.  the user can start/stop the blink
-            // this is the value of when they stop the blink
-            onOffStatus: onOffStatus
+            // this is the value of when they stop the blink, can be "paused" or "on"
+            pausedStatus: "paused"
         };
     },
 
-    handleBlinkStatusChange: function(e){
+    handleOnCheckboxChange: function(e){
 
-        let value = e.target.value;
+        const checked = e.target.checked;
 
-        // if the value is on or off, save it for next time
-        if (value !== "blink"){
-            this.setState({ onOffStatus: value });
-        }
+        // if the value is on or paused, save it for next time
+        const pausedStatus = (checked) ? "on" : "paused";
 
-        this.props.onBlinkStatusChange(value);
+        this.setState({ pausedStatus });
+
+        this.props.onBlinkStatusChange(pausedStatus);
     },
 
-    handleStartStopClick: function(e){
+    handleStartPauseClick: function(e){
 
         if (this.props.blinkStatus === "blink"){
-            this.props.onBlinkStatusChange(this.state.onOffStatus);
+            this.props.onBlinkStatusChange(this.state.pausedStatus);
         }
         else {
             this.props.onBlinkStatusChange("blink");
         }
+    },
+
+    handleResetClick: function(e){
+        this.props.onTimeReset();
     },
 
     handleDebugChange: function(e){
@@ -130,34 +133,41 @@ export default React.createClass({
 
                 <div className="control control--blink-status">
 
-                    <div className="label">Blink status</div>
+                    <div style={{display: "flex"}}>
+                        <button type="button" onClick={this.handleStartPauseClick} style={{marginRight: "auto"}}>
+                            {(this.props.blinkStatus === "blink") ? "Pause": "Start"}
+                        </button>
 
-                    <button type="button" onClick={this.handleStartStopClick}>
-                        {(this.props.blinkStatus === "blink") ? "Stop": "Start"}
-                    </button>
+                        <span className="number" style={{textAlign: "right"}}>
+                            {(this.props.time/1000).toFixed(3)}
+                        </span>
 
-                    { // show "on" and "off" radios if it's not blinking
-                    (this.props.blinkStatus !== "blink")
-                    ? (
-                        blinks
-                            .filter((b) => (b !== "blink"))
-                            .map((b) => (
-                                <label className="radio" key={b}>
-                                    <input
-                                    type="radio"
-                                    name="blink-status"
-                                    checked={b === this.props.blinkStatus}
-                                    value={b}
-                                    onChange={this.handleBlinkStatusChange} />
-                                    {b}
-                                </label>
-                            ))
-                    )
-                    : null
-                    }
+                    </div>
 
-                    <div className="number" style={{textAlign: "right"}}>
-                        {(this.props.time/1000).toFixed(3)}
+                    <div style={{display: "flex"}}>
+
+                        {/* only show this checkbox if we're paused */}
+                        <label className="radio" style={{
+                            visibility: (this.props.blinkStatus !== "blink") ? "visible" : "hidden",
+                            flexGrow: 1
+                        }}>
+                            <input
+                                type="checkbox"
+                                checked={this.props.blinkStatus === "on"}
+                                value="on"
+                                onChange={this.handleOnCheckboxChange}
+                            />
+                            All on
+                        </label>
+
+                        { /* only show reset if we're paused */ }
+                        <button type="button" onClick={this.handleResetClick} style={{
+                            visibility: (this.props.time !== 0)
+                                ? "visible" : "hidden"
+                        }}>
+                            Reset
+                        </button>
+
                     </div>
                 </div>
 

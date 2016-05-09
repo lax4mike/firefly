@@ -1,4 +1,3 @@
-
 import React, { PropTypes } from "react";
 import getOffset from "../offset.js";
 
@@ -25,7 +24,7 @@ export default React.createClass({
             }).isRequired
         }),
 
-        blinkStatus  : PropTypes.oneOf(["blink", "on", "off"]).isRequired,
+        blinkStatus  : PropTypes.oneOf(["blink", "on", "off", "paused"]).isRequired,
 
         debug: PropTypes.shape({
             enabled       : PropTypes.bool.isRequired,
@@ -256,6 +255,7 @@ export default React.createClass({
     render: function(){
 
         const getBlinkOpacity = function(phi){
+
             const isOff = (blinkStatus === "off" || firefly.isInTheLight);
             const isOn = (blinkStatus === "on");
             if (isOff){ return OFF_OPACITY; }
@@ -310,8 +310,9 @@ export default React.createClass({
                     width="14" height="30" xlinkHref="img/firefly.svg"
                     style={{
                         "opacity"   : (firefly.isInTheLight) ? "0.2" : "0",
-                        "pointer-events": "none"
-                    }}/>
+                        "pointerEvents": "none"
+                    }}
+                />
 
 
 

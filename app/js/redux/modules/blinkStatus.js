@@ -1,3 +1,4 @@
+import { RESET_TIME } from "./time.js";
 
 // action constants
 const SET_BLINKSTATUS = "SET_BLINKSTATUS";
@@ -17,8 +18,8 @@ export function setBlinkStatus(status){
     };
 }
 
-// inital state
-let initialState = blinks[1];
+// inital state ("off")
+const initialState = blinks[2];
 
 // reducer function
 function reducer(state = initialState, action) {
@@ -27,6 +28,14 @@ function reducer(state = initialState, action) {
 
         case SET_BLINKSTATUS: {
             return action.status;
+        }
+
+        // reset the blink status when the time is reset
+        // if it was paused, reset it back to "off"
+        case RESET_TIME: {
+            return (state === "paused")
+                ? initialState
+                : state;
         }
 
         default:

@@ -12,7 +12,7 @@ const App = React.createClass({
     propTypes: {
         debug: PropTypes.shape({
             enabled: PropTypes.bool.isRequired,
-            debugFirefly: PropTypes.string.isRequired
+            debugFirefly: PropTypes.string
         }).isRequired
     },
 

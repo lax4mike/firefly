@@ -2,12 +2,19 @@ import { PHI_TICK } from "../../utils/phi.js";
 
 // action constant
 export const TICK = "TICK";
+export const RESET_TIME = "RESET_TIME";
 
 
 // action creators
 export function tick(){
     return {
         type: TICK
+    };
+}
+
+export function resetTime(){
+    return {
+        type: RESET_TIME
     };
 }
 
@@ -24,6 +31,9 @@ export default function reducer(state = initialState, action){
 
         case TICK:
             return state + TICK_INCREMENT;
+
+        case RESET_TIME:
+            return 0;
 
         default: return state;
     }

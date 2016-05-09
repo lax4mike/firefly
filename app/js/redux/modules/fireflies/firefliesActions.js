@@ -14,7 +14,7 @@ let fireflyId = 0;
 
 
 // all fireflies should start at a random time.
-function getRandomPhi(){
+export function getRandomPhi(){
     return Math.round(Math.random() * PHI_THRESHOLD);
 }
 

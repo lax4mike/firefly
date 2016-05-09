@@ -7,6 +7,7 @@ import { updateRadius,
 import { setBlinkStatus }       from "../redux/modules/blinkStatus.js";
 import { updateFlashlight }     from "../redux/modules/flashlight.js";
 import { toggleDebug }          from "../redux/modules/debug.js";
+import { resetTime }            from "../redux/modules/time.js";
 import { setAmplitudeIncrement,
          setDissipationFator }  from "../redux/modules/phaseParameters.js";
 import { getPhaseParameters }   from "../redux/modules/phaseSelectors.js";
@@ -39,6 +40,9 @@ function mapDispatchToProps(dispatch, ownProps) {
         },
         onBlinkStatusChange: function(status){
             dispatch( setBlinkStatus(status) );
+        },
+        onTimeReset: function(status){
+            dispatch( resetTime(status) );
         },
         onDebugChange: function(bool){
             dispatch( toggleDebug(bool) );
