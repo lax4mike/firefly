@@ -23,11 +23,13 @@ export default function reducer(state = {}, action) {
     const canvas     = canvasReducer(state.canvas, action);
     const flashlight = flashlightReducer(state.flashlight, action, canvas);
 
-    const fireflies  = firefliesReducer(state.fireflies, action,
-        {canvas, phaseParameters, signalRadius, flashlight, time});
-
-    const debug = debugReducer(state.debug, action, fireflies);
+    const debug = debugReducer(state.debug, action);
+    const debugFirefly = debug.debugFirefly;
     
+    const fireflies  = firefliesReducer(state.fireflies, action,
+        {canvas, phaseParameters, signalRadius, flashlight, time, debugFirefly});
+
+
     return Object.assign({}, simpleReducerState, {
         time,
         debug,

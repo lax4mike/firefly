@@ -1,10 +1,8 @@
-import { TICK, RESET_TIME } from "../time.js";
+import { TICK } from "../time.js";
 import {
     PHI_THRESHOLD, PHI_TICK,
-    tickNextPhi, jumpNextPhi } from "../../../utils/phi.js";
-import { getNeighborsById, getIsInTheLightIds } from "./firefliesSelectors.js";
-import { getRandomPhi } from "./firefliesActions.js";
-import { getPhaseParameters } from "../phaseSelectors.js";
+    tickNextPhi, jumpNextPhi, tick } from "../../../utils/phi.js";
+
 import { mapObject, filterObject, indexBy, withoutKeys, withKeys } from "../../../utils/object.js";
 
 import {
@@ -36,72 +34,15 @@ const initialState = {
 
 // reducer function
 function reducer(state = initialState, action,
-    {canvas, time, phaseParameters, signalRadius, flashlight}) {
+    {time, phaseParameters, signalRadius, debugFirefly, flashlight}) {
 
     switch(action.type) {
 
         case TICK: {
 
             const fireflies = state;
-            const firefliesById = fireflies.firefliesById;
-            const { alpha, beta } = getPhaseParameters(phaseParameters);
+            return tick({fireflies, time, phaseParameters, signalRadius, debugFirefly, flashlight})
 
-            const neighborsById = getNeighborsById(fireflies.positionsById, signalRadius.radius);
-            const isInTheLightIds = getIsInTheLightIds(fireflies.positionsById, flashlight);
-
-            // increment phi for each firefly
-            const newFirefliesById = mapObject(firefliesById, (ff) => {
-
-                // all the neighbors that blinked on this tick
-                const justBlinkedNeighbors = neighborsById[ff.id]
-                    .filter(n => firefliesById[n.id].justBlinked);
-                    // add the data of the firefly, just for debugging
-                    // .map(f => Object.assign({}, f, fireflies[f.id]) );
-
-                // whether or not this firefly is in the light
-                const isInTheLight = isInTheLightIds.includes(ff.id);
-
-                // whether or not this firefly should jump when it see's
-                // it's neighbor blink
-                // *NOTE* if two neightbors blinked on this tick, we're ignoring
-                // it, and only jumping once
-                const shouldJump = justBlinkedNeighbors.length > 0
-                                && ff.phi > 0;
-
-                // calculate the next phi.
-                // if it's in the light, reset to 0; or jump; or just tick
-                const phi = (isInTheLight) ? 0
-                          : (shouldJump)      ? jumpNextPhi(ff.phi, alpha, beta)
-                          : tickNextPhi(ff.phi);
-
-                // if this tick pushed phi over the threshold, mark it so other
-                // fireflies can see next tick
-                const justBlinked = (!isInTheLight) && (phi === 0);
-
-                // update the lastBlink if we just blinked
-                const lastBlink = Object.assign({}, ff.lastBlink,
-                    (justBlinked) ? {
-                        time: time,
-                        duration: time - ff.lastBlink.time
-                    } : {}
-                );
-
-                // update this firefly
-                return Object.assign({}, ff, { phi, justBlinked, lastBlink });
-            });
-
-            return Object.assign({}, state, {
-                firefliesById: newFirefliesById
-            });
-        }
-
-        case RESET_TIME: {
-            // when the time gets reset, reset phi to a random number
-            return Object.assign({}, state, {
-                firefliesById: mapObject(state.firefliesById,
-                    (ff) => Object.assign({}, ff, { phi: getRandomPhi() })
-                )
-            });
         }
 
         case FIREFLIES_SET: {

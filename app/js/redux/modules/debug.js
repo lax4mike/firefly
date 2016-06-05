@@ -53,27 +53,31 @@ function reducer(state = initialState, action, fireflies) {
 
         case TICK: {
 
-            // if debuging isn't enabled, abort
-            if (!state.enabled || !state.debugFirefly){
-                return state;
-            }
+            return state;
 
-            // grab the debug firefly from the firefly list
-            const debugFirefly = fireflies.firefliesById[state.debugFirefly]
-
-            if (!debugFirefly){
-                throw new Error("this should never happen!");
-            }
-
-            // push it to the history
-            let history = state.history.concat(debugFirefly);
-
-            // don't let the history grow too large
-            if (history.length > 20){
-                history.shift();
-            }
-
-            return Object.assign({}, state, { history });
+            //
+            //
+            // // if debuging isn't enabled, abort
+            // if (!state.enabled || !state.debugFirefly){
+            //     return state;
+            // }
+            //
+            // // grab the debug firefly from the firefly list
+            // const debugFirefly = fireflies.firefliesById[state.debugFirefly]
+            //
+            // if (!debugFirefly){
+            //     throw new Error("this should never happen!");
+            // }
+            //
+            // // push it to the history
+            // let history = state.history.concat(debugFirefly);
+            //
+            // // don't let the history grow too large
+            // if (history.length > 20){
+            //     history.shift();
+            // }
+            //
+            // return Object.assign({}, state, { history });
 
             // // debug info of hovered firefly
             // if (ff.id === debugFirefly){
