@@ -76,8 +76,8 @@ volatile boolean FADE = 0;
 
 int MODE = 3;
 
+int phi = 0;
 int phi_threshold = 2000;
-long next_flashtime = millis() + phi_threshold;
 float alpha = 1.1191;
 
 
@@ -118,8 +118,6 @@ void setup() {
 void loop() {
 
   last_flash_time = millis();
-
-  Serial.println("start of loop()!!");
 
   while(analogRead(photo_pin) < photo_threshold && MODE == 1){   //  **************************************      MODE 1     *****************
 
@@ -196,50 +194,34 @@ void loop() {
   while(analogRead(photo_pin) < photo_threshold && MODE == 3){
 
     // only run every 64 ms
-    // delay(8);
-
+    delay(64/clock_prescaler);
 
     // blink when phi goes over the threshold
-    if(millis() > next_flashtime){
+    if(phi > phi_threshold){
 
-//      Serial.println(analogRead(photo_pin));
-
-      next_flashtime = millis() + phi_threshold/clock_prescaler;
+      phi = 0;
 
       // change the color based on how many times it pulsed since the last blink
       blink_color = num_pulses;
-
-      last_flash_time = millis();
 
       blink();
 
       Serial.println("blinking");
     }
 
-    if(pulse_detected){
 
-      //phi =  millis() - last_flash_time
-
-//      Serial.print("next_flastime before: ");
-//      Serial.println(next_flashtime);
-
-      next_flashtime = next_flashtime - (((float)millis() - (float)last_flash_time) * alpha);
-
-//      Serial.println("pulse detected");
-//      Serial.print("next_flastime after: ");
-//      Serial.println(next_flashtime);
-//
-//      Serial.print("last_flash_time: ");
-//      Serial.println(last_flash_time);
-//
-//      Serial.print("next - last: ");
-//      Serial.println(next_flashtime - last_flash_time);
-
+    if (pulse_detected){
+      phi = phi * alpha + 1;
+      Serial.println("pulse detected");
+    }
+    else {
+      phi = phi + 64;
+      Serial.println(phi);
     }
 
-    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
-      //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-    }
+//    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
+//      //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+//    }
 
   }
 
