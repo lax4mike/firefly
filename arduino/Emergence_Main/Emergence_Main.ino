@@ -119,7 +119,8 @@ void loop() {
 
   last_flash_time = millis();
 
-  while(analogRead(photo_pin) < photo_threshold && MODE == 1){   //  **************************************      MODE 1     *****************
+  //  **************************************      MODE 1     *****************
+  while(analogRead(photo_pin) < photo_threshold && MODE == 1){   
 
     if(millis() > last_flash_time + time_between_flashes/8){
 
@@ -171,7 +172,8 @@ void loop() {
 
   }
 
-  while(analogRead(photo_pin) < photo_threshold && MODE == 2){  //*****************************************     MODE 2      *************************
+  //*****************************************     MODE 2      *************************/
+  while(analogRead(photo_pin) < photo_threshold && MODE == 2){  
 
     setup_timer2();
 
@@ -191,14 +193,26 @@ void loop() {
 
   }
 
+  
+  //*****************************************     MODE 3      *************************/
   while(analogRead(photo_pin) < photo_threshold && MODE == 3){
 
     // only run every 64 ms
     delay(64/clock_prescaler);
 
+    if (pulse_detected){
+      phi = phi * alpha;
+      Serial.println("pulse detected");
+      pulse_detected = 0;
+    }
+    else {
+      phi = phi + 64;
+    }
+
     // blink when phi goes over the threshold
     if(phi > phi_threshold){
 
+      // reset phi
       phi = 0;
 
       // change the color based on how many times it pulsed since the last blink
@@ -209,15 +223,7 @@ void loop() {
       Serial.println("blinking");
     }
 
-
-    if (pulse_detected){
-      phi = phi * alpha + 1;
-      Serial.println("pulse detected");
-    }
-    else {
-      phi = phi + 64;
-      Serial.println(phi);
-    }
+    Serial.println(phi);
 
 //    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
 //      //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
@@ -230,7 +236,6 @@ void loop() {
 
 
 //**********************************************************************
-
 void blink(){
 
   setup_timer2();
@@ -269,8 +274,6 @@ void blink(){
   }
 
   led_counter = blink_steps;
-
-
 
 }
 
@@ -418,6 +421,6 @@ ISR(TIMER2_COMPB_vect){
 //**********************************************************************
 
 void pulse_detect(){
-  pulse_detected = 1;
-  num_pulses++;
+   pulse_detected = 1;
+   num_pulses++;
 }
