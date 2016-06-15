@@ -74,7 +74,7 @@ volatile unsigned int OCR2A_calculated;
 volatile unsigned int OCR2B_calculated;
 volatile boolean FADE = 0;
 
-int MODE = 3;
+int MODE = 4;
 
 int phi = 0;
 int phi_threshold = 2000;
@@ -230,6 +230,36 @@ void loop() {
 //    }
 
   }
+
+   //*****************************************     MODE 4      *************************/
+  while(MODE == 4){
+
+    int time_in = millis();
+
+    if(pulse_detected){
+      while(millis() < time_in + 1500 / clock_prescaler){
+        if(pulse_detected){
+          delayMicroseconds(100 / clock_prescaler);
+          num_pulses++;
+          pulse_detected = 0;
+        }
+        
+      }
+    }
+
+    if(num_pulses){
+      blink_color = num_pulses / 10;
+
+      Serial.print("num_pulses: ");
+      Serial.println(num_pulses);
+
+      blink();
+
+      num_pulses = 0;
+        
+    }
+  }
+
 
 }
 
@@ -422,5 +452,5 @@ ISR(TIMER2_COMPB_vect){
 
 void pulse_detect(){
    pulse_detected = 1;
-   num_pulses++;
+   //num_pulses++;
 }
