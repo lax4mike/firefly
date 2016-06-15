@@ -74,12 +74,7 @@ volatile unsigned int OCR2A_calculated;
 volatile unsigned int OCR2B_calculated;
 volatile boolean FADE = 0;
 
-int MODE = 4;
-
-int phi = 0;
-int phi_threshold = 2000;
-float alpha = 1.1191;
-
+int MODE = 3;
 
 
 //**********************************************************************
@@ -117,10 +112,10 @@ void setup() {
 
 void loop() {
 
+  /*****************************     MODE 1     *****************************/
   last_flash_time = millis();
 
-  //  **************************************      MODE 1     *****************
-  while(analogRead(photo_pin) < photo_threshold && MODE == 1){   
+  while(analogRead(photo_pin) < photo_threshold && MODE == 1){
 
     if(millis() > last_flash_time + time_between_flashes/8){
 
@@ -172,8 +167,9 @@ void loop() {
 
   }
 
-  //*****************************************     MODE 2      *************************/
-  while(analogRead(photo_pin) < photo_threshold && MODE == 2){  
+
+  /*****************************     MODE 2     *****************************/
+  while(analogRead(photo_pin) < photo_threshold && MODE == 2){
 
     setup_timer2();
 
@@ -193,45 +189,61 @@ void loop() {
 
   }
 
-  
-  //*****************************************     MODE 3      *************************/
+
+  /*****************************     MODE 3     *****************************/
+  int phi = 0;
+  int phi_tick = 8;
+  int phi_threshold = 2000;
+  float alpha = 1.1191;
+  bool was_in_the_light = true;
+
+  //  Serial.println("argg!, the light!");
+
   while(analogRead(photo_pin) < photo_threshold && MODE == 3){
 
-    // only run every 64 ms
-    delay(64/clock_prescaler);
+    // blink immediately if the flashlight just went away
+    if (was_in_the_light){
+      blink();
+      was_in_the_light = false;
+    }
+
+    // only run every phi_tick ms
+    delay(phi_tick/clock_prescaler);
 
     if (pulse_detected){
+      // jump phi based on the alpha multiplier
       phi = phi * alpha;
-      Serial.println("pulse detected");
+
+      // reset this flag
       pulse_detected = 0;
+
+      // Serial.println("pulse detected");
     }
     else {
-      phi = phi + 64;
+      // increment phi a constant amount
+      phi = phi + phi_tick;
     }
 
     // blink when phi goes over the threshold
-    if(phi > phi_threshold){
+    if (phi > phi_threshold){
 
       // reset phi
       phi = 0;
 
       // change the color based on how many times it pulsed since the last blink
-      blink_color = num_pulses;
+      // blink_color = num_pulses;
+
+      Serial.println("phi has gone over the edge...");
 
       blink();
-
-      Serial.println("blinking");
     }
 
-    Serial.println(phi);
+    // Serial.println(phi);
 
-//    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
-//      //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-//    }
+  } // MODE 3
 
-  }
 
-   //*****************************************     MODE 4      *************************/
+  /*****************************     MODE 4     *****************************/
   while(MODE == 4){
 
     int time_in = millis();
@@ -243,7 +255,7 @@ void loop() {
           num_pulses++;
           pulse_detected = 0;
         }
-        
+
       }
     }
 
@@ -256,13 +268,12 @@ void loop() {
       blink();
 
       num_pulses = 0;
-        
+
     }
   }
 
 
-}
-
+} // loop()
 
 
 //**********************************************************************
@@ -271,8 +282,6 @@ void blink(){
   setup_timer2();
 
   charge_state = 1;
-
-
 
   delay(charge_delay);             //// make this a function of frequency and cycles
 
@@ -295,6 +304,8 @@ void blink(){
   pulse_detected = 0;                  // Clear the false detections from the pulse cycle
   num_pulses = 0;
   corrected_already = 0;
+
+  Serial.println("blinking");
 
   while(FADE){
     if(pulse_detected){
@@ -451,6 +462,7 @@ ISR(TIMER2_COMPB_vect){
 //**********************************************************************
 
 void pulse_detect(){
-   pulse_detected = 1;
-   //num_pulses++;
+  pulse_detected = 1;
+  //  num_pulses++;
+  //  Serial.println("pulse detected");
 }
