@@ -5,7 +5,6 @@ long frequency = 160000; // Hz
 
 int charge_gate_pin = 11;
 int pulse_gate_pin = 12;
-int led_pin = 13;
 int pulse_detect_pin = 2;
 byte red_pin = 13;
 byte green_pin = A1;
@@ -24,7 +23,9 @@ int pulse_offset;
 int synchronizing_step_size = 25;              //Synchronizing step
 volatile boolean pulse_detected = 0;
 boolean corrected_already = 0;
+
 int num_pulses = 0;
+int num_pulses_max = 9;
 
 int charge_delay = 3;
 volatile int charge_state = 0;
@@ -68,13 +69,20 @@ byte clock_prescaler;
 
 unsigned long millis_offset = 0;
 
-int blink_steps = 60;   // length of blink ~= blink_steps * 4
-int led_counter = blink_steps;
+int led_on_steps;
+int led_fade_steps;   // length of blink ~= (led_fade_steps + led_on_steps) * 4
+volatile unsigned int led_on_counter;
+volatile unsigned int led_fade_counter;
 volatile unsigned int OCR2A_calculated;
 volatile unsigned int OCR2B_calculated;
+volatile boolean FADING = 0;
 volatile boolean FADE = 0;
+volatile boolean BLINKING = 0;
 
-int MODE = 3;
+int local_color = BLUE;
+
+
+int MODE = 1;
 
 
 //**********************************************************************
@@ -89,7 +97,6 @@ void setup() {
   pinMode(test_pin, OUTPUT);
 
   pinMode(photo_pin, INPUT);
-  pinMode(led_pin, OUTPUT);
   pinMode(red_pin, OUTPUT);
   pinMode(green_pin, OUTPUT);
   pinMode(blue_pin, OUTPUT);
@@ -113,37 +120,43 @@ void setup() {
 void loop() {
 
   /*****************************     MODE 1     *****************************/
+  // changes blink rate if detections occur within second half of last cycle (RED)
+  // maintains blink rate if detections occur within first half of last cycle (green)
+  // does nothing if no detections (BLUE)
+  
   last_flash_time = millis();
 
   while(analogRead(photo_pin) < photo_threshold && MODE == 1){
 
-    if(millis() > last_flash_time + time_between_flashes/8){
 
-      Serial.println(analogRead(photo_pin));
+    if(millis() > last_flash_time + time_between_flashes/8){
 
       last_flash_time = millis();
 
-      blink();
+      blink(1, 1, 50, 50, local_color);
 
-      blink_color = BLUE;
-
-      Serial.println("blinking");
+      num_pulses = 0;
+      corrected_already = 0;
+      local_color = BLUE;
+      
     }
 
     if(pulse_detected){
 
       pulse_offset = millis() - last_flash_time;
 
-      pulse_detected = 0;
+      delayMicroseconds(100 / clock_prescaler);
 
-      Serial.println("pulse detected");
+      num_pulses++;
+
+      pulse_detected = 0;
     }
 
     if(pulse_offset){
 
       if(pulse_offset <= (time_between_flashes/2/clock_prescaler)){
         if(pulse_offset > synchronizing_step_size / clock_prescaler + charge_delay){
-          blink_color = GREEN;
+          local_color = GREEN;
         }
       }
 
@@ -152,7 +165,7 @@ void loop() {
         corrected_already = 1;
 
         if(pulse_offset < (time_between_flashes - synchronizing_step_size)/clock_prescaler){
-          blink_color = RED;
+          local_color = RED;
         }
 
       }
@@ -169,6 +182,9 @@ void loop() {
 
 
   /*****************************     MODE 2     *****************************/
+  //cycles through colors endlessly
+
+                     
   while(analogRead(photo_pin) < photo_threshold && MODE == 2){
 
     setup_timer2();
@@ -190,7 +206,10 @@ void loop() {
   }
 
 
-  /*****************************     MODE 3     *****************************/
+  /******************************     MODE 3     *****************************/
+  //strogatz algorithm using PHI
+
+  
   int phi = 0;
   int phi_tick = 8;
   int phi_threshold = 2000;
@@ -203,7 +222,7 @@ void loop() {
 
     // blink immediately if the flashlight just went away
     if (was_in_the_light){
-      blink();
+      blink(1, 1, 30, 60, BLUE);
       was_in_the_light = false;
     }
 
@@ -235,7 +254,7 @@ void loop() {
 
       Serial.println("phi has gone over the edge...");
 
-      blink();
+      blink(1, 1, 30, 60, BLUE);
     }
 
     // Serial.println(phi);
@@ -260,12 +279,12 @@ void loop() {
     }
 
     if(num_pulses){
-      blink_color = num_pulses / 10;
+      local_color = num_pulses / 10;
 
       Serial.print("num_pulses: ");
       Serial.println(num_pulses);
 
-      blink();
+      blink(1, 1, 30, 60, local_color);
 
       num_pulses = 0;
 
@@ -277,19 +296,27 @@ void loop() {
 
 
 //**********************************************************************
-void blink(){
+void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps, int _color){
 
   setup_timer2();
 
-  charge_state = 1;
+  if(_pulse) charge_state = 1;
 
   delay(charge_delay);             //// make this a function of frequency and cycles
 
-  led_counter = blink_steps;
-
+  
   noInterrupts();
 
-  FADE = 1;
+  blink_color = _color;
+  led_on_steps = _led_on_steps;
+  led_fade_steps = _led_fade_steps;
+  led_on_counter = led_on_steps;
+  led_fade_counter = led_fade_steps;
+
+  FADE = _fade;
+
+  FADING = 0;
+  BLINKING = 1;
 
   OCR2A = color_array[blink_color][LED1_VALUE];
   OCR2B = color_array[blink_color][LED2_VALUE];
@@ -297,24 +324,20 @@ void blink(){
   interrupts();
 
 
-  digitalWrite(pulse_gate_pin, HIGH);
+  if(_pulse) digitalWrite(pulse_gate_pin, HIGH);
   delayMicroseconds(50 / clock_prescaler);
   digitalWrite(pulse_gate_pin, LOW);
+  delayMicroseconds(50 / clock_prescaler);
 
-  pulse_detected = 0;                  // Clear the false detections from the pulse cycle
-  num_pulses = 0;
-  corrected_already = 0;
+  if(_pulse) pulse_detected = 0;                  // Clear the false detections from the pulse cycle
 
-  Serial.println("blinking");
-
-  while(FADE){
+/*  while(BLINKING){
     if(pulse_detected){
       pulse_offset = millis() - last_flash_time;
 //      pulse_detected = 0; THIS IS NEEDED FOR MODE 1
     }
   }
-
-  led_counter = blink_steps;
+*/
 
 }
 
@@ -409,13 +432,12 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
 
   if(OCR2A > 10){
     digitalWrite(color_array[blink_color][LED1_PIN], HIGH);
-
-    if(FADE){
-      OCR2A_calculated = led_counter * color_array[blink_color][LED1_VALUE] / blink_steps;
+ 
+    if(FADING){
+      OCR2A_calculated = led_fade_counter * color_array[blink_color][LED1_VALUE] / led_fade_steps;
       OCR2A = OCR2A_calculated;
     }
   }
-
   else{
     OCR2A = 10;
   }
@@ -423,8 +445,8 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
   if(OCR2B > 10){
     digitalWrite(color_array[blink_color][LED2_PIN], HIGH);
 
-    if(FADE){
-      OCR2B_calculated = led_counter * color_array[blink_color][LED2_VALUE] / blink_steps;
+    if(FADING){
+      OCR2B_calculated = led_fade_counter * color_array[blink_color][LED2_VALUE] / led_fade_steps;
       OCR2B = OCR2B_calculated;
     }
   }
@@ -433,10 +455,23 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
 
   }
 
-  if(FADE) led_counter--;
+  if(led_on_counter) led_on_counter--;
+
+  if(!led_on_counter && FADE){
+    FADING = 1;
+  }
+
+  if(!led_on_counter && !FADE){
+    OCR2A = 10;
+    OCR2B = 10;
+    BLINKING = 0;
+  }
+
+  if(FADING) led_fade_counter--;
 
   if(OCR2A == 10 && OCR2B == 10){
-    FADE = 0;
+    FADING = 0;
+    BLINKING = 0;
   }
 
 }
