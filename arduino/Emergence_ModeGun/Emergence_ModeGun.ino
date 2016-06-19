@@ -38,7 +38,7 @@ int num_modes = 5;
 //**********************************************************************
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   pinMode(button_pin, INPUT_PULLUP);
   pinMode(test_pin, OUTPUT);
@@ -69,9 +69,11 @@ void loop() {
 
   Serial.println("falling asleep");
 
-  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   
   if(triggered){
+    
+    delay(500);
 
     setup_timer1();
 
@@ -148,25 +150,25 @@ void loop() {
 
 void send_messages(){
 
-  unsigned long time_in = millis();
+  unsigned long time_in = millis();     // capture start time
 
-  for(int n = 0; n < 10; n++){
+  for(int n = 0; n < 20; n++){          // transmit a flood of pulses (~1000 ms)
     transmit_pulse();
-    delay(8);
+    delay(48);
   }
 
-  if(millis() > 429496000){
+  if(millis() > 429496000){          // handle millis() overflow
     delay(2000);
     time_in = millis();
   }
 
-  while(millis() < time_in + 1500){
+  while(millis() < time_in + 6000){  // delay 4 s from start of transmit
 
   }
 
-  for(int n = 0; n < MODE; n++){
+  for(int n = 0; n < MODE; n++){      // transmit the actual data
     transmit_pulse();
-    delay(8);
+    delay(48);
   }   
   
 }

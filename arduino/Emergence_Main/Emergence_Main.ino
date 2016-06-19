@@ -199,6 +199,8 @@ void loop() {
                      
   while(analogRead(photo_pin) < photo_threshold && MODE == 2){
 
+    Serial.println("MODE 2");
+
     setup_timer2();
 
 
@@ -206,14 +208,28 @@ void loop() {
 
       blink_color = n;
 
-      noInterrupts();
-      OCR2A = color_array[blink_color][LED1_VALUE];
-      OCR2B = color_array[blink_color][LED2_VALUE];
-      interrupts();
+      blink(0, 0, 100, 100, n);
 
-      delay(500 / clock_prescaler);
+//      noInterrupts();
+//      OCR2A = color_array[blink_color][LED1_VALUE];
+//      OCR2B = color_array[blink_color][LED2_VALUE];
+//      interrupts();
 
+      int time_in = millis();
+
+      while(millis() < time_in + 500 / clock_prescaler){
+        if(pulse_detected){
+          num_pulses++;
+          pulse_detected = 0;
+        }
+
+      }
+
+      check_for_mode_gun();
     }
+    
+    num_pulses = 0;
+    
 
   }
 
@@ -370,31 +386,40 @@ void check_for_mode_gun(){
     //delay(10);
 
     //Serial.println("made it to mode change");
+    //delay(500/clock_prescaler);                 // wait for incoming flood to finish
     
-    for(int n = 0; n < 10; n++){
+    for(int n = 0; n < 20; n++){               // transmit a flood of pulses (~500 ms)
       transmit_pulse();
-      delay(1);
+      delay(48 / clock_prescaler);
     }
 
-    delay(300/clock_prescaler);
+    digitalWrite(test_pin, HIGH);
+
+    delay(2500/clock_prescaler);               // delay to ignore ajdacent floods
+
+    digitalWrite(test_pin, LOW);
 
     pulse_detected = 0;
     num_pulses = 0;
 
     long time_in = millis();
-    int time_out_delay = 1500/clock_prescaler;
+    int time_out_delay = 10000/clock_prescaler;
+
     
-    while(!pulse_detected && millis() < time_in + time_out_delay){
+    
+    while(!pulse_detected && millis() < time_in + time_out_delay){   // wait up to 10 s for data
 
     }
 
-    if(pulse_detected){
+    if(pulse_detected){                                 //handle the first piece of data
       digitalWrite(test_pin, LOW);
       //Serial.println("pulse detected");
       time_in = millis();
-      time_out_delay = 200/clock_prescaler;
+      time_out_delay = 640/clock_prescaler;
       num_pulses++;
+      delay(40/clock_prescaler);
       pulse_detected = 0;
+      
     }
 
     while(millis() < time_in + time_out_delay){
@@ -402,24 +427,31 @@ void check_for_mode_gun(){
       if(pulse_detected){
         digitalWrite(test_pin, LOW);
         num_pulses++;
-        //delayMicroseconds(2000);
+        delay(48/clock_prescaler);
         pulse_detected = 0;
+        
       }
     }
 
-    Serial.print("num pulses: "); Serial.println(num_pulses);
+    //Serial.print("num pulses: "); Serial.println(num_pulses);
 
     if(num_pulses){
       for(int n = 0; n < num_pulses; n++){
         transmit_pulse();
-        delay(1);
+        delay(48 / clock_prescaler);
       }
 
-      blink(0, 0, 100, 100, YELLOW);
+      blink(0, 0, 100, 100, num_pulses);
     }
 
     
-    delay(100);
+    delay(400);
+
+    MODE = num_pulses;
+
+    pulse_detected = 0;
+    num_pulses = 0;
+    digitalWrite(test_pin, LOW);
 
     //set_clock_prescaler(8);
 
