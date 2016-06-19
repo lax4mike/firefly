@@ -11,7 +11,7 @@ byte blue_pin = A2;
 int button_pin = A0;
 byte test_pin = A3;
 
-int charge_delay = 3;
+int charge_delay = 16;
 
 
 volatile boolean triggered = 0;
@@ -57,6 +57,8 @@ void setup() {
 
   attachInterrupt(0, trigger_pulled, RISING);
 
+  setup_timer1();
+
   Serial.println("Setup finished");
 
 }
@@ -65,10 +67,13 @@ void setup() {
 
 void loop() {
 
-  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   Serial.println("falling asleep");
 
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  
   if(triggered){
+
+    setup_timer1();
 
     triggered = 0;
     
@@ -84,23 +89,7 @@ void loop() {
 
       if(trigger_state){
 
-        Serial.println("triggered");
-
-        int counter = 0;
-
-        for(int n = 0; n < MODE * 10; n++){
-          charge_state = 1;
-          delay(charge_delay);
-          digitalWrite(pulse_gate_pin, HIGH);
-          delayMicroseconds(200);
-          digitalWrite(pulse_gate_pin, LOW);
-    
-          counter++;
-    
-          Serial.println(counter);
-        }
-
-        Serial.println("shots fired");
+        send_messages();
 
         while(trigger_state){
           debounce_trigger();
@@ -112,9 +101,6 @@ void loop() {
       }
 
       debounce_button();
-
-      //Serial.print("button state: ");
-      //Serial.println(button_state);
 
       if(button_state){
 
@@ -151,71 +137,59 @@ void loop() {
 
         Serial.println("button released");
       }
-
       
-
     }
-
-    
-    
+   
   }
 
-
-
-
-
-
-
-  
-  /*
-  if(Serial.available()){
-    delay(5);
-    int value = Serial.parseInt();
-
-    int counter = 0;
-
-    for(int n = 0; n < value * 10; n++){
-      charge_state = 1;
-      delay(charge_delay);
-      digitalWrite(pulse_gate_pin, HIGH);
-      delayMicroseconds(200);
-      digitalWrite(pulse_gate_pin, LOW);
-
-      counter++;
-
-      Serial.println(counter);
-    }
-  }
-
-  Serial.println(digitalRead(button_pin));
-  delay(250);
-  
-  if(trigger_state){
-    Serial.println("Trigger Pulled");
-    trigger_state = 0;
-  }
-  
-  
-  /*
-  
-  for(int i = 0; i < 8 ; i++){
-    for(int n = 0; n < i * 10; n++){
-      charge_state = 1;
-      delay(charge_delay);
-      digitalWrite(pulse_gate_pin, HIGH);
-      delayMicroseconds(200);
-      digitalWrite(pulse_gate_pin, LOW);
-
-      Serial.println(i);
-    }
-
-    delay(1750);
-  }
-
-  */
 }
 
 //**********************************************************************
+
+void send_messages(){
+
+  unsigned long time_in = millis();
+
+  for(int n = 0; n < 10; n++){
+    transmit_pulse();
+    delay(8);
+  }
+
+  if(millis() > 429496000){
+    delay(2000);
+    time_in = millis();
+  }
+
+  while(millis() < time_in + 1500){
+
+  }
+
+  for(int n = 0; n < MODE; n++){
+    transmit_pulse();
+    delay(8);
+  }   
+  
+}
+
+//**********************************************************************
+
+void transmit_pulse(){
+  
+  charge_state = 1;
+
+  delay(charge_delay);
+
+  digitalWrite(pulse_gate_pin, HIGH);
+  delayMicroseconds(48 / clock_prescaler);
+  digitalWrite(pulse_gate_pin, LOW);
+  delayMicroseconds(48 / clock_prescaler);
+
+  //pulse_detected = 0;                  // Clear the false detections from the pulse cycle
+
+}
+
+//**********************************************************************
+
 
 void debounce_trigger(){
   
@@ -263,7 +237,7 @@ void setup_timer1(){
   TCCR1B = 0;// same for TCCR1B
   TCNT1  = 0;//initialize counter value to 0
   // set compare match register for 1hz increments
-  OCR1A = 16000000/8/frequency; // must be <65536 for this timer
+  OCR1A = 300; // must be <65536 for this timer
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS11 bits for prescaler 8

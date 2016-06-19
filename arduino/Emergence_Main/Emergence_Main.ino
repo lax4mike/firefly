@@ -10,7 +10,7 @@ byte red_pin = 13;
 byte green_pin = A1;
 byte blue_pin = A2;
 int photo_pin = A0;
-byte test_pin = A3;
+byte test_pin = 9;
 
 
 int photo_threshold = 500;                    //Photo Threshold
@@ -27,7 +27,7 @@ boolean corrected_already = 0;
 int num_pulses = 0;
 int num_pulses_max = 9;
 
-int charge_delay = 3;
+int charge_delay = 16 / 8;
 volatile int charge_state = 0;
 volatile long charge_counter = 0;
 int charge_cycles = 35;
@@ -89,10 +89,9 @@ int MODE = 1;
 
 void setup() {
 
-  setClockPrescaler(3);
-  clock_prescaler = 8;
+  set_clock_prescaler(8);
 
-  Serial.begin(76800); // 9600 * clock_prescaler
+  //Serial.begin(76800); // 9600 * clock_prescaler
 
   pinMode(test_pin, OUTPUT);
 
@@ -107,7 +106,7 @@ void setup() {
   digitalWrite(pulse_gate_pin, LOW);
 
   pinMode(pulse_detect_pin, INPUT);
-  attachInterrupt(0, pulse_detect, FALLING);
+  attachInterrupt(0, pulse_detect, RISING);
 
   setup_timer1();
 
@@ -128,12 +127,16 @@ void loop() {
 
   while(analogRead(photo_pin) < photo_threshold && MODE == 1){
 
+    //digitalWrite(test_pin, HIGH);
 
-    if(millis() > last_flash_time + time_between_flashes/8){
+
+    if(millis() > last_flash_time + time_between_flashes/clock_prescaler){
 
       last_flash_time = millis();
 
       blink(1, 1, 50, 50, local_color);
+
+      //Serial.println("blinking");
 
       num_pulses = 0;
       corrected_already = 0;
@@ -141,7 +144,10 @@ void loop() {
       
     }
 
+    //digitalWrite(test_pin, LOW);
+
     if(pulse_detected){
+      digitalWrite(test_pin, LOW);
 
       pulse_offset = millis() - last_flash_time;
 
@@ -151,6 +157,12 @@ void loop() {
 
       pulse_detected = 0;
     }
+
+    //digitalWrite(test_pin, HIGH);
+
+    check_for_mode_gun();
+
+    //digitalWrite(test_pin, LOW);
 
     if(pulse_offset){
 
@@ -174,9 +186,9 @@ void loop() {
 
     }
 
-    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
+//    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
       //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-    }
+//    }
 
   }
 
@@ -300,11 +312,10 @@ void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps
 
   setup_timer2();
 
-  if(_pulse) charge_state = 1;
+  if(_pulse){
+    transmit_pulse();
+  }
 
-  delay(charge_delay);             //// make this a function of frequency and cycles
-
-  
   noInterrupts();
 
   blink_color = _color;
@@ -323,22 +334,96 @@ void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps
 
   interrupts();
 
+}
 
-  if(_pulse) digitalWrite(pulse_gate_pin, HIGH);
-  delayMicroseconds(50 / clock_prescaler);
+//**********************************************************************
+
+void transmit_pulse(){
+
+  detachInterrupt(0);
+
+  digitalWrite(test_pin, LOW);
+  
+  charge_state = 1;
+
+  delay(charge_delay);
+
+  digitalWrite(pulse_gate_pin, HIGH);
+  delayMicroseconds(20 / clock_prescaler);
   digitalWrite(pulse_gate_pin, LOW);
-  delayMicroseconds(50 / clock_prescaler);
+  
+  attachInterrupt(0, pulse_detect, RISING);
 
-  if(_pulse) pulse_detected = 0;                  // Clear the false detections from the pulse cycle
+  pulse_detected = 0;                  // Clear the false detections from the pulse cycle
+  digitalWrite(test_pin, LOW);
+}
 
-/*  while(BLINKING){
-    if(pulse_detected){
-      pulse_offset = millis() - last_flash_time;
-//      pulse_detected = 0; THIS IS NEEDED FOR MODE 1
+//**********************************************************************
+
+void check_for_mode_gun(){
+
+
+    
+  if(num_pulses > num_pulses_max){
+
+    //set_clock_prescaler(1);
+    //delay(10);
+
+    //Serial.println("made it to mode change");
+    
+    for(int n = 0; n < 10; n++){
+      transmit_pulse();
+      delay(1);
     }
-  }
-*/
 
+    delay(300/clock_prescaler);
+
+    pulse_detected = 0;
+    num_pulses = 0;
+
+    long time_in = millis();
+    int time_out_delay = 1500/clock_prescaler;
+    
+    while(!pulse_detected && millis() < time_in + time_out_delay){
+
+    }
+
+    if(pulse_detected){
+      digitalWrite(test_pin, LOW);
+      //Serial.println("pulse detected");
+      time_in = millis();
+      time_out_delay = 200/clock_prescaler;
+      num_pulses++;
+      pulse_detected = 0;
+    }
+
+    while(millis() < time_in + time_out_delay){
+      
+      if(pulse_detected){
+        digitalWrite(test_pin, LOW);
+        num_pulses++;
+        //delayMicroseconds(2000);
+        pulse_detected = 0;
+      }
+    }
+
+    Serial.print("num pulses: "); Serial.println(num_pulses);
+
+    if(num_pulses){
+      for(int n = 0; n < num_pulses; n++){
+        transmit_pulse();
+        delay(1);
+      }
+
+      blink(0, 0, 100, 100, YELLOW);
+    }
+
+    
+    delay(100);
+
+    //set_clock_prescaler(8);
+
+  }
 }
 
 //**********************************************************************
@@ -361,18 +446,41 @@ void startup_routine(){
 
 //**********************************************************************
 
+void set_clock_prescaler(int value){
+  if(value = 1){
+    setClockPrescaler(0);
+    clock_prescaler = 1;
+    setup_timer1();
+    Serial.begin(9600);
+  }
+  if(value = 8){
+    setClockPrescaler(3);
+    clock_prescaler = 8;
+    setup_timer1();
+    Serial.begin(76800);
+  }
+  
+  
+}
+//**********************************************************************
+
 void setup_timer1(){
+
+  //cli();
+
   TCCR1A = 0;// set entire TCCR1A register to 0
   TCCR1B = 0;// same for TCCR1B
   TCNT1  = 0;//initialize counter value to 0
   // set compare match register for 1hz increments
-  OCR1A = 16000000/clock_prescaler/frequency; // must be <65536 for this timer
+  OCR1A = 2400 / clock_prescaler; // this is about the limit of how fast this will work.
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
-  // Set CS11 bits for prescaler 8
-  TCCR1B |= (1 << CS11); //
+  // Set CS11 bits for 1 prescaler
+  TCCR1B |= (1 << CS10);  
   // enable timer compare interrupt
   TIMSK1 |= (1 << OCIE1A);
+  
+  //sei();
 }
 
 //**********************************************************************
@@ -413,6 +521,10 @@ void setup_timer2(){    // 8-bit timer (0-255)
 //**********************************************************************
 
 ISR(TIMER1_COMPA_vect){
+
+  //digitalWrite(test_pin, digitalRead(test_pin)^1);
+  
+
   if(charge_state){
     if(charge_counter < charge_cycles * 2){
       charge_counter++;
@@ -424,6 +536,8 @@ ISR(TIMER1_COMPA_vect){
       digitalWrite(charge_gate_pin, LOW);
     }
   }
+
+ 
 }
 
 //**********************************************************************
@@ -476,6 +590,8 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
 
 }
 
+
+
 //**********************************************************************
 
 ISR(TIMER2_COMPA_vect){
@@ -498,6 +614,7 @@ ISR(TIMER2_COMPB_vect){
 
 void pulse_detect(){
   pulse_detected = 1;
+  digitalWrite(test_pin, HIGH);
   //  num_pulses++;
   //  Serial.println("pulse detected");
 }
