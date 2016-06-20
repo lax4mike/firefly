@@ -67,9 +67,9 @@ void setup() {
 
 void loop() {
 
-  Serial.println("falling asleep");
+  //Serial.println("falling asleep");
 
-  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   
   if(triggered){
     
@@ -81,8 +81,8 @@ void loop() {
     
     time_awoken = millis();
         
-    Serial.println("triggered");
-    Serial.println(digitalRead(trigger_pin));
+    //Serial.println("triggered");
+    //Serial.println(digitalRead(trigger_pin));
 
     while(millis() < time_awoken + time_awake){
 
@@ -96,10 +96,10 @@ void loop() {
         while(trigger_state){
           debounce_trigger();
           delay(1);
-          Serial.println(digitalRead(trigger_pin));
+          //Serial.println(digitalRead(trigger_pin));
         }
 
-        Serial.println("trigger released");
+        //Serial.println("trigger released");
       }
 
       debounce_button();
@@ -111,8 +111,8 @@ void loop() {
           MODE = 1;
         }
 
-        Serial.print("MODE: ");
-        Serial.println(MODE);
+        //Serial.print("MODE: ");
+        //Serial.println(MODE);
 
         for(int n = 1; n <= MODE; n++){
           if(n % 2){
@@ -137,7 +137,7 @@ void loop() {
 
         time_awoken = millis();
 
-        Serial.println("button released");
+        //Serial.println("button released");
       }
       
     }
