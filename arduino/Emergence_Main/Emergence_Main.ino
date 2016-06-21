@@ -122,7 +122,7 @@ void loop() {
   // changes blink rate if detections occur within second half of last cycle (RED)
   // maintains blink rate if detections occur within first half of last cycle (green)
   // does nothing if no detections (BLUE)
-  
+
   last_flash_time = millis();
 
   while(analogRead(photo_pin) < photo_threshold && MODE == 1){
@@ -141,7 +141,7 @@ void loop() {
       num_pulses = 0;
       corrected_already = 0;
       local_color = BLUE;
-      
+
     }
 
     //digitalWrite(test_pin, LOW);
@@ -196,7 +196,7 @@ void loop() {
   /*****************************     MODE 2     *****************************/
   //cycles through colors endlessly
 
-                     
+
   while(analogRead(photo_pin) < photo_threshold && MODE == 2){
 
     Serial.println("MODE 2");
@@ -227,9 +227,9 @@ void loop() {
 
       check_for_mode_gun();
     }
-    
+
     num_pulses = 0;
-    
+
 
   }
 
@@ -237,16 +237,20 @@ void loop() {
   /******************************     MODE 3     *****************************/
   //strogatz algorithm using PHI
 
-  
+
   int phi = 0;
   int phi_tick = 8;
-  int phi_threshold = 2000;
+  int phi_threshold = 2048;
+  int SYNC_THRESHOLD = phi_threshold/16;
   float alpha = 1.1191;
   bool was_in_the_light = true;
+  int furthest_pulse = 0; // time to the pulse that is furthest from the blink
 
   //  Serial.println("argg!, the light!");
 
   while(analogRead(photo_pin) < photo_threshold && MODE == 3){
+
+    //  check_for_mode_gun();
 
     // blink immediately if the flashlight just went away
     if (was_in_the_light){
@@ -263,12 +267,23 @@ void loop() {
 
 
     if (pulse_detected){
+
+      // calculate how far from the blink this pulse is
+      int distance_before = min(abs(0 - phi), abs(phi_threshold - phi));
+      // int distance_after = min(abs(0 - phi*alpha), abs(phi_threshold - phi*alpha));
+
+      // keep the one that is furthest away
+      furthest_pulse = max(furthest_pulse, distance_before);
+
+
       // jump phi based on the alpha multiplier
       phi = phi * alpha;
 
       // reset this flag
       pulse_detected = 0;
 
+      // increment num_pulses for modegun
+      num_pulses++;
       // Serial.println("pulse detected");
     }
     else {
@@ -287,7 +302,20 @@ void loop() {
 
       Serial.println("phi has gone over the edge...");
 
-      blink(1, 1, 30, 60, BLUE);
+      int color = (furthest_pulse < SYNC_THRESHOLD*1) ? BLUE
+                : (furthest_pulse < SYNC_THRESHOLD*2) ? PURPLE
+                : (furthest_pulse < SYNC_THRESHOLD*3) ? YELLOW
+                : (furthest_pulse < SYNC_THRESHOLD*4) ? ORANGE
+                : RED;
+
+      Serial.print(furthest_pulse);
+      Serial.print(" ");
+      Serial.println(color);
+
+      // reset
+      furthest_pulse = 0;
+
+      blink(1, 1, 30, 60, color);
     }
 
     // Serial.println(phi);
@@ -366,7 +394,7 @@ void transmit_pulse(){
   detachInterrupt(0);
 
   digitalWrite(test_pin, LOW);
-  
+
   charge_state = 1;
 
   delay(charge_delay);
@@ -374,7 +402,7 @@ void transmit_pulse(){
   digitalWrite(pulse_gate_pin, HIGH);
   delayMicroseconds(20 / clock_prescaler);
   digitalWrite(pulse_gate_pin, LOW);
-  
+
   attachInterrupt(0, pulse_detect, RISING);
 
   pulse_detected = 0;                  // Clear the false detections from the pulse cycle
@@ -382,11 +410,17 @@ void transmit_pulse(){
 }
 
 //**********************************************************************
+long mode_gun_last_cleared = millis();
 
 void check_for_mode_gun(){
 
+  Serial.println(num_pulses);
+  // clear num_pulses if it's been more than 1.5 seconds
+  if (millis() < mode_gun_last_cleared + 1500/clock_prescaler){
+    Serial.println("clearing!");
+    num_pulses = 0;
+  }
 
-    
   if(num_pulses > num_pulses_max){
 
     //set_clock_prescaler(1);
@@ -394,7 +428,7 @@ void check_for_mode_gun(){
 
     //Serial.println("made it to mode change");
     //delay(500/clock_prescaler);                 // wait for incoming flood to finish
-    
+
     for(int n = 0; n < 20; n++){               // transmit a flood of pulses (~500 ms)
       transmit_pulse();
       delay(48 / clock_prescaler);
@@ -412,8 +446,8 @@ void check_for_mode_gun(){
     long time_in = millis();
     int time_out_delay = 10000/clock_prescaler;
 
-    
-    
+
+
     while(!pulse_detected && millis() < time_in + time_out_delay){   // wait up to 10 s for data
 
     }
@@ -426,17 +460,17 @@ void check_for_mode_gun(){
       num_pulses++;
       delay(40/clock_prescaler);
       pulse_detected = 0;
-      
+
     }
 
     while(millis() < time_in + time_out_delay){
-      
+
       if(pulse_detected){
         digitalWrite(test_pin, LOW);
         num_pulses++;
         delay(48/clock_prescaler);
         pulse_detected = 0;
-        
+
       }
     }
 
@@ -451,7 +485,7 @@ void check_for_mode_gun(){
       blink(0, 0, 100, 100, num_pulses);
     }
 
-    
+
     delay(400);
 
     MODE = num_pulses;
@@ -498,8 +532,8 @@ void set_clock_prescaler(int value){
     setup_timer1();
     Serial.begin(76800);
   }
-  
-  
+
+
 }
 //**********************************************************************
 
@@ -515,10 +549,10 @@ void setup_timer1(){
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS11 bits for 1 prescaler
-  TCCR1B |= (1 << CS10);  
+  TCCR1B |= (1 << CS10);
   // enable timer compare interrupt
   TIMSK1 |= (1 << OCIE1A);
-  
+
   //sei();
 }
 
@@ -562,7 +596,7 @@ void setup_timer2(){    // 8-bit timer (0-255)
 ISR(TIMER1_COMPA_vect){
 
   //digitalWrite(test_pin, digitalRead(test_pin)^1);
-  
+
 
   if(charge_state){
     if(charge_counter < charge_cycles * 2){
@@ -576,7 +610,7 @@ ISR(TIMER1_COMPA_vect){
     }
   }
 
- 
+
 }
 
 //**********************************************************************
@@ -585,7 +619,7 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
 
   if(OCR2A > 10){
     digitalWrite(color_array[blink_color][LED1_PIN], HIGH);
- 
+
     if(FADING){
       OCR2A_calculated = led_fade_counter * color_array[blink_color][LED1_VALUE] / led_fade_steps;
       OCR2A = OCR2A_calculated;
