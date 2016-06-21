@@ -15,7 +15,9 @@ byte test_pin = 9;
 
 int photo_threshold = 500;                    //Photo Threshold
 
-
+int time_since(long timestamp){
+  return millis() - timestamp;
+}
 
 long last_flash_time;
 int time_between_flashes = 1500;
@@ -82,7 +84,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 
-int MODE = 3;
+int MODE = 5;
 
 
 //**********************************************************************
@@ -352,8 +354,68 @@ void loop() {
     }
   }
 
+  /******************************     MODE 5     *****************************/
+// follow the flashlight
+
+bool was_in_the_light_mode5 = true;
+int STEP_MODE5 = 100;
+
+//  Serial.println("argg!, the light!");
+
+while(analogRead(photo_pin) < photo_threshold && MODE == 5){
+
+  //  check_for_mode_gun();
+
+
+
+  // blink immediately if the flashlight just went away
+  if (was_in_the_light_mode5){
+
+    was_in_the_light_mode5 = false;
+  Serial.print("GO!");
+
+    long flashlight_gone = millis();
+
+    while(time_since(flashlight_gone) < STEP_MOSE5*7){
+
+      if (time_since(flashlight_gone) < 250){
+        blink(0, 1, 30, 60, BLUE);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*1){
+          blink(0, 1, 30, 60, BLUE_GREEN);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*2){
+          blink(0, 1, 30, 60, GREEN);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*3){
+          blink(0, 1, 30, 60, GREEN_YELLOW);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*4){
+          blink(0, 1, 30, 60, YELLOW);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*5){
+          blink(0, 1, 30, 60, ORANGE);
+      }
+      else if (time_since(flashlight_gone) < STEP_MOSE5*6){
+          blink(0, 1, 30, 60, RED);
+      }
+      else {
+          blink(0, 1, 30, 60, PURPLE);
+      }
+
+    }
+
+
+    was_in_the_light = false;
+  }
+
+} // MODE 5
+
 
 } // loop()
+
+
+
 
 
 //**********************************************************************
