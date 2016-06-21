@@ -82,7 +82,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 
-int MODE = 1;
+int MODE = 3;
 
 
 //**********************************************************************
@@ -187,7 +187,7 @@ void loop() {
     }
 
 //    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
-      //LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+//      LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
 //    }
 
   }
@@ -250,12 +250,17 @@ void loop() {
 
     // blink immediately if the flashlight just went away
     if (was_in_the_light){
-      blink(1, 1, 30, 60, BLUE);
+      blink(1, 1, 30, 60, GREEN);
       was_in_the_light = false;
     }
 
-    // only run every phi_tick ms
-    delay(phi_tick/clock_prescaler);
+
+    // delay for phi_tick ms in low power mode
+    long time_in = millis();
+    while(millis() < time_in + (phi_tick/clock_prescaler)){
+//      LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    }
+
 
     if (pulse_detected){
       // jump phi based on the alpha multiplier
@@ -355,6 +360,8 @@ void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps
 //**********************************************************************
 
 void transmit_pulse(){
+
+  setup_timer1();
 
   detachInterrupt(0);
 
