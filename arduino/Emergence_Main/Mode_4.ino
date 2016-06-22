@@ -37,11 +37,14 @@ void mode_4(){
 
     Serial.println("blink!");
 
-    // delay a bit before the flash sequence
-    delay(500/clock_prescaler);
+    // delay for a short amount of time before transmitting
+    delay(100/clock_prescaler);
 
     // tell the others!
     transmit_pulse();
+
+    // delay a bit before the flash sequence
+    delay(400/clock_prescaler);
 
     long time_start = millis();
 
@@ -81,7 +84,7 @@ void mode_4(){
     Serial.println("end blink");
 
     // wait some time
-    delay(5000/clock_prescaler);
+    delay(1000/clock_prescaler);
     can_blink_m4 = 1;
     pulse_detected = 0;
   }
