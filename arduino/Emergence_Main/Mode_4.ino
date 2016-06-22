@@ -1,3 +1,6 @@
+/**
+ * Follow the flashlight and pulse to the neighbors
+ */
 bool was_in_the_light_m4;
 int STEP_MODE4;
 int can_blink_m4;
@@ -96,6 +99,8 @@ void mode4_in_the_dark(){
     Serial.println("end blink");
 
     // wait some time
+    // i'm not sure if we need this, because we're delaying 400ms after the
+    // transmit + 700ms for the blink sequence
     //low_power_delay(1, 1000);
     can_blink_m4 = 1;
     pulse_detected = 0;
