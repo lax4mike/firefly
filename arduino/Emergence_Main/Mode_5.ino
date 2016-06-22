@@ -11,9 +11,6 @@ void initialize_mode_5(){
 
 void mode_5(){
 
-  //  check_for_mode_gun();
-
-
   // if the flashlight just went away
   if (was_in_the_light_mode5){
 
@@ -22,7 +19,7 @@ void mode_5(){
     Serial.println("GO!");
 
     // delay a bit before the flash sequence
-    delay(500/clock_prescaler);
+    low_power_delay(1, 500);
 
     long flashlight_gone = millis();
 
@@ -59,8 +56,8 @@ void mode_5(){
 
     }
 
-    was_in_the_light = false;
   }
 
-  
+  go_into_low_power(30);
+
 }
