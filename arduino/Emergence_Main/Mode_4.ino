@@ -3,18 +3,18 @@ int STEP_MODE4;
 int can_blink_m4;
 int should_blink_m4;
 
-void initialize_mode_4(){
+void mode4_in_the_light(){
   was_in_the_light_m4 = true;
   STEP_MODE4 = 32;
   can_blink_m4 = 1;
   should_blink_m4 = 0;
-  Serial.println("argg!, the light!");
+ // Serial.println("mode4 - light loop!");
 }
 
 
-void mode_4(){
+void mode4_in_the_dark(){
 
-  Serial.println("mode4");
+//  Serial.println("mode4 - Dark loop");
 
   if (can_blink_m4 && (was_in_the_light_m4 || pulse_detected)){
 

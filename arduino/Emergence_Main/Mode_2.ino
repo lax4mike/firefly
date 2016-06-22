@@ -1,8 +1,8 @@
-void initialize_mode_2(){
+void mode2_in_the_light(){
 
 }
 
-void mode_2(){
+void mode2_in_the_dark(){
   Serial.println("MODE 2");
 
   setup_timer2();

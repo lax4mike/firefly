@@ -3,12 +3,12 @@
   // maintains blink rate if detections occur within first half of last cycle (green)
   // does nothing if no detections (BLUE)
 
-void initialize_mode_1(){
+void mode1_in_the_light(){
   
 }
 
 
-void mode_1(){
+void mode1_in_the_dark(){
 
   //digitalWrite(test_pin, HIGH);
 

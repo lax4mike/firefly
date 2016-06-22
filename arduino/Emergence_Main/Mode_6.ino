@@ -1,8 +1,8 @@
-void initialize_mode_6(){
+void mode6_in_the_light(){
   
 }
 
-void mode_6(){
+void mode6_in_the_dark(){
 
   
 }

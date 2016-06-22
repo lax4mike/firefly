@@ -6,7 +6,7 @@ float alpha;
 bool was_in_the_light;
 int furthest_pulse;
 
-void initialize_mode_3(){
+void mode3_in_the_light(){
   
   phi = 0;
   phi_tick = 8;
@@ -18,7 +18,7 @@ void initialize_mode_3(){
     
 }
 
-void mode_3(){
+void mode3_in_the_dark(){
 
 
 

@@ -119,58 +119,72 @@ void setup() {
 //**********************************************************************
 
 void loop() {
+//
+//  Serial.print("Main Loop - Mode is: ");
+//  Serial.println(MODE);
+//  
+//  Serial.print("dark? ");
+//  Serial.println(is_in_the_dark());
+  
 
   //last_flash_time = millis();
 
-  while(analogRead(photo_pin) < photo_threshold){
+  //While in the dark
+  //while(is_in_the_dark()){
 
-    initialize_mode_1();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 1){
-      mode_1();
+  if (MODE == 1) {
+    mode1_in_the_light();
+    while (is_in_the_dark()) {
+      mode1_in_the_dark();
       check_for_mode_gun();
     }
-    
-    initialize_mode_2();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 2){
-      mode_2();
-      check_for_mode_gun();
-    }
-    
-    initialize_mode_3();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 3){
-      mode_3();
-      check_for_mode_gun();
-    }
-
-    initialize_mode_4();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 4){
-      mode_4();
-      check_for_mode_gun();
-    }
-
-    initialize_mode_5();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 5){
-      mode_5();
-      check_for_mode_gun();
-    }
-    
-    initialize_mode_6();
-    while(analogRead(photo_pin) < photo_threshold && MODE == 6){
-      mode_6();
-      check_for_mode_gun();
-    }    
-    
   }
+  else if (MODE == 2) {
+    mode2_in_the_light();
+    while (is_in_the_dark()) {
+      mode2_in_the_dark();
+      check_for_mode_gun();
+    }
+  }
+  else if (MODE == 3) {
+   mode3_in_the_light();
+    while (is_in_the_dark()) {
+      mode3_in_the_dark();
+      check_for_mode_gun();
+    }
+  }
+  else if (MODE == 4) {
+   mode4_in_the_light();
+    while (is_in_the_dark()) {
+      mode4_in_the_dark();
+      check_for_mode_gun();
+    }
+  }
+  else if (MODE == 5) {
+   mode5_in_the_light();
+    while (is_in_the_dark()) {
+      mode5_in_the_dark();
+      check_for_mode_gun();
+    }
+  }
+  else if (MODE == 6) {
+   mode6_in_the_light();
+    while (is_in_the_dark()) {
+      mode6_in_the_dark();
+      check_for_mode_gun();
+    }
+  }
+
 
 }
 
 
 //**********************************************************************
-void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps, int _color){
+void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps, int _color) {
 
   setup_timer2();
 
-  if(_pulse){
+  if (_pulse) {
     transmit_pulse();
   }
 
@@ -196,7 +210,7 @@ void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps
 
 //**********************************************************************
 
-void transmit_pulse(){
+void transmit_pulse() {
 
   setup_timer1();
 
@@ -215,25 +229,25 @@ void transmit_pulse(){
   attachInterrupt(0, pulse_detect, RISING);
 
   pulse_detected = 0;                  // Clear the false detections from the pulse cycle
-  
+
   digitalWrite(test_pin, LOW);
 }
 
 //**********************************************************************
 long mode_gun_last_cleared = millis();
 
-void check_for_mode_gun(){
+void check_for_mode_gun() {
 
   handle_pulse();
 
   //Serial.println(num_pulses);
   // clear num_pulses if it's been more than 1.5 seconds
-  if (millis() < mode_gun_last_cleared + 1500/clock_prescaler){
+  if (millis() < mode_gun_last_cleared + 1500 / clock_prescaler) {
     Serial.println("clearing!");
     num_pulses = 0;
   }
 
-  if(num_pulses > num_pulses_max){
+  if (num_pulses > num_pulses_max) {
 
     //set_clock_prescaler(1);
     //delay(10);
@@ -241,14 +255,14 @@ void check_for_mode_gun(){
     //Serial.println("made it to mode change");
     //delay(500/clock_prescaler);                 // wait for incoming flood to finish
 
-    for(int n = 0; n < 20; n++){               // transmit a flood of pulses (~500 ms)
+    for (int n = 0; n < 20; n++) {             // transmit a flood of pulses (~500 ms)
       transmit_pulse();
       delay(48 / clock_prescaler);
     }
 
     digitalWrite(test_pin, HIGH);
 
-    delay(2500/clock_prescaler);               // delay to ignore ajdacent floods
+    delay(2500 / clock_prescaler);             // delay to ignore ajdacent floods
 
     digitalWrite(test_pin, LOW);
 
@@ -256,31 +270,31 @@ void check_for_mode_gun(){
     num_pulses = 0;
 
     long time_in = millis();
-    int time_out_delay = 10000/clock_prescaler;
+    int time_out_delay = 10000 / clock_prescaler;
 
 
 
-    while(!pulse_detected && millis() < time_in + time_out_delay){   // wait up to 10 s for data
+    while (!pulse_detected && millis() < time_in + time_out_delay) { // wait up to 10 s for data
 
     }
 
-    if(pulse_detected){                                 //handle the first piece of data
+    if (pulse_detected) {                               //handle the first piece of data
       //digitalWrite(test_pin, LOW);
       //Serial.println("pulse detected");
       time_in = millis();
-      time_out_delay = 640/clock_prescaler;
-      delay(40/clock_prescaler);
+      time_out_delay = 640 / clock_prescaler;
+      delay(40 / clock_prescaler);
       num_pulses++;
       pulse_detected = 0;
 
     }
 
-    while(millis() < time_in + time_out_delay){
+    while (millis() < time_in + time_out_delay) {
 
-      if(pulse_detected){
+      if (pulse_detected) {
         digitalWrite(test_pin, LOW);
         num_pulses++;
-        delay(48/clock_prescaler);
+        delay(48 / clock_prescaler);
         pulse_detected = 0;
 
       }
@@ -288,8 +302,8 @@ void check_for_mode_gun(){
 
     //Serial.print("num pulses: "); Serial.println(num_pulses);
 
-    if(num_pulses){
-      for(int n = 0; n < num_pulses; n++){
+    if (num_pulses) {
+      for (int n = 0; n < num_pulses; n++) {
         transmit_pulse();
         delay(48 / clock_prescaler);
       }
@@ -300,7 +314,7 @@ void check_for_mode_gun(){
 
     delay(400);
 
-    if(num_pulses <= num_modes){
+    if (num_pulses <= num_modes) {
       MODE = num_pulses;
     }
 
@@ -315,42 +329,42 @@ void check_for_mode_gun(){
 
 //**********************************************************************
 
-void low_power_delay(boolean _handle_pulses, int _delay_time){
+void low_power_delay(boolean _handle_pulses, int _delay_time) {
 
   long time_in = millis();
 
-  while(millis() < time_in + _delay_time / clock_prescaler && BLINKING){
-    if(_handle_pulses){
+  while (millis() < time_in + _delay_time / clock_prescaler && BLINKING) {
+    if (_handle_pulses) {
       handle_pulse();
     }
   }
 
-  while(millis() < time_in + _delay_time / clock_prescaler - 15 / clock_prescaler){
+  while (millis() < time_in + _delay_time / clock_prescaler - 15 / clock_prescaler) {
     LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-    if(_handle_pulses){
+    if (_handle_pulses) {
       handle_pulse();
     }
   }
 
-  while(millis() < time_in + _delay_time / clock_prescaler){
-    if(_handle_pulses){
+  while (millis() < time_in + _delay_time / clock_prescaler) {
+    if (_handle_pulses) {
       handle_pulse();
     }
   }
 
 
-  
+
 
   setup_timer1();
   setup_timer2();
-  
+
 }
 
 //**********************************************************************
 
-void handle_pulse(){
-  if(pulse_detected){
-    delayMicroseconds(104/clock_prescaler);
+void handle_pulse() {
+  if (pulse_detected) {
+    delayMicroseconds(104 / clock_prescaler);
     num_pulses++;
     pulse_detected = 0;
   }
@@ -358,30 +372,30 @@ void handle_pulse(){
 
 //**********************************************************************
 
-void go_into_low_power(int _sleep_time){
+void go_into_low_power(int _sleep_time) {
 
   long _time_in = millis();
   int _time_out = 500 / clock_prescaler;
-  
-  while(BLINKING){
-    if(millis() > _time_in + _time_out){
+
+  while (BLINKING) {
+    if (millis() > _time_in + _time_out) {
       return;
     }
   }
-    
-  if(_sleep_time == 15){
+
+  if (_sleep_time == 15) {
     LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   }
-  else if(_sleep_time == 30){
+  else if (_sleep_time == 30) {
     LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   }
-  else if(_sleep_time == 60){
+  else if (_sleep_time == 60) {
     LowPower.idle(SLEEP_60MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   }
-  else if(_sleep_time == 120){
+  else if (_sleep_time == 120) {
     LowPower.idle(SLEEP_120MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   }
-  else if(_sleep_time == 250){
+  else if (_sleep_time == 250) {
     LowPower.idle(SLEEP_250MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
   }
   else return;
@@ -389,8 +403,8 @@ void go_into_low_power(int _sleep_time){
 
 //**********************************************************************
 
-void startup_routine(){
-  for(int n = 0; n < 3; n++){
+void startup_routine() {
+  for (int n = 0; n < 3; n++) {
     digitalWrite(red_pin, HIGH);
     delay(100 / clock_prescaler);
     digitalWrite(red_pin, LOW);
@@ -407,14 +421,14 @@ void startup_routine(){
 
 //**********************************************************************
 
-void set_clock_prescaler(int value){
-  if(value = 1){
+void set_clock_prescaler(int value) {
+  if (value = 1) {
     setClockPrescaler(0);
     clock_prescaler = 1;
     setup_timer1();
     Serial.begin(9600);
   }
-  if(value = 8){
+  if (value = 8) {
     setClockPrescaler(3);
     clock_prescaler = 8;
     setup_timer1();
@@ -423,13 +437,13 @@ void set_clock_prescaler(int value){
 }
 
 //**********************************************************************
-long time_since(long timestamp){
+long time_since(long timestamp) {
   return millis() - timestamp;
 }
 
 //**********************************************************************
 int test;
-void setup_timer1(){
+void setup_timer1() {
 
   //cli();
 
@@ -450,7 +464,7 @@ void setup_timer1(){
 
 //**********************************************************************
 
-void setup_timer2(){    // 8-bit timer (0-255)
+void setup_timer2() {   // 8-bit timer (0-255)
 
   TCCR2A = 0;  // clear any previous settings
   TCCR2B = 0;
@@ -460,9 +474,9 @@ void setup_timer2(){    // 8-bit timer (0-255)
   OCR2A = 10; // set compare value
   OCR2B = 10;
 
-  TCCR2A |= (1 << WGM21)|(1 << WGM20); // set mode to fast PWM
+  TCCR2A |= (1 << WGM21) | (1 << WGM20); // set mode to fast PWM
 
-  TCCR2B |= (1 << CS21)|(1 << CS20); // set prescaler 32, which, in addition to clock_prescaler makes:
+  TCCR2B |= (1 << CS21) | (1 << CS20); // set prescaler 32, which, in addition to clock_prescaler makes:
 
   //  16000 / 8 / 32 /256 = overflow 244 times per second, or once per 4 ms
 
@@ -485,17 +499,17 @@ void setup_timer2(){    // 8-bit timer (0-255)
 
 //**********************************************************************
 
-ISR(TIMER1_COMPA_vect){
+ISR(TIMER1_COMPA_vect) {
 
   //digitalWrite(test_pin, digitalRead(test_pin)^1);
 
 
-  if(charge_state){
-    if(charge_counter < charge_cycles * 2){
+  if (charge_state) {
+    if (charge_counter < charge_cycles * 2) {
       charge_counter++;
-      digitalWrite(charge_gate_pin, digitalRead(charge_gate_pin)^1);
+      digitalWrite(charge_gate_pin, digitalRead(charge_gate_pin) ^ 1);
     }
-    else{
+    else {
       charge_counter = 0;
       charge_state = 0;
       digitalWrite(charge_gate_pin, LOW);
@@ -507,48 +521,48 @@ ISR(TIMER1_COMPA_vect){
 
 //**********************************************************************
 
-ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
+ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
 
-  if(OCR2A > 10){
+  if (OCR2A > 10) {
     digitalWrite(color_array[blink_color][LED1_PIN], HIGH);
 
-    if(FADING){
+    if (FADING) {
       OCR2A_calculated = led_fade_counter * color_array[blink_color][LED1_VALUE] / led_fade_steps;
       OCR2A = OCR2A_calculated;
     }
   }
-  else{
+  else {
     OCR2A = 10;
   }
 
-  if(OCR2B > 10){
+  if (OCR2B > 10) {
     digitalWrite(color_array[blink_color][LED2_PIN], HIGH);
 
-    if(FADING){
+    if (FADING) {
       OCR2B_calculated = led_fade_counter * color_array[blink_color][LED2_VALUE] / led_fade_steps;
       OCR2B = OCR2B_calculated;
     }
   }
-  else{
+  else {
     OCR2B = 10;
 
   }
 
-  if(led_on_counter) led_on_counter--;
+  if (led_on_counter) led_on_counter--;
 
-  if(!led_on_counter && FADE){
+  if (!led_on_counter && FADE) {
     FADING = 1;
   }
 
-  if(!led_on_counter && !FADE){
+  if (!led_on_counter && !FADE) {
     OCR2A = 10;
     OCR2B = 10;
     BLINKING = 0;
   }
 
-  if(FADING) led_fade_counter--;
+  if (FADING) led_fade_counter--;
 
-  if(OCR2A == 10 && OCR2B == 10){
+  if (OCR2A == 10 && OCR2B == 10) {
     FADING = 0;
     BLINKING = 0;
   }
@@ -559,7 +573,7 @@ ISR(TIMER2_OVF_vect){      // Turns on PWM for led1 and led2 pins.
 
 //**********************************************************************
 
-ISR(TIMER2_COMPA_vect){
+ISR(TIMER2_COMPA_vect) {
 
   digitalWrite(color_array[blink_color][LED1_PIN], LOW);
 
@@ -568,7 +582,7 @@ ISR(TIMER2_COMPA_vect){
 
 //**********************************************************************
 
-ISR(TIMER2_COMPB_vect){
+ISR(TIMER2_COMPB_vect) {
 
 
   digitalWrite(color_array[blink_color][LED2_PIN], LOW);
@@ -577,12 +591,19 @@ ISR(TIMER2_COMPB_vect){
 
 //**********************************************************************
 
-void pulse_detect(){
-//  if (pulse_detected) { 
-//    return;
-//  }
+void pulse_detect() {
+  //  if (pulse_detected) {
+  //    return;
+  //  }
   pulse_detected = 1;
   //digitalWrite(test_pin, HIGH);
-//  num_pulses++;
+  //  num_pulses++;
   //  Serial.println("pulse detected");
 }
+
+
+//Returnes true if the bug is still in teh dark
+boolean is_in_the_dark() {
+  return analogRead(photo_pin) < photo_threshold;
+}
+
