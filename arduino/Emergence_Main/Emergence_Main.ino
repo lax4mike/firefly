@@ -16,9 +16,7 @@ byte test_pin = 9;
 
 int photo_threshold = 500;                    //Photo Threshold
 
-int time_since(long timestamp){
-  return millis() - timestamp;
-}
+
 
 long last_flash_time;
 int time_between_flashes = 1500;
@@ -85,7 +83,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 
-int MODE = 2;
+int MODE = 5;
 
 
 //**********************************************************************
@@ -121,7 +119,7 @@ void setup() {
 
 void loop() {
 
-  last_flash_time = millis();
+  //last_flash_time = millis();
 
   while(analogRead(photo_pin) < photo_threshold){
 
@@ -225,7 +223,9 @@ long mode_gun_last_cleared = millis();
 
 void check_for_mode_gun(){
 
-  Serial.println(num_pulses);
+  handle_pulse();
+
+  //Serial.println(num_pulses);
   // clear num_pulses if it's been more than 1.5 seconds
   if (millis() < mode_gun_last_cleared + 1500/clock_prescaler){
     Serial.println("clearing!");
@@ -312,14 +312,67 @@ void check_for_mode_gun(){
 
 //**********************************************************************
 
-void low_power_delay(int _delay_time){
+void low_power_delay(boolean _handle_pulses, int _delay_time){
 
-  int time_in = millis();
+  long time_in = millis();
+
+  while(millis() < time_in + _delay_time / clock_prescaler && BLINKING){
+    if(_handle_pulses){
+      handle_pulse();
+    }
+  }
 
   while(millis() < time_in + _delay_time / clock_prescaler){
     LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    if(_handle_pulses){
+      handle_pulse();
+    }
   }
+
+  setup_timer1();
+  setup_timer2();
   
+}
+
+//**********************************************************************
+
+void handle_pulse(){
+  if(pulse_detected){
+    delayMicroseconds(104/clock_prescaler);
+    num_pulses++;
+    pulse_detected = 0;
+  }
+}
+
+//**********************************************************************
+
+void go_into_low_power(int _sleep_time){
+
+  long _time_in = millis();
+  int _time_out = 500 / clock_prescaler;
+  
+  while(BLINKING){
+    if(millis() > _time_in + _time_out){
+      return;
+    }
+  }
+    
+  if(_sleep_time == 15){
+    LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  }
+  else if(_sleep_time == 30){
+    LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  }
+  else if(_sleep_time == 60){
+    LowPower.idle(SLEEP_60MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  }
+  else if(_sleep_time == 120){
+    LowPower.idle(SLEEP_120MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  }
+  else if(_sleep_time == 250){
+    LowPower.idle(SLEEP_250MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  }
+  else return;
 }
 
 //**********************************************************************
@@ -355,9 +408,13 @@ void set_clock_prescaler(int value){
     setup_timer1();
     Serial.begin(76800);
   }
-
-
 }
+
+//**********************************************************************
+int time_since(long timestamp){
+  return millis() - timestamp;
+}
+
 //**********************************************************************
 int test;
 void setup_timer1(){
