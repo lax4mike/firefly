@@ -1,8 +1,8 @@
-bool was_in_the_light_mode5;
+bool was_in_the_light_m5;
 int STEP_MODE5;
 
 void mode5_in_the_light(){
-  was_in_the_light_mode5 = true;
+  was_in_the_light_m5 = true;
   STEP_MODE5 = 32;
 
   Serial.println("argg!, mode5 the light!");
@@ -12,9 +12,9 @@ void mode5_in_the_light(){
 void mode5_in_the_dark(){
 
   // if the flashlight just went away
-  if (was_in_the_light_mode5){
+  if (was_in_the_light_m5){
 
-    was_in_the_light_mode5 = false;
+    was_in_the_light_m5 = false;
 
     Serial.println("GO!");
 
@@ -55,7 +55,7 @@ void mode5_in_the_dark(){
       }
 
     }
-
+    
   }
 
   go_into_low_power(30);

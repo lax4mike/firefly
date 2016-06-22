@@ -83,7 +83,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 int num_modes = 6;
-int MODE = 4;
+int MODE = 3;
 
 
 
@@ -122,10 +122,10 @@ void loop() {
 //
 //  Serial.print("Main Loop - Mode is: ");
 //  Serial.println(MODE);
-//  
+//
 //  Serial.print("dark? ");
 //  Serial.println(is_in_the_dark());
-  
+
 
   //last_flash_time = millis();
 
@@ -332,10 +332,12 @@ void check_for_mode_gun() {
 void low_power_delay(boolean _handle_pulses, int _delay_time) {
 
   long time_in = millis();
+  int did_handle_pulse = false;
 
   while (millis() < time_in + _delay_time / clock_prescaler && BLINKING) {
     if (_handle_pulses) {
       handle_pulse();
+      did_handle_pulse = true;
     }
   }
 
@@ -343,20 +345,22 @@ void low_power_delay(boolean _handle_pulses, int _delay_time) {
     LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
     if (_handle_pulses) {
       handle_pulse();
+      did_handle_pulse = true;
     }
   }
 
   while (millis() < time_in + _delay_time / clock_prescaler) {
     if (_handle_pulses) {
       handle_pulse();
+      did_handle_pulse = true;
     }
   }
 
-
-
-
-  setup_timer1();
-  setup_timer2();
+  // only reset the timers if we did something
+  if (did_handle_pulse){
+    setup_timer1();
+    setup_timer2();
+  }
 
 }
 
@@ -606,4 +610,3 @@ void pulse_detect() {
 boolean is_in_the_dark() {
   return analogRead(photo_pin) < photo_threshold;
 }
-

@@ -1,3 +1,6 @@
+/**
+ * Storgatz syncronizing algorithm
+ */
 int phi;
 int phi_tick;
 int phi_threshold;
@@ -6,36 +9,37 @@ float alpha;
 bool was_in_the_light;
 int furthest_pulse;
 
-void mode3_in_the_light(){
-  
+void mode3_in_the_light() {
+
   phi = 0;
   phi_tick = 8;
   phi_threshold = 2048;
-  SYNC_THRESHOLD = phi_threshold/16;
+  SYNC_THRESHOLD = phi_threshold / 16;
   alpha = 1.1191;
   was_in_the_light = true;
   furthest_pulse = 0; // time to the pulse that is furthest from the blink
-    
+
+//  Serial.println("arrg! the light!!");
 }
 
-void mode3_in_the_dark(){
+void mode3_in_the_dark() {
 
+//  Serial.print("mode3 in the dark ");
 
-
-  //  check_for_mode_gun();
-    
   // blink immediately if the flashlight just went away
-  if (was_in_the_light){
+  if (was_in_the_light) {
     blink(1, 1, 30, 60, GREEN);
     was_in_the_light = false;
+//    Serial.println("blink green");
   }
 
 
   // delay for phi_tick ms in low power mode
-  
-  low_power_delay(0, 64);
 
-  if (pulse_detected){
+    low_power_delay(0, phi_tick);
+//  delay(phi_tick / clock_prescaler);
+
+  if (pulse_detected) {
 
     handle_pulse();
 
@@ -50,6 +54,8 @@ void mode3_in_the_dark(){
     // jump phi based on the alpha multiplier
     phi = phi * alpha;
 
+//    Serial.println("pulse detected");
+
   }
   else {
     // increment phi a constant amount
@@ -57,7 +63,7 @@ void mode3_in_the_dark(){
   }
 
   // blink when phi goes over the threshold
-  if (phi > phi_threshold){
+  if (phi > phi_threshold) {
 
     // reset phi
     phi = 0;
@@ -65,17 +71,17 @@ void mode3_in_the_dark(){
     // change the color based on how many times it pulsed since the last blink
     // blink_color = num_pulses;
 
-    Serial.println("phi has gone over the edge...");
+//    Serial.println("phi has gone over the edge...");
 
-    int color = (furthest_pulse < SYNC_THRESHOLD*1) ? BLUE
-              : (furthest_pulse < SYNC_THRESHOLD*2) ? PURPLE
-              : (furthest_pulse < SYNC_THRESHOLD*3) ? YELLOW
-              : (furthest_pulse < SYNC_THRESHOLD*4) ? ORANGE
-              : RED;
+    int color = (furthest_pulse < SYNC_THRESHOLD * 1) ? BLUE
+                : (furthest_pulse < SYNC_THRESHOLD * 2) ? PURPLE
+                : (furthest_pulse < SYNC_THRESHOLD * 3) ? YELLOW
+                : (furthest_pulse < SYNC_THRESHOLD * 4) ? ORANGE
+                : RED;
 
-    Serial.print(furthest_pulse);
-    Serial.print(" ");
-    Serial.println(color);
+//    Serial.print(furthest_pulse);
+//    Serial.print(" ");
+//    Serial.println(color);
 
     // reset
     furthest_pulse = 0;
