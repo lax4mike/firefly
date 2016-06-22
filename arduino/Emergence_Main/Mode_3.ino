@@ -32,13 +32,12 @@ void mode_3(){
 
 
   // delay for phi_tick ms in low power mode
-  long time_in = millis();
-  while(millis() < time_in + (phi_tick/clock_prescaler)){
-//      LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-  }
-
+  
+  low_power_delay(0, 64);
 
   if (pulse_detected){
+
+    handle_pulse();
 
     // calculate how far from the blink this pulse is
     int distance_before = min(abs(0 - phi), abs(phi_threshold - phi));
@@ -51,14 +50,6 @@ void mode_3(){
     // jump phi based on the alpha multiplier
     phi = phi * alpha;
 
-    delayMicroseconds(50);
-
-    // reset this flag
-    pulse_detected = 0;
-
-    // increment num_pulses for modegun
-    num_pulses++;
-    // Serial.println("pulse detected");
   }
   else {
     // increment phi a constant amount

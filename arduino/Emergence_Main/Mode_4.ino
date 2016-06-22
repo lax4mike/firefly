@@ -38,13 +38,13 @@ void mode_4(){
     Serial.println("blink!");
 
     // delay for a short amount of time before transmitting
-    delay(100/clock_prescaler);
+    low_power_delay(1, 100);
 
     // tell the others!
     transmit_pulse();
 
     // delay a bit before the flash sequence
-    delay(400/clock_prescaler);
+    low_power_delay(1, 400);
 
     long time_start = millis();
 
@@ -79,12 +79,24 @@ void mode_4(){
           blink(0, 0, 30, 60, PURPLE);
       }
 
+      // For mode_gun checks
+      handle_pulse();
+
+      // interrupts coloring blinking if it sees a flashlight
+      if(analogRead(photo_pin) > photo_threshold){
+        // reset num_pulses so it doesn't think this is the mode_gun
+        num_pulses =0;
+        return;
+      }
+
     }
+
+    check_for_mode_gun();
 
     Serial.println("end blink");
 
     // wait some time
-    delay(1000/clock_prescaler);
+    //low_power_delay(1, 1000);
     can_blink_m4 = 1;
     pulse_detected = 0;
   }

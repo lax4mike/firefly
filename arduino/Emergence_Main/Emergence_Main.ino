@@ -82,8 +82,9 @@ volatile boolean BLINKING = 0;
 
 int local_color = BLUE;
 
+int num_modes = 6;
+int MODE = 4;
 
-int MODE = 5;
 
 
 //**********************************************************************
@@ -154,7 +155,7 @@ void loop() {
     }
     
     initialize_mode_6();
-    while(MODE == 6){
+    while(analogRead(photo_pin) < photo_threshold && MODE == 6){
       mode_6();
       check_for_mode_gun();
     }    
@@ -299,7 +300,9 @@ void check_for_mode_gun(){
 
     delay(400);
 
-    MODE = num_pulses;
+    if(num_pulses <= num_modes){
+      MODE = num_pulses;
+    }
 
     pulse_detected = 0;
     num_pulses = 0;
@@ -322,12 +325,21 @@ void low_power_delay(boolean _handle_pulses, int _delay_time){
     }
   }
 
-  while(millis() < time_in + _delay_time / clock_prescaler){
-    LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+  while(millis() < time_in + _delay_time / clock_prescaler - 15 / clock_prescaler){
+    LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
     if(_handle_pulses){
       handle_pulse();
     }
   }
+
+  while(millis() < time_in + _delay_time / clock_prescaler){
+    if(_handle_pulses){
+      handle_pulse();
+    }
+  }
+
+
+  
 
   setup_timer1();
   setup_timer2();
@@ -411,7 +423,7 @@ void set_clock_prescaler(int value){
 }
 
 //**********************************************************************
-int time_since(long timestamp){
+long time_since(long timestamp){
   return millis() - timestamp;
 }
 
