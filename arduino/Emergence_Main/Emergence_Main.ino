@@ -83,7 +83,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 int num_modes = 6;
-int MODE = 3;
+int MODE = 4;
 
 
 
@@ -238,13 +238,18 @@ long mode_gun_last_cleared = millis();
 
 void check_for_mode_gun() {
 
+   Serial.print("Mode is: ");
+   Serial.println(MODE);
+
   handle_pulse();
 
   //Serial.println(num_pulses);
   // clear num_pulses if it's been more than 1.5 seconds
+  // ie. the num_pulses_max need to happen within this 1.5 seconds
   if (millis() < mode_gun_last_cleared + 1500 / clock_prescaler) {
     Serial.println("clearing!");
     num_pulses = 0;
+    mode_gun_last_cleared = millis();
   }
 
   if (num_pulses > num_pulses_max) {
@@ -252,17 +257,19 @@ void check_for_mode_gun() {
     //set_clock_prescaler(1);
     //delay(10);
 
-    //Serial.println("made it to mode change");
+    Serial.println("made it to mode change");
     //delay(500/clock_prescaler);                 // wait for incoming flood to finish
 
-    for (int n = 0; n < 20; n++) {             // transmit a flood of pulses (~500 ms)
+    // transmit a flood of pulses (~960 ms)
+    for (int n = 0; n < 20; n++) {
       transmit_pulse();
       delay(48 / clock_prescaler);
     }
 
     digitalWrite(test_pin, HIGH);
 
-    delay(2500 / clock_prescaler);             // delay to ignore ajdacent floods
+    // delay to ignore adjacent floods (2.5s)
+    delay(2500 / clock_prescaler);
 
     digitalWrite(test_pin, LOW);
 
@@ -272,13 +279,13 @@ void check_for_mode_gun() {
     long time_in = millis();
     int time_out_delay = 10000 / clock_prescaler;
 
-
-
-    while (!pulse_detected && millis() < time_in + time_out_delay) { // wait up to 10 s for data
+    // wait up to 10 s for data
+    while (!pulse_detected && (millis() < time_in + time_out_delay)) {
 
     }
 
-    if (pulse_detected) {                               //handle the first piece of data
+    // handle the first piece of data
+    if (pulse_detected) {
       //digitalWrite(test_pin, LOW);
       //Serial.println("pulse detected");
       time_in = millis();
@@ -287,21 +294,23 @@ void check_for_mode_gun() {
       num_pulses++;
       pulse_detected = 0;
 
-    }
+      while (millis() < time_in + time_out_delay) {
 
-    while (millis() < time_in + time_out_delay) {
-
-      if (pulse_detected) {
-        digitalWrite(test_pin, LOW);
-        num_pulses++;
-        delay(48 / clock_prescaler);
-        pulse_detected = 0;
-
+        if (pulse_detected) {
+          digitalWrite(test_pin, LOW);
+          num_pulses++;
+          delay(48 / clock_prescaler);
+          pulse_detected = 0;
+        }
       }
+
     }
 
-    //Serial.print("num pulses: "); Serial.println(num_pulses);
+    Serial.print("Mode change num_pulses: ");
+    Serial.println(num_pulses);
 
+    // if we got some pulses (from the gun, or our neighbors)
+    // rebroadcast them
     if (num_pulses) {
       for (int n = 0; n < num_pulses; n++) {
         transmit_pulse();
@@ -314,9 +323,17 @@ void check_for_mode_gun() {
 
     delay(400);
 
-    if (num_pulses <= num_modes) {
+    // if we didn't get any data, default to MODE 3
+    if (num_pulses <= 0 || num_pulses > num_modes) {
+      MODE = 3;
+    }
+    else if (num_pulses <= num_modes) {
       MODE = num_pulses;
     }
+
+    Serial.print("Mode has been changed to: ");
+    Serial.println(MODE);
+
 
     pulse_detected = 0;
     num_pulses = 0;
@@ -368,6 +385,7 @@ void low_power_delay(boolean _handle_pulses, int _delay_time) {
 
 void handle_pulse() {
   if (pulse_detected) {
+    // TODO to debounce so we don't get double pulses
     delayMicroseconds(104 / clock_prescaler);
     num_pulses++;
     pulse_detected = 0;
