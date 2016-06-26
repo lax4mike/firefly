@@ -12,7 +12,7 @@ int furthest_pulse;
 void mode3_in_the_light() {
 
   phi = 0;
-  phi_tick = 8;
+  phi_tick = 64;
   phi_threshold = 2048;
   SYNC_THRESHOLD = phi_threshold / 16;
   alpha = 1.1191;

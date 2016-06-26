@@ -3,23 +3,29 @@
   // maintains blink rate if detections occur within first half of last cycle (green)
   // does nothing if no detections (BLUE)
 
+long last_flash_time;
+int time_between_flashes = 1500;
+int new_pulse_offset = 0;
+int ave_pulse_offset = 0;
+
+int synchronizing_step_size = 25;              //Synchronizing step
+boolean corrected_already = 0;
+
+//**********************************************************************
 void mode1_in_the_light(){
   
 }
 
-
+//**********************************************************************
 void mode1_in_the_dark(){
 
-  //digitalWrite(test_pin, HIGH);
-
-
-    if(millis() > last_flash_time + time_between_flashes/clock_prescaler){
+    if(time_to_blink()){
 
       last_flash_time = millis();
 
       blink(1, 1, 50, 50, local_color);
 
-      //Serial.println("blinking");
+      Serial.println("blinking");
 
       num_pulses = 0;
       corrected_already = 0;
@@ -27,18 +33,21 @@ void mode1_in_the_dark(){
 
     }
 
-    //digitalWrite(test_pin, LOW);
 
     if(pulse_detected){
-      digitalWrite(test_pin, LOW);
 
-      pulse_offset = millis() - last_flash_time;
+      handle_pulse();
 
-      delayMicroseconds(100 / clock_prescaler);
+      new_pulse_offset = millis() - last_flash_time;
 
-      num_pulses++;
+      Serial.print("New pulse offset: ");
+      Serial.println(new_pulse_offset);
 
-      pulse_detected = 0;
+      ave_pulse_offset = update_average(ave_pulse_offset, num_pulses, new_pulse_offset);
+
+      Serial.print("Ave pulse offset: ");
+      Serial.println(ave_pulse_offset);
+
     }
 
     //digitalWrite(test_pin, HIGH);
@@ -47,32 +56,48 @@ void mode1_in_the_dark(){
 
     //digitalWrite(test_pin, LOW);
 
-    if(pulse_offset){
+    if(new_pulse_offset){
 
-      if(pulse_offset <= (time_between_flashes/2/clock_prescaler)){
-        if(pulse_offset > synchronizing_step_size / clock_prescaler + charge_delay){
+      if(ave_pulse_offset <= (time_between_flashes/2/clock_prescaler)){
+        if(ave_pulse_offset > synchronizing_step_size / clock_prescaler + charge_delay){
           local_color = GREEN;
         }
       }
 
-      if(pulse_offset > (time_between_flashes/2/clock_prescaler) && !corrected_already){
+      if(ave_pulse_offset > (time_between_flashes/2/clock_prescaler) && !corrected_already){
         last_flash_time = last_flash_time - synchronizing_step_size/clock_prescaler;
         corrected_already = 1;
 
-        if(pulse_offset < (time_between_flashes - synchronizing_step_size)/clock_prescaler){
+        if(ave_pulse_offset < (time_between_flashes - synchronizing_step_size)/clock_prescaler){
           local_color = RED;
         }
 
       }
 
-      pulse_offset = 0;
+      new_pulse_offset = 0;
 
     }
 
-//    while(!pulse_detected && millis() < last_flash_time + time_between_flashes/clock_prescaler - 30 / clock_prescaler){//change 30 if changing SLEEP_30MS
-//      LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
-//    }
+    while(!almost_time_to_blink && !pulse_detected){
+      go_into_low_power(15);
+    }
 
   
 }
+
+//**********************************************************************
+boolean time_to_blink(){
+  return (millis() > last_flash_time + time_between_flashes/clock_prescaler);
+}
+
+//**********************************************************************
+boolean almost_time_to_blink(){
+  return millis() > last_flash_time + time_between_flashes/clock_prescaler - 15;
+}
+
+//**********************************************************************
+int update_average(long current_value, int weight, int new_value){
+  return (current_value * (weight - 1) + new_value) / weight;
+}
+
 

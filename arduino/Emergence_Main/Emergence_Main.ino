@@ -13,17 +13,9 @@ byte blue_pin = A2;
 int photo_pin = A0;
 byte test_pin = 9;
 
-
 int photo_threshold = 500;                    //Photo Threshold
 
-
-
-long last_flash_time;
-int time_between_flashes = 1500;
-int pulse_offset;
-int synchronizing_step_size = 25;              //Synchronizing step
 volatile boolean pulse_detected = 0;
-boolean corrected_already = 0;
 
 int num_pulses = 0;
 int num_pulses_max = 9;
@@ -83,7 +75,8 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 int num_modes = 6;
-int MODE = 4;
+byte default_mode = 1;
+int MODE = default_mode;
 
 
 
@@ -238,15 +231,15 @@ long mode_gun_last_cleared = millis();
 
 void check_for_mode_gun() {
 
-   Serial.print("Mode is: ");
-   Serial.println(MODE);
+//   Serial.print("Mode is: ");
+//   Serial.println(MODE);
 
   handle_pulse();
 
   //Serial.println(num_pulses);
   // clear num_pulses if it's been more than 1.5 seconds
   // ie. the num_pulses_max need to happen within this 1.5 seconds
-  if (millis() < mode_gun_last_cleared + 1500 / clock_prescaler) {
+  if (millis() > mode_gun_last_cleared + 1500 / clock_prescaler) {
     Serial.println("clearing!");
     num_pulses = 0;
     mode_gun_last_cleared = millis();
@@ -325,7 +318,7 @@ void check_for_mode_gun() {
 
     // if we didn't get any data, default to MODE 3
     if (num_pulses <= 0 || num_pulses > num_modes) {
-      MODE = 3;
+      MODE = default_mode;
     }
     else if (num_pulses <= num_modes) {
       MODE = num_pulses;
@@ -339,6 +332,9 @@ void check_for_mode_gun() {
     num_pulses = 0;
     digitalWrite(test_pin, LOW);
 
+    // reset the modegun timeout clock
+    mode_gun_last_cleared = millis();
+
     //set_clock_prescaler(8);
 
   }
@@ -349,32 +345,30 @@ void check_for_mode_gun() {
 void low_power_delay(boolean _handle_pulses, int _delay_time) {
 
   long time_in = millis();
-  int did_handle_pulse = false;
+  int went_to_sleep = false;
 
   while (millis() < time_in + _delay_time / clock_prescaler && BLINKING) {
     if (_handle_pulses) {
       handle_pulse();
-      did_handle_pulse = true;
     }
   }
 
   while (millis() < time_in + _delay_time / clock_prescaler - 15 / clock_prescaler) {
     LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
     if (_handle_pulses) {
       handle_pulse();
-      did_handle_pulse = true;
     }
   }
 
   while (millis() < time_in + _delay_time / clock_prescaler) {
     if (_handle_pulses) {
       handle_pulse();
-      did_handle_pulse = true;
     }
   }
 
   // only reset the timers if we did something
-  if (did_handle_pulse){
+  if (went_to_sleep){
     setup_timer1();
     setup_timer2();
   }
@@ -398,6 +392,7 @@ void go_into_low_power(int _sleep_time) {
 
   long _time_in = millis();
   int _time_out = 500 / clock_prescaler;
+  boolean went_to_sleep = false;
 
   while (BLINKING) {
     if (millis() > _time_in + _time_out) {
@@ -407,20 +402,31 @@ void go_into_low_power(int _sleep_time) {
 
   if (_sleep_time == 15) {
     LowPower.idle(SLEEP_15MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
   }
   else if (_sleep_time == 30) {
     LowPower.idle(SLEEP_30MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
   }
   else if (_sleep_time == 60) {
     LowPower.idle(SLEEP_60MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
   }
   else if (_sleep_time == 120) {
     LowPower.idle(SLEEP_120MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
   }
   else if (_sleep_time == 250) {
     LowPower.idle(SLEEP_250MS, ADC_OFF, TIMER2_OFF, TIMER1_OFF, TIMER0_ON, SPI_OFF, USART0_OFF, TWI_OFF);
+    went_to_sleep = 1;
   }
   else return;
+
+  if(went_to_sleep){
+    setup_timer1();
+    setup_timer2();
+  }
+
 }
 
 //**********************************************************************
