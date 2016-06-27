@@ -13,7 +13,7 @@ byte blue_pin = A2;
 int photo_pin = A0;
 byte test_pin = 9;
 
-int photo_threshold = 500;                    //Photo Threshold
+int photo_threshold = 500;                                                //PHOTO THRESHOLD
 
 volatile boolean pulse_detected = 0;
 
@@ -24,6 +24,8 @@ int charge_delay = 16 / 8;
 volatile int charge_state = 0;
 volatile long charge_counter = 0;
 int charge_cycles = 35;
+
+//********************************************************************* COLOR AND BLINKING
 
 byte blink_color;
 
@@ -56,6 +58,8 @@ byte color_array[8][4] = {
 
 };
 
+
+
 int led_on_steps;
 int led_fade_steps;   // length of blink ~= (led_fade_steps + led_on_steps) * 4
 volatile unsigned int led_on_counter;
@@ -66,13 +70,14 @@ volatile boolean FADING = 0;
 volatile boolean FADE = 0;
 volatile boolean BLINKING = 0;
 
-int local_color = BLUE;
 
+//********************************************************************** MODE DECLARATIONS
+
+//                                 1         2         3     4      5       6
+byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, RED, PURPLE, YELLOW };
 int num_modes = 6;
-byte default_mode = 3;
+byte default_mode = 6;
 int MODE = default_mode;
-
-
 
 //**********************************************************************
 
@@ -257,7 +262,7 @@ void check_for_mode_gun() {
   // clear num_pulses if it's been more than 1.5 seconds
   // ie. the num_pulses_max need to happen within this 1.5 seconds
   if (millis() > mode_gun_last_cleared + 1500 / clock_prescaler) {
-    Serial.println("clearing!");
+    //Serial.println("clearing!");
     num_pulses = 0;
     mode_gun_last_cleared = millis();
   }
@@ -271,6 +276,7 @@ void check_for_mode_gun() {
     //delay(500/clock_prescaler);                 // wait for incoming flood to finish
 
     // transmit a flood of pulses (~960 ms)
+    blink(0, 0, 100, 100, mode_color_array[MODE]);
     for (int n = 0; n < 20; n++) {
       transmit_pulse();
       delay(48 / clock_prescaler);
@@ -322,12 +328,13 @@ void check_for_mode_gun() {
     // if we got some pulses (from the gun, or our neighbors)
     // rebroadcast them
     if (num_pulses) {
+
+      blink(0, 0, 100, 100, mode_color_array[num_pulses]);
+      
       for (int n = 0; n < num_pulses; n++) {
         transmit_pulse();
         delay(48 / clock_prescaler);
       }
-
-      blink(0, 0, 100, 100, num_pulses);
     }
 
 
@@ -528,7 +535,7 @@ void setup_timer2() {   // 8-bit timer (0-255)
 
   TCCR2B |= (1 << CS21) | (1 << CS20); // set prescaler 32, which, in addition to clock_prescaler makes:
 
-  //  16000 / 8 / 32 /256 = overflow 244 times per second, or once per 4 ms
+  //  16000000 / 8 / 32 /256 = overflow 244 times per second, or once per 4 ms
 
   // CS22   CS21   CS20   Prescaler
   //  0      0      0     Timer OFF

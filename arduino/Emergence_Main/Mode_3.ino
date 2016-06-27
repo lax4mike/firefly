@@ -1,4 +1,4 @@
-/**
+/** MODE 3: GREEN
  * Storgatz syncronizing algorithm
  */
 int phi;

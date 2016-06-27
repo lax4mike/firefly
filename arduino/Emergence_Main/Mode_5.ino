@@ -1,4 +1,4 @@
-/**
+/** MODE5: PURPLE
  * Follow the flashlight and blink through colors
  */
 bool was_in_the_light_m5;

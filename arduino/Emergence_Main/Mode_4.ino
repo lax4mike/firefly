@@ -1,4 +1,4 @@
-/**
+/** MODE 4: RED
  * Follow the flashlight and pulse to the neighbors and blink through colors
  */
 bool was_in_the_light_m4;

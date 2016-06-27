@@ -1,4 +1,4 @@
-  /*****************************     MODE 1     *****************************/
+  /*****************************     MODE 1: BLUE   *****************************/
   // changes blink rate if detections occur within second half of last cycle (RED)
   // maintains blink rate if detections occur within first half of last cycle (green)
   // does nothing if no detections (BLUE)
@@ -7,6 +7,7 @@ long last_flash_time;
 int time_between_flashes = 1500;
 int new_pulse_offset = 0;
 int ave_pulse_offset = 0;
+int local_color = BLUE;
 
 int synchronizing_step_size = 25;              //Synchronizing step
 boolean corrected_already = 0;
