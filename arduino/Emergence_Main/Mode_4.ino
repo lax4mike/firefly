@@ -1,5 +1,5 @@
-/**
- * Follow the flashlight and pulse to the neighbors
+/** MODE 4: RED
+ * Follow the flashlight and pulse to the neighbors and blink through colors
  */
 bool was_in_the_light_m4;
 int STEP_MODE4;
@@ -39,6 +39,9 @@ void mode4_in_the_dark(){
     was_in_the_light_m4 = false;
 
     Serial.println("blink!");
+    
+    // reset the modegun timer so it doesn't clear itself after all these delays
+    mode_gun_last_cleared = millis();
 
     // delay for a short amount of time before transmitting
     low_power_delay(1, 100);
@@ -83,18 +86,14 @@ void mode4_in_the_dark(){
       }
 
       // For mode_gun checks
-      handle_pulse();
+      check_for_mode_gun();
 
       // interrupts coloring blinking if it sees a flashlight
-      if(analogRead(photo_pin) > photo_threshold){
-        // reset num_pulses so it doesn't think this is the mode_gun
-        num_pulses =0;
+      if(light_is_on()){
         return;
       }
 
     }
-
-    check_for_mode_gun();
 
     Serial.println("end blink");
 
@@ -104,6 +103,10 @@ void mode4_in_the_dark(){
     //low_power_delay(1, 1000);
     can_blink_m4 = 1;
     pulse_detected = 0;
+  }
+
+  while(!light_is_on() && !pulse_detected){
+    go_into_low_power(250);
   }
 
 }
