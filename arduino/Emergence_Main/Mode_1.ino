@@ -68,7 +68,7 @@ void mode1_in_the_dark(){
 
     }
 
-    while(!almost_time_to_blink && !pulse_detected){
+    while(!almost_time_to_blink() && !pulse_detected){
       go_into_low_power(15);
     }
 
@@ -82,7 +82,7 @@ boolean time_to_blink(){
 
 //**********************************************************************
 boolean almost_time_to_blink(){
-  return millis() > last_flash_time + time_between_flashes/clock_prescaler - 15;
+  return (millis() > last_flash_time + time_between_flashes/clock_prescaler - 15);
 }
 
 //**********************************************************************

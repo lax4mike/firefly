@@ -105,4 +105,8 @@ void mode4_in_the_dark(){
     pulse_detected = 0;
   }
 
+  while(!light_is_on() && !pulse_detected){
+    go_into_low_power(250);
+  }
+
 }
