@@ -33,7 +33,7 @@ int frequency = 10000; // Hz
 unsigned long time_awoken;
 int time_awake = 10000;
 int MODE = 1;
-int num_modes = 5;
+int num_modes = 6;
 
 //**********************************************************************
 
@@ -73,7 +73,12 @@ void loop() {
   
   if(triggered){
     
-    delay(500);
+    for(int n = 0; n < 5; n++){
+      digitalWrite(blue_pin, HIGH);
+      delay(100);
+      digitalWrite(blue_pin, LOW);
+      delay(100);
+    }
 
     setup_timer1();
 
@@ -93,11 +98,14 @@ void loop() {
 
         send_messages();
 
-        while(trigger_state){
+        // use the debounce to properly clear the trigger
+        while(trigger_state) {
           debounce_trigger();
           delay(1);
           //Serial.println(digitalRead(trigger_pin));
         }
+
+        time_awoken = millis();
 
         //Serial.println("trigger released");
       }
@@ -117,15 +125,15 @@ void loop() {
         for(int n = 1; n <= MODE; n++){
           if(n % 2){
             digitalWrite(red_pin, HIGH);
-            delay(250);
+            delay(100);
             digitalWrite(red_pin, LOW);
-            delay(250);
+            delay(100);
           }
           else{
             digitalWrite(green_pin, HIGH);
-            delay(250);
+            delay(100);
             digitalWrite(green_pin, LOW);
-            delay(250);
+            delay(100);
           }
         }
 
@@ -162,8 +170,14 @@ void send_messages(){
     time_in = millis();
   }
 
-  while(millis() < time_in + 6000){  // delay 4 s from start of transmit
-
+                                           
+  while(millis() < time_in + 6000){  // blink yellow and wait ~6 seconds
+    digitalWrite(green_pin, HIGH);
+    digitalWrite(red_pin, HIGH);
+    delay(100);
+    digitalWrite(green_pin, LOW);
+    digitalWrite(red_pin, LOW);
+    delay(100);
   }
 
   for(int n = 0; n < MODE; n++){      // transmit the actual data
@@ -186,8 +200,6 @@ void transmit_pulse(){
   digitalWrite(pulse_gate_pin, LOW);
   delayMicroseconds(48 / clock_prescaler);
 
-  //pulse_detected = 0;                  // Clear the false detections from the pulse cycle
-
 }
 
 //**********************************************************************
@@ -203,6 +215,7 @@ void debounce_trigger(){
     }
   }
   else{
+    triggered = 0;
     trigger_debounce_counter--;
     if(trigger_debounce_counter < 0){
       trigger_debounce_counter = 0;

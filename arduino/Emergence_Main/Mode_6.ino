@@ -13,17 +13,22 @@ void mode6_in_the_dark(){
 
   if(rand_number == 1){
     blink(1,0, 100,100, YELLOW);
+    mode_gun_last_cleared = millis();
     low_power_delay(1, 1000);
+    
   }
 
   if(pulse_detected){
     handle_pulse();
     low_power_delay(1, 256);
     rand_number = random(10);
-    if(true){
+    if(rand_number > 3){
+      mode_gun_last_cleared = millis();
       blink(1,0, 100, 100, YELLOW);
-      low_power_delay(1, 1000);
+      low_power_delay(1, 512);
     }
+    Serial.print("num_pulses: ");
+    Serial.println(num_pulses);
     
   }
 

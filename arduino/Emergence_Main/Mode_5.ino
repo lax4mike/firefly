@@ -21,6 +21,9 @@ void mode5_in_the_dark(){
 
     Serial.println("GO!");
 
+    // reset the modegun timer so it doesn't clear itself after all these delays
+    mode_gun_last_cleared = millis();
+
     // delay a bit before the flash sequence
     low_power_delay(1, 500);
 

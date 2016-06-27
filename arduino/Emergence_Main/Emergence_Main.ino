@@ -1,7 +1,7 @@
 #include <LowPower.h>
 #include <prescaler.h>
 
-
+byte clock_prescaler;
 long frequency = 160000; // Hz
 
 int charge_gate_pin = 11;
@@ -41,8 +41,6 @@ byte LED2_PIN = 1;
 byte LED1_VALUE = 2;
 byte LED2_VALUE = 3;
 
-
-
 byte color_array[8][4] = {
 
   // NOTES: Stay safely away from 0 and 255 (10 away seems to work fine)
@@ -58,10 +56,6 @@ byte color_array[8][4] = {
 
 };
 
-byte clock_prescaler;
-
-unsigned long millis_offset = 0;
-
 int led_on_steps;
 int led_fade_steps;   // length of blink ~= (led_fade_steps + led_on_steps) * 4
 volatile unsigned int led_on_counter;
@@ -75,7 +69,7 @@ volatile boolean BLINKING = 0;
 int local_color = BLUE;
 
 int num_modes = 6;
-byte default_mode = 1;
+byte default_mode = 3;
 int MODE = default_mode;
 
 
@@ -125,44 +119,67 @@ void loop() {
   //While in the dark
   //while(is_in_the_dark()){
 
+
+  long light_on_time = millis();
+
+  if(light_is_on()){
+
+    
+    while(light_is_on() && millis() <= light_on_time + 60000 / clock_prescaler){
+      go_into_low_power(15);
+      check_for_mode_gun();
+    }
+  
+    while(light_is_on() && millis() > light_on_time + 60000 / clock_prescaler){
+      MODE = default_mode;
+      LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
+      check_for_mode_gun();
+    }
+    // clear num_pulses after it's been in the light (modes 4 and 5 could otherwise
+    // recieve to many pulses if someone waves the light really fast
+    num_pulses = 0;
+  }
+
+
+
   if (MODE == 1) {
     mode1_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 1) {
       mode1_in_the_dark();
       check_for_mode_gun();
     }
   }
   else if (MODE == 2) {
     mode2_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 2) {
       mode2_in_the_dark();
       check_for_mode_gun();
     }
   }
   else if (MODE == 3) {
    mode3_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 3) {
       mode3_in_the_dark();
       check_for_mode_gun();
     }
   }
   else if (MODE == 4) {
    mode4_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 4) {
       mode4_in_the_dark();
       check_for_mode_gun();
     }
   }
   else if (MODE == 5) {
    mode5_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 5) {
       mode5_in_the_dark();
       check_for_mode_gun();
     }
   }
   else if (MODE == 6) {
    mode6_in_the_light();
-    while (is_in_the_dark()) {
+    while (!light_is_on() && MODE == 6) {
       mode6_in_the_dark();
       check_for_mode_gun();
     }
@@ -470,6 +487,11 @@ long time_since(long timestamp) {
 }
 
 //**********************************************************************
+boolean light_is_on() {
+  return analogRead(photo_pin) > photo_threshold;
+}
+
+//**********************************************************************
 int test;
 void setup_timer1() {
 
@@ -630,7 +652,7 @@ void pulse_detect() {
 }
 
 
-//Returnes true if the bug is still in teh dark
-boolean is_in_the_dark() {
-  return analogRead(photo_pin) < photo_threshold;
-}
+////Returnes true if the bug is still in teh dark
+//boolean is_in_the_dark() {
+//  return analogRead(photo_pin) < photo_threshold;
+//}
