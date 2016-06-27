@@ -134,6 +134,7 @@ void loop() {
     triggered = 0;
     
     time_awoken = millis();
+    int first_press = true;
         
     //Serial.println("triggered");
     //Serial.println(digitalRead(trigger_pin));
@@ -163,10 +164,14 @@ void loop() {
 
       if(button_state){
 
-        MODE++;
-        if(MODE > num_modes){
-          MODE = 1;
+        if(!first_press){
+
+          MODE++;
+          if(MODE > num_modes){
+            MODE = 1;
+          }
         }
+        else first_press = false;
 
         //Serial.print("MODE: ");
         //Serial.println(MODE);

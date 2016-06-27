@@ -69,6 +69,7 @@ volatile unsigned int OCR2B_calculated;
 volatile boolean FADING = 0;
 volatile boolean FADE = 0;
 volatile boolean BLINKING = 0;
+byte led_minimum = 10;
 
 
 //********************************************************************** MODE DECLARATIONS
@@ -580,7 +581,7 @@ ISR(TIMER1_COMPA_vect) {
 
 ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
 
-  if (OCR2A > 10) {
+  if (OCR2A > led_minimum) {
     digitalWrite(color_array[blink_color][LED1_PIN], HIGH);
 
     if (FADING) {
@@ -589,10 +590,10 @@ ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
     }
   }
   else {
-    OCR2A = 10;
+    OCR2A = led_minimum;
   }
 
-  if (OCR2B > 10) {
+  if (OCR2B > led_minimum) {
     digitalWrite(color_array[blink_color][LED2_PIN], HIGH);
 
     if (FADING) {
@@ -601,8 +602,7 @@ ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
     }
   }
   else {
-    OCR2B = 10;
-
+    OCR2B = led_minimum;
   }
 
   if (led_on_counter) led_on_counter--;
@@ -612,14 +612,16 @@ ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
   }
 
   if (!led_on_counter && !FADE) {
-    OCR2A = 10;
-    OCR2B = 10;
+    OCR2A = led_minimum;
+    OCR2B = led_minimum;
     BLINKING = 0;
+    digitalWrite(color_array[blink_color][LED1_PIN], LOW);
+    digitalWrite(color_array[blink_color][LED2_PIN], LOW);
   }
 
   if (FADING) led_fade_counter--;
 
-  if (OCR2A == 10 && OCR2B == 10) {
+  if (OCR2A == led_minimum && OCR2B == led_minimum) {
     FADING = 0;
     BLINKING = 0;
   }

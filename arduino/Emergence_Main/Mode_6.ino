@@ -51,6 +51,7 @@ void mode6_in_the_dark(){
 void blink_and_pulse(){
   mode_gun_last_cleared = millis();
   blink(1,0, 100, 100, YELLOW);
+
   low_power_delay(1, 512);
  
 }
