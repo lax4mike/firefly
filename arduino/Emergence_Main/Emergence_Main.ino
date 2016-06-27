@@ -77,7 +77,7 @@ byte led_minimum = 10;
 //                                 1         2         3     4      5       6
 byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, RED, PURPLE, YELLOW };
 int num_modes = 6;
-byte default_mode = 6;
+byte default_mode = 3;
 int MODE = default_mode;
 
 //**********************************************************************
@@ -323,18 +323,28 @@ void check_for_mode_gun() {
 
     }
 
-    Serial.print("Mode change num_pulses: ");
-    Serial.println(num_pulses);
-
     // if we got some pulses (from the gun, or our neighbors)
+    // check to see if it's real
     // rebroadcast them
     if (num_pulses) {
 
-      blink(0, 0, 100, 100, mode_color_array[num_pulses]);
-      
-      for (int n = 0; n < num_pulses; n++) {
-        transmit_pulse();
-        delay(48 / clock_prescaler);
+      boolean mode_is_real = false;
+
+      if (num_pulses <= 0 || num_pulses > num_modes) {
+        MODE = default_mode;
+      }
+      else {
+        MODE = num_pulses;
+        mode_is_real = true;
+      }
+
+      blink(0, 0, 100, 100, mode_color_array[MODE]);
+
+      if(mode_is_real){
+        for (int n = 0; n < MODE; n++) {
+          transmit_pulse();
+          delay(48 / clock_prescaler);
+        }
       }
     }
 
@@ -342,12 +352,7 @@ void check_for_mode_gun() {
     delay(400);
 
     // if we didn't get any data, default to MODE 3
-    if (num_pulses <= 0 || num_pulses > num_modes) {
-      MODE = default_mode;
-    }
-    else if (num_pulses <= num_modes) {
-      MODE = num_pulses;
-    }
+
 
     Serial.print("Mode has been changed to: ");
     Serial.println(MODE);

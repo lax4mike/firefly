@@ -41,21 +41,10 @@ void mode1_in_the_dark(){
 
       new_pulse_offset = millis() - last_flash_time;
 
-      Serial.print("New pulse offset: ");
-      Serial.println(new_pulse_offset);
-
       ave_pulse_offset = update_average(ave_pulse_offset, num_pulses, new_pulse_offset);
-
-      Serial.print("Ave pulse offset: ");
-      Serial.println(ave_pulse_offset);
 
     }
 
-    //digitalWrite(test_pin, HIGH);
-
-    //check_for_mode_gun();
-
-    //digitalWrite(test_pin, LOW);
 
     if(new_pulse_offset){
 
