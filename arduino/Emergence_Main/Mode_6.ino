@@ -42,6 +42,10 @@ void mode6_in_the_dark(){
       blink_and_pulse();
     }
     
+    // delay to stop listening to adjacent ones
+    low_power_delay(0, 1000);
+    pulse_detected = 0;
+    
   }
 
 }
