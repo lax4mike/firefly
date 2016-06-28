@@ -1,4 +1,4 @@
-/** MODE 4: RED
+/** MODE 4: ORANGE
  * Follow the flashlight and pulse to the neighbors and blink through colors
  */
 bool was_in_the_light_m4;
@@ -18,6 +18,10 @@ void mode4_in_the_light(){
 void mode4_in_the_dark(){
 
 //  Serial.println("mode4 - Dark loop");
+
+  while(!light_is_on() && !pulse_detected){
+    go_into_low_power(250);
+  }
 
   if (can_blink_m4 && (was_in_the_light_m4 || pulse_detected)){
 
@@ -54,46 +58,7 @@ void mode4_in_the_dark(){
 
     long time_start = millis();
 
-    while(time_since(time_start) < STEP_MODE4*7){
-
-      Serial.print(time_since(time_start));
-      Serial.print(" " );
-      Serial.println(STEP_MODE4);
-
-      if (time_since(time_start) < STEP_MODE4){
-          blink(0, 0, 30, 60, BLUE);
-      }
-      else if (time_since(time_start) < STEP_MODE4*2){
-          blink(0, 0, 30, 60, BLUE_GREEN);
-      }
-      else if (time_since(time_start) < STEP_MODE4*3){
-          blink(0, 0, 30, 60, GREEN);
-      }
-      else if (time_since(time_start) < STEP_MODE4*4){
-          blink(0, 0, 30, 60, GREEN_YELLOW);
-      }
-      else if (time_since(time_start) < STEP_MODE4*5){
-          blink(0, 0, 30, 60, YELLOW);
-      }
-      else if (time_since(time_start) < STEP_MODE4*6){
-          blink(0, 0, 30, 60, ORANGE);
-      }
-      else if (time_since(time_start) < STEP_MODE4*7){
-          blink(0, 0, 30, 60, RED);
-      }
-      else {
-          blink(0, 0, 30, 60, PURPLE);
-      }
-
-      // For mode_gun checks
-      check_for_mode_gun();
-
-      // interrupts coloring blinking if it sees a flashlight
-      if(light_is_on()){
-        return;
-      }
-
-    }
+    blink(0, 1, 250, 250, ORANGE);
 
     Serial.println("end blink");
 
@@ -105,8 +70,6 @@ void mode4_in_the_dark(){
     pulse_detected = 0;
   }
 
-  while(!light_is_on() && !pulse_detected){
-    go_into_low_power(250);
-  }
+
 
 }

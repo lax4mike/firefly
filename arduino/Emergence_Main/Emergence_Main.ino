@@ -75,7 +75,7 @@ byte led_minimum = 10;
 //********************************************************************** MODE DECLARATIONS
 
 //                                 1         2         3     4      5       6
-byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, RED, PURPLE, YELLOW };
+byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
 int num_modes = 6;
 byte default_mode = 3;
 int MODE = default_mode;
