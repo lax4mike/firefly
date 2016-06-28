@@ -1,6 +1,7 @@
 /** 
  * Phi syncronizing algorithm
  */
+
 int phi;
 int phi_tick;
 int phi_threshold;

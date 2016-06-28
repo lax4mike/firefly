@@ -5,9 +5,9 @@ void mode6_in_the_light(){
   
   int rand_number = mode_gun_last_cleared % 25;
 
-  Serial.println("Entering darkness");
+  //Serial.println("Entering darkness");
 
-  Serial.println(rand_number);
+  //Serial.println(rand_number);
 
   for(int n = 0; n < rand_number; n++){
     int garbage = random(500);
@@ -26,7 +26,7 @@ void mode6_in_the_dark(){
 
   int rand_number = random(156);  // one should fire every ~10 s... multiply 156 by the number of bugs
 
-  Serial.println(rand_number);
+  //Serial.println(rand_number);
 
   if(rand_number == 42){   // this is the answer to the ultimate question
     blink_and_pulse();
@@ -41,11 +41,12 @@ void mode6_in_the_dark(){
     if(rand_number > 3){
       blink_and_pulse();
     }
+
+    //check_for_mode_gun();
+    mode_gun_last_cleared = millis();
     
     // delay to stop listening to adjacent ones
-    low_power_delay(0, 1000);
-    pulse_detected = 0;
-    
+    low_power_delay(1, 1000);    
   }
 
 }

@@ -8,7 +8,7 @@ void mode5_in_the_light(){
   was_in_the_light_m5 = true;
   STEP_MODE5 = 32;
 
-  Serial.println("argg!, mode5 the light!");
+  //Serial.println("argg!, mode5 the light!");
 }
 
 
@@ -19,7 +19,7 @@ void mode5_in_the_dark(){
 
     was_in_the_light_m5 = false;
 
-    Serial.println("GO!");
+    //Serial.println("GO!");
 
     // reset the modegun timer so it doesn't clear itself after all these delays
     mode_gun_last_cleared = millis();
@@ -31,9 +31,9 @@ void mode5_in_the_dark(){
 
     while(time_since(flashlight_gone) < STEP_MODE5*7){
 
-      Serial.print(time_since(flashlight_gone));
-      Serial.print(" " );
-      Serial.println(STEP_MODE5);
+//      Serial.print(time_since(flashlight_gone));
+        Serial.print(" " );
+//      Serial.println(STEP_MODE5);
 
       if (time_since(flashlight_gone) < STEP_MODE5){
         blink(0, 1, 30, 60, BLUE);

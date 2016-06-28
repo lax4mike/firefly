@@ -26,8 +26,6 @@ void mode1_in_the_dark(){
 
       blink(1, 1, 50, 50, local_color);
 
-      Serial.println("blinking");
-
       num_pulses = 0;
       corrected_already = 0;
       local_color = BLUE;

@@ -64,8 +64,6 @@ int led_on_steps;
 int led_fade_steps;   // length of blink ~= (led_fade_steps + led_on_steps) * 4
 volatile unsigned int led_on_counter;
 volatile unsigned int led_fade_counter;
-volatile unsigned int OCR2A_calculated;
-volatile unsigned int OCR2B_calculated;
 volatile boolean FADING = 0;
 volatile boolean FADE = 0;
 volatile boolean BLINKING = 0;
@@ -273,7 +271,6 @@ void check_for_mode_gun() {
     //set_clock_prescaler(1);
     //delay(10);
 
-    Serial.println("made it to mode change");
     //delay(500/clock_prescaler);                 // wait for incoming flood to finish
 
     // transmit a flood of pulses (~960 ms)
@@ -352,11 +349,6 @@ void check_for_mode_gun() {
     delay(400);
 
     // if we didn't get any data, default to MODE 3
-
-
-    Serial.print("Mode has been changed to: ");
-    Serial.println(MODE);
-
 
     pulse_detected = 0;
     num_pulses = 0;
@@ -590,8 +582,7 @@ ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
     digitalWrite(color_array[blink_color][LED1_PIN], HIGH);
 
     if (FADING) {
-      OCR2A_calculated = led_fade_counter * color_array[blink_color][LED1_VALUE] / led_fade_steps;
-      OCR2A = OCR2A_calculated;
+      OCR2A = led_fade_counter * color_array[blink_color][LED1_VALUE] / led_fade_steps;
     }
   }
   else {
@@ -602,8 +593,7 @@ ISR(TIMER2_OVF_vect) {     // Turns on PWM for led1 and led2 pins.
     digitalWrite(color_array[blink_color][LED2_PIN], HIGH);
 
     if (FADING) {
-      OCR2B_calculated = led_fade_counter * color_array[blink_color][LED2_VALUE] / led_fade_steps;
-      OCR2B = OCR2B_calculated;
+      OCR2B = led_fade_counter * color_array[blink_color][LED2_VALUE] / led_fade_steps;
     }
   }
   else {
