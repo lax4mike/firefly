@@ -130,12 +130,12 @@ void loop() {
 
   if(light_is_on()){
 
-    
+
     while(light_is_on() && millis() <= light_on_time + 60000 / clock_prescaler){
       go_into_low_power(15);
       check_for_mode_gun();
     }
-  
+
     while(light_is_on() && millis() > light_on_time + 60000 / clock_prescaler){
       MODE = default_mode;
       LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
@@ -156,16 +156,16 @@ void loop() {
     }
   }
   else if (MODE == 2) {
-    mode2_in_the_light();
+    phi_in_the_light();
     while (!light_is_on() && MODE == 2) {
-      mode2_in_the_dark();
+      phi_in_the_dark(1.04);
       check_for_mode_gun();
     }
   }
   else if (MODE == 3) {
-   mode3_in_the_light();
+   phi_in_the_light();
     while (!light_is_on() && MODE == 3) {
-      mode3_in_the_dark();
+      phi_in_the_dark(1.1191);
       check_for_mode_gun();
     }
   }
