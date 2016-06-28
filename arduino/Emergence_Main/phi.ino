@@ -1,30 +1,28 @@
-/** MODE 3: GREEN
- * Storgatz syncronizing algorithm
+/** 
+ * Phi syncronizing algorithm
  */
 int phi;
 int phi_tick;
 int phi_threshold;
 int SYNC_THRESHOLD;
-float alpha;
 bool was_in_the_light;
 int furthest_pulse;
 
-void mode3_in_the_light() {
+void phi_in_the_light() {
 
   phi = 0;
   phi_tick = 64;
   phi_threshold = 2048;
   SYNC_THRESHOLD = phi_threshold / 16;
-  alpha = 1.1191;
   was_in_the_light = true;
   furthest_pulse = 0; // time to the pulse that is furthest from the blink
 
 //  Serial.println("arrg! the light!!");
 }
 
-void mode3_in_the_dark() {
-
-//  Serial.print("mode3 in the dark ");
+// alpha = 1.1191;
+void phi_in_the_dark(float alpha) {
+//  Serial.print("phi in the dark ");
 
   // blink immediately if the flashlight just went away
   if (was_in_the_light) {
