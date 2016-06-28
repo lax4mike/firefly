@@ -4,21 +4,22 @@
 byte clock_prescaler;
 long frequency = 160000; // Hz
 
-int charge_gate_pin = 11;
-int pulse_gate_pin = 12;
-int pulse_detect_pin = 2;
-byte red_pin = 13;
-byte green_pin = A1;
-byte blue_pin = A2;
-int photo_pin = A0;
-byte test_pin = 9;
+const byte charge_gate_pin = 11;
+const byte pulse_gate_pin = 12;
+const byte pulse_detect_pin = 2;
+const byte red_pin = 13;
+const byte green_pin = A1;
+const byte blue_pin = A2;
+const byte photo_pin = A0;
+const byte test_pin = 9;
 
 int photo_threshold = 500;                                                //PHOTO THRESHOLD
 
 volatile boolean pulse_detected = 0;
 
 int num_pulses = 0;
-int num_pulses_max = 12;
+const byte num_pulses_max = 13;
+const byte transmit_pulses = 40;
 
 int charge_delay = 16 / 8;
 volatile int charge_state = 0;
@@ -29,21 +30,21 @@ int charge_cycles = 35;
 
 byte blink_color;
 
-byte BLUE = 0;
-byte BLUE_GREEN = 1;
-byte GREEN = 2;
-byte GREEN_YELLOW = 3;
-byte YELLOW = 4;
-byte ORANGE = 5;
-byte RED = 6;
-byte PURPLE = 7;
+const byte BLUE = 0;
+const byte BLUE_GREEN = 1;
+const byte GREEN = 2;
+const byte GREEN_YELLOW = 3;
+const byte YELLOW = 4;
+const byte ORANGE = 5;
+const byte RED = 6;
+const byte PURPLE = 7;
 
-byte LED1_PIN = 0;
-byte LED2_PIN = 1;
-byte LED1_VALUE = 2;
-byte LED2_VALUE = 3;
+const byte LED1_PIN = 0;
+const byte LED2_PIN = 1;
+const byte LED1_VALUE = 2;
+const byte LED2_VALUE = 3;
 
-byte color_array[8][4] = {
+const byte color_array[8][4] = {
 
   // NOTES: Stay safely away from 0 and 255 (10 away seems to work fine)
 
@@ -58,8 +59,6 @@ byte color_array[8][4] = {
 
 };
 
-
-
 int led_on_steps;
 int led_fade_steps;   // length of blink ~= (led_fade_steps + led_on_steps) * 4
 volatile unsigned int led_on_counter;
@@ -67,16 +66,16 @@ volatile unsigned int led_fade_counter;
 volatile boolean FADING = 0;
 volatile boolean FADE = 0;
 volatile boolean BLINKING = 0;
-byte led_minimum = 10;
+const byte led_minimum = 10;
 
 
 //********************************************************************** MODE DECLARATIONS
 
 //                                 1         2         3     4      5       6
-byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
-int num_modes = 6;
-byte default_mode = 3;
-int MODE = default_mode;
+const byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
+const byte num_modes = 6;
+const byte default_mode = 3;
+byte MODE = default_mode;
 
 //**********************************************************************
 
@@ -196,11 +195,19 @@ void loop() {
 //**********************************************************************
 void blink(boolean _pulse, boolean _fade, int _led_on_steps, int _led_fade_steps, int _color) {
 
+  //deliberately stomp on any blinks that are happening already
+
   setup_timer2();
+
+  digitalWrite(blue_pin, LOW);
+  digitalWrite(green_pin, LOW);
+  digitalWrite(red_pin, LOW);
 
   if (_pulse) {
     transmit_pulse();
   }
+
+  // configure variables for blink interrupts
 
   noInterrupts();
 
@@ -268,32 +275,25 @@ void check_for_mode_gun() {
 
   if (num_pulses > num_pulses_max) {
 
-    //set_clock_prescaler(1);
-    //delay(10);
-
-    //delay(500/clock_prescaler);                 // wait for incoming flood to finish
-
-    // transmit a flood of pulses (~960 ms)
+    // transmit a flood of pulses
     blink(0, 0, 100, 100, mode_color_array[MODE]);
-    for (int n = 0; n < 30; n++) {
+    for (int n = 0; n < transmit_pulses; n++) {
       transmit_pulse();
       delay(48 / clock_prescaler);
     }
 
-    digitalWrite(test_pin, HIGH);
 
-    // delay to ignore adjacent floods (2.5s)
-    delay(2500 / clock_prescaler);
+    // delay to ignore adjacent floods (~4.5s)
+    delay((transmit_pulses * 64 + 2000) / clock_prescaler);
 
-    digitalWrite(test_pin, LOW);
 
     pulse_detected = 0;
     num_pulses = 0;
 
     long time_in = millis();
-    int time_out_delay = 10000 / clock_prescaler;
+    int time_out_delay = 60000 / clock_prescaler;
 
-    // wait up to 10 s for data
+    // wait up to 30 s for data
     while (!pulse_detected && (millis() < time_in + time_out_delay)) {
 
     }
@@ -317,6 +317,8 @@ void check_for_mode_gun() {
           pulse_detected = 0;
         }
       }
+
+      delay(transmit_pulses * 64 / clock_prescaler);
 
     }
 
@@ -345,14 +347,12 @@ void check_for_mode_gun() {
       }
     }
 
+    // wait for 4 layers of propagation to happen
+    delay(transmit_pulses * 64 / clock_prescaler * 4);
 
-    delay(400);
-
-    // if we didn't get any data, default to MODE 3
 
     pulse_detected = 0;
     num_pulses = 0;
-    digitalWrite(test_pin, LOW);
 
     // reset the modegun timeout clock
     mode_gun_last_cleared = millis();

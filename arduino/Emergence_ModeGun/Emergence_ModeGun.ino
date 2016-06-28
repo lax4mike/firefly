@@ -82,7 +82,7 @@ volatile boolean BLINKING = 0;
 
 //**********************************************************************
 
-byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, RED, PURPLE, YELLOW };
+byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
 
 
 //**********************************************************************
@@ -213,7 +213,7 @@ void send_messages(){
 
   unsigned long time_in = millis();     // capture start time
 
-  for(int n = 0; n < 30; n++){          // transmit a flood of pulses (~1000 ms)
+  for(int n = 0; n < 40; n++){          // transmit a flood of pulses
     transmit_pulse();
     delay(48);
   }
@@ -224,7 +224,7 @@ void send_messages(){
   }
 
                                            
-  while(millis() < time_in + 6000){  // blink the mode color and wait ~6 seconds
+  while(millis() < time_in + 10000){  // blink the mode color and wait ~10 seconds
     blink(0,0,25,25, mode_color_array[MODE]);
     delay(200);
   }

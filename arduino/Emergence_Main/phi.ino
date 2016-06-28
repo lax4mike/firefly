@@ -8,6 +8,7 @@ int phi_threshold;
 int SYNC_THRESHOLD;
 bool was_in_the_light;
 int furthest_pulse;
+boolean interrupt_attached;
 
 void phi_in_the_light() {
 
@@ -17,6 +18,7 @@ void phi_in_the_light() {
   SYNC_THRESHOLD = phi_threshold / 16;
   was_in_the_light = true;
   furthest_pulse = 0; // time to the pulse that is furthest from the blink
+  interrupt_attached = true;
 
 //  Serial.println("arrg! the light!!");
 }
@@ -34,6 +36,12 @@ void phi_in_the_dark(float alpha) {
 
 
   // delay for phi_tick ms in low power mode
+
+    if(!interrupt_attached && !BLINKING){
+      attachInterrupt(0, pulse_detect, RISING);
+      pulse_detected = 0;
+      interrupt_attached = true;
+    }
 
     low_power_delay(0, phi_tick);
 //  delay(phi_tick / clock_prescaler);
@@ -85,7 +93,11 @@ void phi_in_the_dark(float alpha) {
     // reset
     furthest_pulse = 0;
 
+    detachInterrupt(0);
+    interrupt_attached = false;
+    
     blink(1, 1, 30, 60, color);
+    
   }
 
 }

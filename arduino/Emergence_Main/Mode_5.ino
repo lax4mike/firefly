@@ -36,28 +36,36 @@ void mode5_in_the_dark(){
         Serial.println(STEP_MODE5);
 
       if (time_since(flashlight_gone) < STEP_MODE5){
-        blink(0, 1, 30, 60, BLUE);
+        blink(0, 0, 30, 60, BLUE);
+        delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*2){
-          blink(0, 1, 30, 60, BLUE_GREEN);
+          blink(0, 0, 30, 60, BLUE_GREEN);
+          delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*3){
-          blink(0, 1, 30, 60, GREEN);
+          blink(0, 0, 30, 60, GREEN);
+          delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*4){
-          blink(0, 1, 30, 60, GREEN_YELLOW);
+          blink(0, 0, 30, 60, GREEN_YELLOW);
+          delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*5){
-          blink(0, 1, 30, 60, YELLOW);
+          blink(0, 0, 30, 60, YELLOW);
+          delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*6){
-          blink(0, 1, 30, 60, ORANGE);
+          blink(0, 0, 30, 60, ORANGE);
+          delay(150/clock_prescaler);
       }
       else if (time_since(flashlight_gone) < STEP_MODE5*7){
-          blink(0, 1, 30, 60, RED);
+          blink(0, 0, 30, 60, RED);
+          delay(150/clock_prescaler);
       }
       else {
           blink(0, 1, 30, 60, PURPLE);
+          delay(150/clock_prescaler);
       }
 
     }

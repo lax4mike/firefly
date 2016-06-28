@@ -1,5 +1,9 @@
 // MODE 6 - YELLOW
 
+long last_pulse_time_m6 = 0;
+
+const int random_range = 2000;
+
 
 void mode6_in_the_light(){
   
@@ -10,42 +14,28 @@ void mode6_in_the_light(){
   //Serial.println(rand_number);
 
   for(int n = 0; n < rand_number; n++){
-    int garbage = random(500);
+    int garbage = random(random_range);
   }
-
+  
   blink_and_pulse();
 
-  
 }
 
 //*********************************************************************
 
 void mode6_in_the_dark(){
 
-  low_power_delay(0, 64);
+  go_into_low_power(60);
 
-  int rand_number = random(156);  // one should fire every ~10 s... multiply 156 by the number of bugs
-
-  //Serial.println(rand_number);
-
-  if(rand_number == 42){   // this is the answer to the ultimate question
+  if(random(random_range) == 42){   // this is the answer to the ultimate question
     blink_and_pulse();
   }
 
   if(pulse_detected){
-    handle_pulse();
-    low_power_delay(0, 64);    // 64 for propagation delay
-    
-    rand_number = random(10);
-    
-    if(rand_number > 3){
-      blink_and_pulse();
-    }
 
-    mode_gun_last_cleared = millis();
-    
-    // delay to stop listening to adjacent ones
-    low_power_delay(1, 1000);    
+    if(random(10) > 6){
+      blink_and_pulse();
+    }   
   }
 
 }
@@ -53,8 +43,14 @@ void mode6_in_the_dark(){
 //*********************************************************************
 
 void blink_and_pulse(){
-  mode_gun_last_cleared = millis();
-  blink(1,0, 100, 100, YELLOW);
-  low_power_delay(0, 128);
+  
+  // only if it's been at least 1.5 sec since the last transmit:
+  
+  if(millis() > last_pulse_time_m6 + 3000 / clock_prescaler){
+    low_power_delay(0, 128);    // 128 for propagation delay
+    last_pulse_time_m6 = millis();
+    blink(1,0, 100, 100, YELLOW);
+    low_power_delay(0, 256);
+  }
 }
 
