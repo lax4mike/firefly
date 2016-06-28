@@ -74,7 +74,7 @@ const byte led_minimum = 10;
 //                                 1         2         3     4      5       6
 const byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
 const byte num_modes = 6;
-const byte default_mode = 3;
+const byte default_mode = 5;
 byte MODE = default_mode;
 
 //**********************************************************************
@@ -127,7 +127,6 @@ void loop() {
 
   if(light_is_on()){
 
-
     while(light_is_on() && millis() <= light_on_time + 60000 / clock_prescaler){
       go_into_low_power(15);
       check_for_mode_gun();
@@ -143,49 +142,61 @@ void loop() {
     num_pulses = 0;
   }
 
+  boolean went_dark = darkness();
+
+  while(!light_is_on() && !darkness()){
+    go_into_low_power(15);
+    check_for_mode_gun();
+  }
 
 
   if (MODE == 1) {
     mode1_in_the_light();
-    while (!light_is_on() && MODE == 1) {
+    while (!light_is_on() && went_dark && MODE == 1) {
       mode1_in_the_dark();
       check_for_mode_gun();
     }
+    went_dark = false;
   }
   else if (MODE == 2) {
     phi_in_the_light();
-    while (!light_is_on() && MODE == 2) {
+    while (!light_is_on() && went_dark && MODE == 2) {
       phi_in_the_dark(1.04);
       check_for_mode_gun();
     }
+    went_dark = false;
   }
   else if (MODE == 3) {
    phi_in_the_light();
-    while (!light_is_on() && MODE == 3) {
+    while (!light_is_on() && went_dark && MODE == 3) {
       phi_in_the_dark(1.1191);
       check_for_mode_gun();
     }
+    went_dark = false;
   }
   else if (MODE == 4) {
    mode4_in_the_light();
-    while (!light_is_on() && MODE == 4) {
+    while (!light_is_on() && went_dark && MODE == 4) {
       mode4_in_the_dark();
       check_for_mode_gun();
     }
+    went_dark = false;
   }
   else if (MODE == 5) {
    mode5_in_the_light();
-    while (!light_is_on() && MODE == 5) {
+    while (!light_is_on() && went_dark && MODE == 5) {
       mode5_in_the_dark();
       check_for_mode_gun();
     }
+    went_dark = false;
   }
   else if (MODE == 6) {
    mode6_in_the_light();
-    while (!light_is_on() && MODE == 6) {
+    while (!light_is_on() && went_dark && MODE == 6) {
       mode6_in_the_dark();
       check_for_mode_gun();
     }
+    went_dark = false;
   }
 
 
@@ -494,6 +505,11 @@ long time_since(long timestamp) {
 //**********************************************************************
 boolean light_is_on() {
   return analogRead(photo_pin) > photo_threshold;
+}
+
+//**********************************************************************
+boolean darkness() {
+  return analogRead(photo_pin) < photo_threshold - 50;
 }
 
 //**********************************************************************

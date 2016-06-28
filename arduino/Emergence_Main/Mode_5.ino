@@ -2,13 +2,10 @@
  * Follow the flashlight and blink through colors
  */
 bool was_in_the_light_m5;
-int STEP_MODE5;
+
 
 void mode5_in_the_light(){
   was_in_the_light_m5 = true;
-  STEP_MODE5 = 32;
-
-  //Serial.println("argg!, mode5 the light!");
 }
 
 
@@ -27,49 +24,14 @@ void mode5_in_the_dark(){
     // delay a bit before the flash sequence
     low_power_delay(1, 500);
 
-    long flashlight_gone = millis();
-
-    while(time_since(flashlight_gone) < STEP_MODE5*7){
-
-//      Serial.print(time_since(flashlight_gone));
-//      Serial.print(" " );
-        Serial.println(STEP_MODE5);
-
-      if (time_since(flashlight_gone) < STEP_MODE5){
-        blink(0, 0, 30, 60, BLUE);
-        delay(150/clock_prescaler);
+    for(int n = BLUE; n <= PURPLE; n++){
+      blink(0, 0, 64, 60, n);
+      while(BLINKING){
+        if(light_is_on()){
+          return;
+        }
       }
-      else if (time_since(flashlight_gone) < STEP_MODE5*2){
-          blink(0, 0, 30, 60, BLUE_GREEN);
-          delay(150/clock_prescaler);
-      }
-      else if (time_since(flashlight_gone) < STEP_MODE5*3){
-          blink(0, 0, 30, 60, GREEN);
-          delay(150/clock_prescaler);
-      }
-      else if (time_since(flashlight_gone) < STEP_MODE5*4){
-          blink(0, 0, 30, 60, GREEN_YELLOW);
-          delay(150/clock_prescaler);
-      }
-      else if (time_since(flashlight_gone) < STEP_MODE5*5){
-          blink(0, 0, 30, 60, YELLOW);
-          delay(150/clock_prescaler);
-      }
-      else if (time_since(flashlight_gone) < STEP_MODE5*6){
-          blink(0, 0, 30, 60, ORANGE);
-          delay(150/clock_prescaler);
-      }
-      else if (time_since(flashlight_gone) < STEP_MODE5*7){
-          blink(0, 0, 30, 60, RED);
-          delay(150/clock_prescaler);
-      }
-      else {
-          blink(0, 1, 30, 60, PURPLE);
-          delay(150/clock_prescaler);
-      }
-
-    }
-    
+    }    
   }
 
   go_into_low_power(30);

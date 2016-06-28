@@ -35,16 +35,8 @@ void mode4_in_the_dark(){
 
     low_power_delay(0, 300);
 
+    //clear mode gun timer so we have enough time to accumulate pulses once we leave this if statement
     mode_gun_last_cleared = millis();
-
-    // using this while loop to delay 1s, but exit if the light turns on
-//    long time_in = millis();
-//    while(millis() < 1000 / clock_prescaler + time_in && !light_is_on()){
-//      go_into_low_power(30);
-//      handle_pulse();
-//    }
-
-    //pulse_detected = 0;
 
     was_in_the_light_m4 = false;
     
