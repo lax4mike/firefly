@@ -213,7 +213,7 @@ void send_messages(){
 
   unsigned long time_in = millis();     // capture start time
 
-  for(int n = 0; n < 20; n++){          // transmit a flood of pulses (~1000 ms)
+  for(int n = 0; n < 30; n++){          // transmit a flood of pulses (~1000 ms)
     transmit_pulse();
     delay(48);
   }

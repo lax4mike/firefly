@@ -32,8 +32,8 @@ void mode5_in_the_dark(){
     while(time_since(flashlight_gone) < STEP_MODE5*7){
 
 //      Serial.print(time_since(flashlight_gone));
-        Serial.print(" " );
-//      Serial.println(STEP_MODE5);
+//      Serial.print(" " );
+        Serial.println(STEP_MODE5);
 
       if (time_since(flashlight_gone) < STEP_MODE5){
         blink(0, 1, 30, 60, BLUE);

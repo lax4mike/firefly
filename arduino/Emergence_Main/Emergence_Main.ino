@@ -18,7 +18,7 @@ int photo_threshold = 500;                                                //PHOT
 volatile boolean pulse_detected = 0;
 
 int num_pulses = 0;
-int num_pulses_max = 9;
+int num_pulses_max = 12;
 
 int charge_delay = 16 / 8;
 volatile int charge_state = 0;
@@ -275,7 +275,7 @@ void check_for_mode_gun() {
 
     // transmit a flood of pulses (~960 ms)
     blink(0, 0, 100, 100, mode_color_array[MODE]);
-    for (int n = 0; n < 20; n++) {
+    for (int n = 0; n < 30; n++) {
       transmit_pulse();
       delay(48 / clock_prescaler);
     }

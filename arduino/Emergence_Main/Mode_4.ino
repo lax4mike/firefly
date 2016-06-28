@@ -36,22 +36,16 @@ void mode4_in_the_dark(){
     was_in_the_light_m4 = false;
     
     // reset the modegun timer so it doesn't clear itself after all these delays
-    mode_gun_last_cleared = millis();
+    //mode_gun_last_cleared = millis();
 
     // delay for a short amount of time before transmitting
-    low_power_delay(1, 100);
+    low_power_delay(0, 250);
 
     // tell the others!
-    transmit_pulse();
+    blink(1, 1, 250, 250, ORANGE);
 
-    // delay a bit before the flash sequence
-    low_power_delay(1, 400);
+    low_power_delay(0, 400);
 
-    long time_start = millis();
-
-    blink(0, 1, 250, 250, ORANGE);
-
-    check_for_mode_gun();
     mode_gun_last_cleared = millis();
 
     // using this while loop to delay 1s, but exit if the light turns on

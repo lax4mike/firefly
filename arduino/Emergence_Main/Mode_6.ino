@@ -34,7 +34,7 @@ void mode6_in_the_dark(){
 
   if(pulse_detected){
     handle_pulse();
-    low_power_delay(1, 64);    // 64 for propagation delay
+    low_power_delay(0, 64);    // 64 for propagation delay
     
     rand_number = random(10);
     
@@ -42,7 +42,6 @@ void mode6_in_the_dark(){
       blink_and_pulse();
     }
 
-    //check_for_mode_gun();
     mode_gun_last_cleared = millis();
     
     // delay to stop listening to adjacent ones
@@ -56,8 +55,6 @@ void mode6_in_the_dark(){
 void blink_and_pulse(){
   mode_gun_last_cleared = millis();
   blink(1,0, 100, 100, YELLOW);
-
-  low_power_delay(1, 512);
- 
+  low_power_delay(0, 128);
 }
 
