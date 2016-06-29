@@ -74,7 +74,7 @@ const byte led_minimum = 10;
 //                                 1         2         3     4      5       6
 const byte mode_color_array[7] = { 0 , BLUE, GREEN_YELLOW, GREEN, ORANGE, PURPLE, YELLOW };
 const byte num_modes = 6;
-const byte default_mode = 5;
+const byte default_mode = 3;
 byte MODE = default_mode;
 
 //**********************************************************************
