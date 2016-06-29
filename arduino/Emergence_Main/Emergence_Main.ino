@@ -13,7 +13,7 @@ const byte blue_pin = A2;
 const byte photo_pin = A0;
 const byte test_pin = 9;
 
-int photo_threshold = 500;                                                //PHOTO THRESHOLD
+int photo_threshold = 200;                                                //PHOTO THRESHOLD
 
 volatile boolean pulse_detected = 0;
 
@@ -49,13 +49,13 @@ const byte color_array[8][4] = {
   // NOTES: Stay safely away from 0 and 255 (10 away seems to work fine)
 
   { blue_pin, green_pin, 200, 10 },     //  0  blue
-  { blue_pin, green_pin, 80, 100 },    //  1  blue_green
+  { blue_pin, green_pin, 80, 100 },     //  1  blue_green
   { blue_pin, green_pin, 10, 200 },     //  2  green
-  { red_pin, green_pin, 75, 200 },     //  3  green / yellow
-  { red_pin, green_pin, 200, 200 },    //  4  yellow
-  { red_pin, green_pin, 200, 75 },     //  5  orange
+  { red_pin, green_pin, 75, 200 },      //  3  green / yellow
+  { red_pin, green_pin, 200, 200 },     //  4  yellow
+  { red_pin, green_pin, 200, 75 },      //  5  orange
   { red_pin, green_pin, 200, 10 },      //  6  red
-  { red_pin, blue_pin, 128, 128},      //  7  purple
+  { red_pin, blue_pin, 128, 128},       //  7  purple
 
 };
 
@@ -509,7 +509,7 @@ boolean light_is_on() {
 
 //**********************************************************************
 boolean darkness() {
-  return analogRead(photo_pin) < photo_threshold - 50;
+  return analogRead(photo_pin) < photo_threshold - 25;
 }
 
 //**********************************************************************
