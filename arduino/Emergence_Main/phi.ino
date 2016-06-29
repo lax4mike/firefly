@@ -1,4 +1,4 @@
-/** 
+/**
  * Phi syncronizing algorithm
  */
 
@@ -8,6 +8,7 @@ int phi_threshold;
 int SYNC_THRESHOLD;
 bool was_in_the_light;
 int furthest_pulse;
+// int closest_pulse;
 boolean interrupt_attached;
 
 void phi_in_the_light() {
@@ -18,6 +19,7 @@ void phi_in_the_light() {
   SYNC_THRESHOLD = phi_threshold / 16;
   was_in_the_light = true;
   furthest_pulse = 0; // time to the pulse that is furthest from the blink
+  // closest_pulse = phi_threshold;
   interrupt_attached = true;
 
 //  Serial.println("arrg! the light!!");
@@ -56,6 +58,7 @@ void phi_in_the_dark(float alpha) {
 
     // keep the one that is furthest away
     furthest_pulse = max(furthest_pulse, distance_before);
+    // closest_pulse = min(closest_pulse, distance_after);
 
 
     // jump phi based on the alpha multiplier
@@ -81,9 +84,9 @@ void phi_in_the_dark(float alpha) {
 //    Serial.println("phi has gone over the edge...");
 
     int color = (furthest_pulse < SYNC_THRESHOLD * 1) ? BLUE
-                : (furthest_pulse < SYNC_THRESHOLD * 2) ? PURPLE
-                : (furthest_pulse < SYNC_THRESHOLD * 3) ? YELLOW
-                : (furthest_pulse < SYNC_THRESHOLD * 4) ? ORANGE
+                : (furthest_pulse < SYNC_THRESHOLD * 3) ? PURPLE
+                : (furthest_pulse < SYNC_THRESHOLD * 5) ? YELLOW
+                : (furthest_pulse < SYNC_THRESHOLD * 7) ? ORANGE
                 : RED;
 
 //    Serial.print(furthest_pulse);
@@ -95,9 +98,9 @@ void phi_in_the_dark(float alpha) {
 
     detachInterrupt(0);
     interrupt_attached = false;
-    
+
     blink(1, 1, 30, 60, color);
-    
+
   }
 
 }
