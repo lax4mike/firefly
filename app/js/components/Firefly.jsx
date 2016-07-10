@@ -21,7 +21,8 @@ export default React.createClass({
             lastBlink: PropTypes.shape({
                 time    : PropTypes.number.isRequired,
                 duration: PropTypes.number.isRequired
-            }).isRequired
+            }).isRequired,
+            color    : PropTypes.string.isRequired
         }),
 
         blinkStatus  : PropTypes.oneOf(["blink", "on", "off", "paused"]).isRequired,
@@ -270,8 +271,10 @@ export default React.createClass({
 
         const { firefly, signalRadius, radius, blinkStatus, debug } = this.props;
 
-        const fill = (debug.enabled && debug.debugFirefly === firefly.id)
-                        ? "url('#green')" : "url('#yellow')";
+        // const fill = (debug.enabled && debug.debugFirefly === firefly.id)
+        //                 ? "url('#green')" : "url('#yellow')";
+
+        const fill = `url('#${firefly.color}')`;
         const fillOpacity = getBlinkOpacity(firefly.phi);
 
         return (

@@ -5,6 +5,8 @@ import { mapObject, filterObject, indexBy, withoutKeys, withKeys } from "./objec
 // when this threshold is hit, the firefly will blink and reset phi to 0
 export const PHI_THRESHOLD = 2000;
 
+const SYNC_THRESHOLD = PHI_THRESHOLD / 16;
+
 // how much to go up when there are no neighbor blinks detected
 export const PHI_TICK = 64;
 
@@ -124,9 +126,12 @@ function tickLauder({fireflies, time, phaseParameters, signalRadius, debugFirefl
 
 
 
-
-
-
+function getDistanceToBlink(phi){
+    return Math.round(Math.min(
+        Math.abs(0 - phi),
+        Math.abs(PHI_THRESHOLD - phi)
+    ));
+}
 
 function tickStrogatz({fireflies, time, phaseParameters, signalRadius, debugFirefly, flashlight}){
 
@@ -173,6 +178,29 @@ function tickStrogatz({fireflies, time, phaseParameters, signalRadius, debugFire
             } : {}
         );
 
+        // if this firefly detected a neightbor, check to see
+        // if this pulse happened furthest from the blink time
+        const furthestPulse =
+            // reset if we just blinked or are in the light
+            (justBlinked || isInTheLight) ? 0
+            // if we detected a pulse, see if it is the furthest
+            : (shouldJump) ? Math.max(getDistanceToBlink(phi), ff.furthestPulse)
+            // otherwise, leave it
+            : ff.furthestPulse;
+
+        const wasInTheLight = ff.isInTheLight && !isInTheLight;
+        // const color = "light";
+        const color =
+              (wasInTheLight) ? "green"
+            // only change color if we just blinked
+            : (!justBlinked) ? ff.color
+            : (ff.furthestPulse < SYNC_THRESHOLD * 1) ? "blue"
+            : (ff.furthestPulse < SYNC_THRESHOLD * 3) ? "purple"
+            : (ff.furthestPulse < SYNC_THRESHOLD * 5) ? "yellow"
+            : (ff.furthestPulse < SYNC_THRESHOLD * 5) ? "orange"
+            : "red";
+
+
         // debug info of hovered firefly
         if (ff.id === debugFirefly){
             (shouldJump)
@@ -191,7 +219,7 @@ function tickStrogatz({fireflies, time, phaseParameters, signalRadius, debugFire
         }
 
         // update this firefly
-        return Object.assign({}, ff, { phi, justBlinked, lastBlink });
+        return Object.assign({}, ff, { phi, justBlinked, lastBlink, color, furthestPulse });
     });
 
     return Object.assign({}, fireflies, {

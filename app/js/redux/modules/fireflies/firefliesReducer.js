@@ -23,6 +23,7 @@ const initialState = {
  *    id: number,
  *    phi: number,
  *    justBlinked: boolean, whether this ff fired on this tick
+ *    color: one of the colors from colors.js
  * }
  * state.positionsById[ffid] = {
  *    id: number,

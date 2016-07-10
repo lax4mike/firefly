@@ -2,8 +2,12 @@
 // colors
 export default [
     {
-        id: "yellow",
+        id: "light",
         hex: "#fff4c8"
+    },
+    {
+        id: "yellow",
+        hex: "#f4c912"
     },
     {
         id: "orange",
@@ -16,6 +20,10 @@ export default [
     {
         id: "blue",
         hex: "#3498db"
+    },
+    {
+        id: "purple",
+        hex: "#745dcf"
     },
     {
         id: "green",

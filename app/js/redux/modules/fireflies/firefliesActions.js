@@ -25,7 +25,9 @@ function makeFirefly(props){
         phi: 0,
         x: 0,
         y: 0,
+        color: "blue",
         justBlinked: false,
+        furthestPulse: 0,
         lastBlink: {
             time: 0,
             duration: 0
