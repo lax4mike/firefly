@@ -13,7 +13,7 @@ const byte blue_pin = A2;
 const byte photo_pin = A0;
 const byte test_pin = 9;
 
-int photo_threshold = 200;                                                //PHOTO THRESHOLD
+int photo_threshold = 500;                                                //PHOTO THRESHOLD
 
 volatile boolean pulse_detected = 0;
 
@@ -283,6 +283,8 @@ void check_for_mode_gun() {
     num_pulses = 0;
     mode_gun_last_cleared = millis();
   }
+
+  return;
 
   if (num_pulses > num_pulses_max) {
 
