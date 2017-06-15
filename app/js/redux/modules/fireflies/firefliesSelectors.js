@@ -24,6 +24,7 @@ export const getFireflies = (state) => {
 };
 
 // create a quadtree with the current firefly positions
+// http://www.mikechambers.com/blog/2011/03/21/javascript-quadtree-implementation/
 export const makeQuadtree = createSelector(
     (positionsById) => positionsById,
     (positionsById) => {
