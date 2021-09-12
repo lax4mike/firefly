@@ -1,92 +1,22 @@
 /**
- *  Usage:
- *      Once per computer:
- *         $ npm install -g gulp
- *
- *      Once per project, in gulp folder:
- *         $ npm install
- *
- *
- *      Running clumped tasks (defined in this file) --
- *      see tasks/utils.js config
- *         $ gulp dev
- *
- *      Running single task (task defined in /tasks.  eg. /tasks/css.js)
- *         $ gulp css            // will use the default config
- *         $ gulp css --env prod // will use the prod config
- *
- *      For details on setConfig, see "user supplied keys" in /tasks/utils.js
-**/
+ *  See ./readme.md for usage
+ **/
+const gulp = require("gulp");
+const quench = require("./quench/quench.js");
 
-// Include gulp and plugins
-var gulp    = require("gulp"),
-    utils   = require("./tasks/utils"),
-    path    = require("path"),
-    config  = utils.loadConfig(); // initialize the config
+const projectRoot = quench.resolvePath(__dirname, "..");
 
-
-// set some defaults
-utils.setConfig({
-    root  : path.resolve(__dirname, "../app"),
-    dest  : path.resolve(__dirname, "../build"),
-    env   : ""
-});
-
-
-// load the tasks
-utils.loadTasks(["copy", "js", "js-common", "bower", "css"]);
+const createBuildTasks = require("./tasks/createBuildTasks.js");
+const { build, browserSync } = createBuildTasks(projectRoot);
 
 /**
- * dev task
+ * gulp build
+ *
+ * to build for production/jenkins:
+ *    node_modules/.bin/gulp build --no-watch --env production
  */
-gulp.task("dev", function(){
+const buildTask = gulp.series(build, browserSync);
+buildTask.description = "Build frontend assets";
+exports.build = buildTask;
 
-    // set the dev config (cache in utils.js)
-    utils.setConfig({
-        env   : "dev",
-        watch : true
-    });
-
-    // build with this config
-    utils.build();
-
-});
-
-/**
- * prod task
- */
-gulp.task("prod", function(){
-
-    // set the prod config (cache in utils.js)
-    utils.setConfig({
-        env   : "prod",
-        watch : false
-    });
-
-    // build with this config
-    utils.build();
-
-});
-
-/**
- * prod watch task
- * react is a lot faster with production build
- */
-gulp.task("prod-watch", function(){
-
-    // set the prod config (cache in utils.js)
-    utils.setConfig({
-        env   : "prod",
-        watch : true
-    });
-
-    // build with this config
-    utils.build();
-
-});
-
-
-
-
-// Default Task (run when you run 'gulp'). dev envirnoment
-gulp.task("default", [config.local.defaultTask || "dev"]);
+exports.default = quench.logHelp;
